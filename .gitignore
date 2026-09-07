@@ -1,0 +1,21 @@
+.vs/
+
+# Visual Studio build outputs
+/Debug/
+/Release/
+/x64/
+/SimpleGame/Debug/
+/SimpleGame/Release/
+/SimpleGame/x64/
+
+*.exe
+*.ilk
+*.pdb
+*.obj
+*.log
+*.pch
+*.idb
+*.tlog
+*.lastbuildstate
+*.suo
+*.db
