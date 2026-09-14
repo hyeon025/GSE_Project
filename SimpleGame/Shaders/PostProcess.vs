@@ -1,5 +1,6 @@
 #version 330 core
 out vec2 v_Uv;
+
 void main()
 {
     // A fullscreen triangle avoids a diagonal interpolation seam.

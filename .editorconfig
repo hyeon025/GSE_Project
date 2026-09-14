@@ -1,0 +1,22 @@
+root = true
+
+[.clang-format*]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+[SimpleGame/*.{cpp,h}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[SimpleGame/Shaders/*.{vs,fs}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true

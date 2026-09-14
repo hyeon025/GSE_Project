@@ -156,6 +156,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameWorld.h" />
+    <ClInclude Include="LevelOne.h" />
+    <ClInclude Include="LevelOneView.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="stdafx.h" />
@@ -173,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Terrain.fs" />
+    <None Include="Shaders\Terrain.vs" />
     <None Include="Shaders\PostProcess.vs" />
     <None Include="Shaders\Downsample.fs" />
     <None Include="Shaders\Blur.fs" />

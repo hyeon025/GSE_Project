@@ -3,6 +3,7 @@ in vec2 v_Uv;
 uniform sampler2D u_Source;
 uniform vec2 u_Direction;
 out vec4 FragColor;
+
 void main()
 {
     vec3 color = texture(u_Source, v_Uv).rgb * 0.227027;

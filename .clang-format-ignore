@@ -1,0 +1,7 @@
+SimpleGame/Dependencies/**
+Debug/**
+Release/**
+x64/**
+SimpleGame/Debug/**
+SimpleGame/Release/**
+SimpleGame/x64/**

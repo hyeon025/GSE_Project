@@ -2,12 +2,23 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdint>
+#include <functional>
 #include "Dependencies/glew.h"
+
 struct Color
 {
     float r, g, b, a;
-    Color(float red, float green, float blue, float alpha = 1) : r(red), g(green), b(blue), a(alpha) {}
+
+    Color(float red, float green, float blue, float alpha = 1)
+        : r(red),
+          g(green),
+          b(blue),
+          a(alpha)
+    {
+    }
 };
+
 struct PostProcessingSettings
 {
     bool enabled = true;
@@ -23,31 +34,86 @@ struct PostProcessingSettings
     float edgeBlurEnd = 1.2f;
     float edgeBlurRadius = 1.5f;
 };
+
 class Renderer
 {
 public:
+    enum class MeshKind
+    {
+        Rock,
+        Tree,
+        Wall,
+        LevelBlock
+    };
+
     Renderer(int width, int height);
     ~Renderer();
-    bool IsInitialized() const { return m_Program != 0 && m_Terrain != 0; }
+    Renderer(const Renderer&) = delete;
+    Renderer& operator=(const Renderer&) = delete;
+
+    bool IsInitialized() const
+    {
+        return m_Program != 0 && m_Terrain != 0;
+    }
+
     void Resize(int width, int height);
     void BeginWorld();
     void EndWorld();
-    const PostProcessingSettings& GetPostProcessing() const { return m_PostSettings; }
+
+    const PostProcessingSettings& GetPostProcessing() const
+    {
+        return m_PostSettings;
+    }
+
     void SetPostProcessing(const PostProcessingSettings& settings);
     void Flush();
+    // Build local-space geometry with Triangle/Rect/Ellipse/Line only, on a cache miss.
+    void CachedMesh(
+        MeshKind kind,
+        std::uint64_t variant,
+        float x,
+        float y,
+        float scale,
+        float opacity,
+        const std::function<void()>& build
+    );
     void Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c);
     void Rect(float x, float y, float width, float height, Color color);
     void Ellipse(float x, float y, float rx, float ry, Color center, Color edge);
     void Line(float ax, float ay, float bx, float by, float width, Color color);
     void Text(float x, float y, const std::wstring& text, Color color, int size = 16);
-    void Terrain(float cameraX, float cameraY, float zoom);
+    void Terrain(float cameraX, float cameraY, float zoom, bool farming = false, float seed = 0);
     void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
     void DrawSolidRectSize(float x, float y, float z, float width, float height, float r, float g, float b, float a);
+
 private:
-    struct Vertex { float x, y, r, g, b, a, u, v; };
-    struct TextTexture { GLuint id; int width, height; };
-    struct RenderTarget { GLuint fbo = 0, texture = 0; };
+    struct Vertex
+    {
+        float x, y, r, g, b, a, u, v;
+    };
+
+    struct TextTexture
+    {
+        GLuint id;
+        int width, height;
+    };
+
+    struct Mesh
+    {
+        GLuint array = 0, buffer = 0;
+        GLsizei count = 0;
+        std::uint64_t lastUsed = 0;
+    };
+
+    struct RenderTarget
+    {
+        GLuint fbo = 0, texture = 0;
+    };
+
     GLuint Program(const char* vertexPath, const char* fragmentPath);
+    void ConfigureVertices(GLuint array, GLuint buffer);
+    void UseGeometry(float x, float y, float scale, float opacity, GLuint texture = 0);
+    void ReleaseMeshes();
     void Submit(const Vertex* vertices, size_t count, GLuint texture = 0);
     bool CreateTarget(RenderTarget& target, int width, int height);
     void ReleaseTargets();
@@ -63,5 +129,9 @@ private:
     bool m_TargetsReady = false, m_RenderingHdr = false;
     PostProcessingSettings m_PostSettings;
     std::vector<Vertex> m_Vertices;
+    std::vector<Vertex>* m_Capture = nullptr;
+    std::map<std::pair<MeshKind, std::uint64_t>, Mesh> m_Meshes;
+    std::uint64_t m_MeshClock = 0;
+    static constexpr size_t MeshCacheCapacity = 512;
     std::map<std::pair<std::wstring, int>, TextTexture> m_Text;
 };

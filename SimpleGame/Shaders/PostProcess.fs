@@ -9,11 +9,12 @@ uniform float u_BloomStrength;
 uniform vec3 u_Vignette;
 uniform vec3 u_EdgeBlur;
 out vec4 FragColor;
+
 vec3 filmic(vec3 color)
 {
-    return clamp((color * (2.51 * color + 0.03))
-        / (color * (2.43 * color + 0.59) + 0.14), 0.0, 1.0);
+    return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), 0.0, 1.0);
 }
+
 void main()
 {
     vec3 color = texture(u_Source, v_Uv).rgb;
