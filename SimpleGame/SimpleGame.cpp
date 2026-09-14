@@ -13,6 +13,7 @@ Distributed under the What The Hell License.
 #include "Dependencies/freeglut.h"
 #include "Renderer.h"
 #include "GameWorld.h"
+#include "GameStory.h"
 #include "GameScene.h"
 #include "LevelOneView.h"
 
@@ -79,10 +80,30 @@ enum Action
     Talk = 40,
     Share,
     TrainNpc,
-    EnterLevel = 60
+    EnterLevel = 60,
+    StoryOpen = 70,
+    StoryAdvance,
+    StoryBattle,
+    StoryInvestigate,
+    RescueNpc,
+    ChangeNpc,
+    ThreatenNpc,
+    EndDestroy,
+    EndSuccessor,
+    EndFreedom
 };
 
 void AbilityUse(bool secondary);
+
+bool InCombat()
+{
+    return g_World.levelOne.active || g_World.storyBattle.active;
+}
+
+LevelOne::Session& CurrentLevel()
+{
+    return g_World.storyBattle.active ? g_World.storyBattle : g_World.levelOne;
+}
 
 float UiWidth()
 {
@@ -113,9 +134,9 @@ void Notify(const std::wstring& s)
 {
     g_Toast = s;
     g_ToastTime = 5;
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
-        LevelOne::Notice(g_World.levelOne, s);
+        LevelOne::Notice(CurrentLevel(), s);
     }
 }
 
@@ -183,7 +204,7 @@ void LevelCommand(LevelOneView::Command command)
     {
         return;
     }
-    auto& level = g_World.levelOne;
+    auto& level = CurrentLevel();
     switch (command)
     {
         case LevelOneView::TogglePause:
@@ -193,6 +214,12 @@ void LevelCommand(LevelOneView::Command command)
             }
             break;
         case LevelOneView::Resume:
+            if (level.judgementPending)
+            {
+                level.judgementPending = false;
+                level.judgementSeen = true;
+                Persist();
+            }
             g_LevelView->paused = false;
             break;
         case LevelOneView::Retry:
@@ -200,7 +227,14 @@ void LevelCommand(LevelOneView::Command command)
             {
                 return;
             }
-            LevelOne::Start(level, NewLevelSeed());
+            if (level.encounter)
+            {
+                Story::BeginBattle(g_World, NewLevelSeed());
+            }
+            else
+            {
+                LevelOne::Start(level, NewLevelSeed());
+            }
             g_LevelView->paused = false;
             Persist();
             break;
@@ -216,6 +250,7 @@ void LevelCommand(LevelOneView::Command command)
         case LevelOneView::Leave:
             level.active = false;
             g_LevelView->paused = false;
+            g_Panel = level.encounter && level.phase != LevelOne::Fighting ? 3 : 0;
             g_Scene->cameraOverride = false;
             RefreshTargets();
             Persist();
@@ -258,6 +293,10 @@ std::wstring TargetName()
     }
     if (g_TargetKind == 2)
     {
+        if (g_World.npcs[g_TargetIndex].id == g_World.story.childId)
+        {
+            return L"\uae30\uc5b5\uc758 \ud30c\ud3b8\uc744 \uc9c0\ub2cc \uc544\uc774";
+        }
         return std::wstring(Personality(g_World.npcs[g_TargetIndex].archetype)) + L" \u00b7 " +
                std::to_wstring(g_World.npcs[g_TargetIndex].id) + L"\ubc88\uc9f8 \uacc4\uc2b9\uc790";
     }
@@ -279,7 +318,7 @@ std::vector<Choice> Choices()
     {
         const auto& n = g_World.npcs[g_TargetIndex];
         c.push_back({L"\uc0b4\uc544\uc628 \uc774\uc57c\uae30\ub97c \ub4e3\ub294\ub2e4", Talk, true});
-        c.push_back({L"\ube75\uc744 \ub098\ub208\ub2e4  \u00b7  \ube75 1", Share, p.bread > 0 && n.trust < 3});
+        c.push_back({L"\ube75\uc744 \ub098\ub208\ub2e4  \u00b7  \ube75 1", Share, p.bread > 0 && n.relationship < 100});
         bool related = Adjacent(p.ability, n.ability);
         c.push_back(
             {related ? std::wstring(AbilityName(n.ability)) +
@@ -288,6 +327,17 @@ std::vector<Choice> Choices()
              TrainNpc,
              related && n.trust > 0 && !p.training[n.ability] && p.stamina >= 25}
         );
+        c.push_back(
+            {L"\uc0c1\ucc98\ub97c \ub3cc\ubcf4\uace0 \ubcf4\ud638\ud55c\ub2e4 \u00b7 \uc57d\ucd08 1",
+             RescueNpc,
+             n.met && !n.saved && p.herbs > 0}
+        );
+        c.push_back(
+            {L"\ub2e4\ub978 \uc0b6\uc744 \uc2dc\uc791\ud558\ub3c4\ub85d \ub3d5\ub294\ub2e4 \u00b7 \ubaa9\uc7ac 2",
+             ChangeNpc,
+             !n.changed && n.relationship >= 50 && p.wood >= 2}
+        );
+        c.push_back({L"\ubcf5\uc885\uc744 \uac15\uc694\ud55c\ub2e4", ThreatenNpc, n.relationship > -100});
         return c;
     }
     if (g_TargetKind != 1)
@@ -296,6 +346,14 @@ std::vector<Choice> Choices()
     }
     const auto& s = g_Sites[g_TargetIndex];
     auto st = State(g_World, s.key);
+    if (Story::CanInvestigate(g_World, s))
+    {
+        c.push_back(
+            {L"\uacc4\uc2b9\uc758 \ubc95\uce59\uc5d0 \uad00\ud55c \ud754\uc801\uc744 \uc870\uc0ac\ud55c\ub2e4",
+             StoryInvestigate,
+             true}
+        );
+    }
     switch (s.kind)
     {
         case Camp:
@@ -377,17 +435,14 @@ std::wstring Description()
 {
     if (g_DeathConfirm)
     {
-        return L"\ud558\ub098\uc758 \uc8fd\uc74c\uc740 \ud558\ub098\uc758 \uc0dd\uba85\uc744 \ub0a8\uae34\ub2e4. \uc9c0\uae08\uae4c\uc9c0\uc758 \uc120\ud0dd\uc740 \uc0c8 \uc778\ubb3c\uc758 \uc131\ud5a5\uc73c\ub85c \uc774\uc5b4\uc9c0\uace0, \ub098\ub294 \ub9c8\uc9c0\ub9c9\uc73c\ub85c \uc26c\uc5c8\ub358 \uacf3\uc5d0\uc11c \ub2e4\uc2dc \ub208\uc744 \ub72c\ub2e4.";
+        return g_World.story.ending == Story::Destroy
+                   ? L"\uacc4\uc2b9\uc758 \ubc95\uce59\uc740 \ub05d\ub0ac\ub2e4. \uc774 \uc8fd\uc74c\uc740 \uc0c8 \uacc4\uc2b9\uc790\ub97c \ub9cc\ub4e4\uc9c0 \uc54a\ub294\ub2e4. \uc2dd\ub7c9\uacfc \ud30c\ud3b8\uc758 \uc808\ubc18\uc744 \uc783\uace0, \uc0c1\ucc98\ub97c \uc548\uc740 \ucc44 \ub3cc\uc544\uc628\ub2e4."
+                   : L"\ud558\ub098\uc758 \uc8fd\uc74c\uc740 \ud558\ub098\uc758 \uc0dd\uba85\uc744 \ub9cc\ub4e0\ub2e4. \uc0c8 \uc0dd\uba85\uc740 \ub098\uc758 \uae30\uc5b5\uc774 \uc544\ub2c8\ub77c \uc0b6\uc758 \ubc29\ud5a5\uc744 \ubb3c\ub824\ubc1b\ub294\ub2e4. \uc138\uacc4\uc640 \uad00\uacc4\ub294 \uacc4\uc18d\ub41c\ub2e4.";
     }
     if (g_TargetKind == 2)
     {
         auto& n = g_World.npcs[g_TargetIndex];
-        return std::wstring(
-                   L"\uadf8\uc5d0\uac8c\uc11c \ub0af\uc775\uc740 \uc0b6\uc758 \ubc29\ud5a5\uc774 \ub290\uaef4\uc9c4\ub2e4.\n\ud0c0\uace0\ub09c \uacc4\uc5f4: "
-               ) +
-               AbilityName(n.ability) + L"   \u00b7   " +
-               (n.trust > 0 ? L"\ub2f9\uc2e0\uc744 \uc2e0\ub8b0\ud55c\ub2e4."
-                            : L"\uc544\uc9c1 \ub2f9\uc2e0\uc744 \ubaa8\ub978\ub2e4.");
+        return Story::NpcLine(g_World, n) + L"\n" + AbilityName(n.ability) + L" \u00b7 " + Story::Faction(n.archetype);
     }
     const auto& s = g_Sites[g_TargetIndex];
     auto st = State(g_World, s.key);
@@ -427,9 +482,42 @@ std::wstring Description()
 
 void Act(int action)
 {
-    if (action == EnterLevel && !g_World.levelOne.active)
+    if (action == StoryOpen && !InCombat())
+    {
+        g_Panel = g_Panel == 3 ? 0 : 3;
+        g_Dialog = g_DeathConfirm = false;
+        std::fill(std::begin(g_Keys), std::end(g_Keys), false);
+        return;
+    }
+    if (g_Panel == 3 && !InCombat())
+    {
+        if (action == StoryAdvance)
+        {
+            Story::Advance(g_World);
+            Persist();
+            return;
+        }
+        if (action == StoryBattle && Story::AvailableBattle(g_World))
+        {
+            Story::BeginBattle(g_World, NewLevelSeed());
+            g_LevelView.reset(new LevelOneView(*g_Scene, g_World.storyBattle));
+            g_Panel = 0;
+            g_Buttons.clear();
+            std::fill(std::begin(g_Keys), std::end(g_Keys), false);
+            Persist();
+            return;
+        }
+        if (action >= EndDestroy && action <= EndFreedom)
+        {
+            Story::ChooseEnding(g_World, action - EndDestroy + Story::Destroy);
+            Persist();
+            return;
+        }
+    }
+    if (action == EnterLevel && !InCombat())
     {
         g_World.levelOne.active = true;
+        g_LevelView.reset(new LevelOneView(*g_Scene, g_World.levelOne));
         g_LevelView->paused = false;
         g_Dialog = false;
         g_Panel = 0;
@@ -508,9 +596,7 @@ void Act(int action)
         Die(g_World);
         g_Dialog = false;
         g_DeathConfirm = false;
-        Notify(
-            L"\ud558\ub098\uc758 \uc0b6\uc774 \ub05d\ub098\uace0, \uc0c8\ub85c\uc6b4 \uacc4\uc2b9\uc790\uac00 \ud0dc\uc5b4\ub0ac\uc2b5\ub2c8\ub2e4."
-        );
+        Notify(Story::DeathMessage(g_World));
         RefreshTargets();
         Persist();
         return;
@@ -520,22 +606,15 @@ void Act(int action)
         auto& n = g_World.npcs[g_TargetIndex];
         if (action == Talk)
         {
-            const wchar_t* stories[] = {
-                L"\ubb34\uae30\ub97c \ub193\uc73c\uba74 \ub610 \ub204\uad70\uac00 \ub2e4\uce60 \uac83 \uac19\uc18c.",
-                L"\uc774\uc720\ub294 \ubaa8\ub974\uaca0\uc9c0\ub9cc, \uad76\uc8fc\ub9b0 \uc774\ub97c \uc9c0\ub098\uce60 \uc218 \uc5c6\uc5b4\uc694.",
-                L"\uc790\uafb8 \ub4a4\ub97c \ub3cc\uc544\ubcf4\uac8c \ub3fc\uc694. \ubb34\uc5c7\uc744 \ud53c\ud558\ub294\uc9c0\ub3c4 \ubaa8\ub974\uba74\uc11c.",
-                L"\uc800 \ud3d0\ud5c8 \ub108\uba38\uc5d0 \ubb34\uc5c7\uc774 \uc788\ub294\uc9c0 \uc54c\uace0 \uc2f6\uc5b4\uc694.",
-                L"\ub0b4\uac00 \ub300\uc2e0 \uc544\ud50c \uc218 \uc788\ub2e4\uba74, \uadf8\uac78\ub85c \ub410\uc5b4\uc694.",
-                L"\uc870\uae08\ub9cc \ub354 \ubaa8\uc73c\uba74 \uc548\uc2ec\ud560 \uc218 \uc788\uc744 \uac83 \uac19\uc18c.",
-                L"\uc5b4\ub518\uac00\uc5d0\ub294 \uc544\uc9c1 \ubd88\uc774 \ucf1c\uc9c4 \uc9d1\uc774 \uc788\uc744 \uac70\uc608\uc694."
-            };
-            Notify(stories[n.archetype]);
+            Story::Talk(g_World, n);
+            Notify(Story::NpcLine(g_World, n));
             g_World.Record(Remembered);
         }
         if (action == Share)
         {
             --p.bread;
-            ++n.trust;
+            n.relationship = std::min(100, n.relationship + 25);
+            n.trust = std::min(3, std::max(0, n.relationship / 25));
             p.echo[1] += 5;
             p.echo[6] += 2;
             g_World.Record(Befriended);
@@ -549,6 +628,40 @@ void Act(int action)
             g_World.Record(Learned);
             Notify(L"\uc778\uc811 \uacc4\uc5f4\uc758 \uc57d\ud55c \uae30\uc220\uc744 \uc775\ud614\uc2b5\ub2c8\ub2e4.");
         }
+        if (action == RescueNpc)
+        {
+            --p.herbs;
+            n.saved = true;
+            n.relationship = std::min(100, n.relationship + 35);
+            n.power = std::min(100, n.power + 10);
+            p.echo[1] += 10;
+            p.echo[4] += 6;
+            Notify(
+                L"\uc0c1\ucc98\uac00 \uc544\ubb3c\uc5c8\ub2e4. \uadf8\ub294 \uc624\ub298\uc758 \ub3c4\uc6c0\uc744 \uc790\uc2e0\uc758 \uae30\uc5b5\uc73c\ub85c \ub0a8\uae34\ub2e4."
+            );
+        }
+        if (action == ChangeNpc)
+        {
+            p.wood -= 2;
+            n.changed = n.freeWill = true;
+            n.archetype = (n.archetype + 3) % 7;
+            n.relationship = std::min(100, n.relationship + 15);
+            n.power = std::min(100, n.power + 30);
+            p.echo[6] += 12;
+            Notify(
+                L"\uacc4\uc2b9\uc790\ub294 \ubb3c\ub824\ubc1b\uc740 \ubc29\ud5a5\uacfc \ub2e4\ub978 \uc0b6\uc744 \uc120\ud0dd\ud588\ub2e4."
+            );
+        }
+        if (action == ThreatenNpc)
+        {
+            n.relationship = std::max(-100, n.relationship - 40);
+            p.echo[0] += 8;
+            p.echo[5] += 4;
+            Notify(
+                L"\uadf8\ub294 \uace0\uac1c\ub97c \uc219\uc600\uc9c0\ub9cc, \ub2f9\uc2e0\uc744 \ud5a5\ud55c \uc801\uc758\ub294 \ub0a8\uc558\ub2e4."
+            );
+        }
+        n.trust = std::min(3, std::max(0, n.relationship / 25));
     }
     else
     {
@@ -556,6 +669,9 @@ void Act(int action)
         auto& st = g_World.states[s.key];
         switch (action)
         {
+            case StoryInvestigate:
+                Notify(Story::Investigate(g_World, s));
+                break;
             case Repair:
                 p.wood -= 2;
                 st.stage = 1;
@@ -664,10 +780,8 @@ void Act(int action)
     }
     if (p.health <= 0)
     {
-        Die(g_World);
-        Notify(
-            L"\uae30\uc5b5\uc758 \ub300\uac00\ub85c \uc0b6\uc744 \uc783\uc5c8\uc2b5\ub2c8\ub2e4. \uc0c8\ub85c\uc6b4 \uc0dd\uba85\uc774 \ub0a8\uc558\uc2b5\ub2c8\ub2e4."
-        );
+        Die(g_World, Story::Ruin);
+        Notify(Story::DeathMessage(g_World));
     }
     g_Dialog = false;
     g_DeathConfirm = false;
@@ -983,6 +1097,112 @@ void SidePanel()
     }
 }
 
+void StoryPanel()
+{
+    g_Buttons.clear();
+    float w = 680, x = (UiWidth() - w) * .5f, y = 104;
+    float h = UiHeight() - 200;
+    Box(0, 88, UiWidth(), UiHeight() - 164, Color(.02f, .03f, .025f, .82f));
+    Box(x, y, w, h, Color(.075f, .10f, .095f, .99f));
+    auto& story = g_World.story;
+    Text(x + 24, y + 14, Story::QuestId(story.stage), g_Accent, 13);
+    Text(x + 24, y + 38, Story::Title(story.stage), g_Ink, 21);
+    float row = Wrap(x + 24, y + 76, w - 48, Story::Passage(g_World), g_Muted, 15) + 12;
+    row = Wrap(x + 24, row, w - 48, Story::Objective(g_World), g_Ink, 15) + 10;
+    if (story.stage == Story::Ruins)
+    {
+        for (int i = 0; i < AbilityCount; ++i)
+        {
+            auto key = Story::RuinKeys()[i];
+            auto site = GetSite(key.first, key.second);
+            std::wstring label = std::wstring(AbilityName((Ability)i)) +
+                                 ((story.relics & (1 << i)) ? L" \u00b7 \ubc1c\uacac"
+                                                            : L" \u00b7 " + std::to_wstring((int)site.p.x) + L", " +
+                                                                  std::to_wstring((int)site.p.y));
+            Text(x + 24 + (i % 2) * 312, row + (i / 2) * 25, label, g_Accent, 14);
+        }
+    }
+    if (story.stage == Story::Successors)
+    {
+        int shown = 0;
+        for (const auto& n : g_World.npcs)
+        {
+            if (n.origin == 0 && !n.met && shown < 3)
+            {
+                Text(
+                    x + 24,
+                    row + shown * 24,
+                    std::to_wstring(n.id) + L"\ubc88\uc9f8 \uacc4\uc2b9\uc790 \u00b7 " + std::to_wstring((int)n.p.x) +
+                        L", " + std::to_wstring((int)n.p.y),
+                    g_Accent,
+                    14
+                );
+                ++shown;
+            }
+        }
+    }
+    if (story.stage == Story::ShapedWorld || story.stage == Story::FirstGrave)
+    {
+        Wrap(
+            x + 24,
+            row,
+            w - 48,
+            L"\ud568\uaed8\ud560 \uacc4\uc2b9\uc790 " + std::to_wstring(Story::Count(g_World, 4)) +
+                L" \u00b7 \uc801\ub300\ud558\ub294 \uacc4\uc2b9\uc790 " + std::to_wstring(Story::Count(g_World, 5)) +
+                L" \u00b7 \uae30\ub85d\ub41c \uc8fd\uc74c " + std::to_wstring(story.deaths.size()),
+            g_Accent,
+            14
+        );
+    }
+    if (story.stage == Story::EndingChoice)
+    {
+        Wrap(
+            x + 24,
+            row,
+            w - 48,
+            Story::FreedomReady(g_World)
+                ? L"\uc544\uc774\uc640 \uacc4\uc2b9\uc790\ub4e4\uc774 \uac01\uc790\uc758 \uc0b6\uc744 \uace0\ub97c \uc900\ube44\uac00 \ub418\uc5c8\ub2e4."
+                : L"\ud574\ubc29\uc758 \uc870\uac74: \uacc4\uc2b9\uc790 10\uba85, \ubcf4\ud638 5\uba85, \ub2e4\ub978 \uc9c4\ub85c 3\uba85, \uc544\uc774\uc5d0\uac8c \uc9c4\uc2e4 \uc804\ub2ec, \uce58\uc6b0\uce58\uc9c0 \uc54a\uc740 \uc0b6.",
+            g_Accent,
+            13
+        );
+        float by = y + h - 158;
+        AddButton(x + 24, by, w - 48, 40, L"\uacc4\uc2b9\uc758 \uc885\ub9d0", EndDestroy);
+        AddButton(x + 24, by + 48, w - 48, 40, L"\uc0c8\ub85c\uc6b4 \uacc4\uc2b9\uc790", EndSuccessor);
+        AddButton(
+            x + 24,
+            by + 96,
+            w - 48,
+            40,
+            L"\uacc4\uc2b9\uc758 \ud574\ubc29",
+            EndFreedom,
+            Story::FreedomReady(g_World)
+        );
+    }
+    else if (Story::AvailableBattle(g_World))
+    {
+        const wchar_t* label =
+            story.stage == Story::Prologue ? L"\ub9c8\uc744\uc744 \ub36e\uce5c \uc2b5\uaca9\uc5d0 \ub9de\uc120\ub2e4"
+            : story.stage == Story::Abelon ? L"\ubd89\uc740 \uc608\ubc30\ub2f9\uc73c\ub85c \uac04\ub2e4"
+                                           : L"\ud0dc\ucd08\uc758 \ubb18\uc9c0\ub85c \ub4e4\uc5b4\uac04\ub2e4";
+        AddButton(x + 24, y + h - 58, w - 48, 40, label, StoryBattle);
+    }
+    else if (Story::CanAdvance(g_World))
+    {
+        AddButton(
+            x + 24,
+            y + h - 58,
+            w - 48,
+            40,
+            L"\ub0a8\uaca8\uc9c4 \uae30\ub85d\uc744 \ub530\ub77c\uac04\ub2e4",
+            StoryAdvance
+        );
+    }
+    g_Buttons.push_back({x + w - 44, y + 12, 32, 32, Close, true, L"\ub2eb\uae30"});
+    Line(x + w - 34, y + 22, x + w - 22, y + 34, 1.4f, g_Muted);
+    Line(x + w - 22, y + 22, x + w - 34, y + 34, 1.4f, g_Muted);
+}
+
 void RenderUI()
 {
     g_UiScale = std::min(1.f, std::min(g_Width / 960.f, g_Height / 640.f));
@@ -991,11 +1211,14 @@ void RenderUI()
     float w = UiWidth(), h = UiHeight();
     if (!g_Dialog && !g_Panel)
     {
-        AddButton(24, 164, 162, 40, L"\uacbd\uc791\uc9c0 \uc785\uc7a5", EnterLevel);
+        Text(24, 110, Story::Title(g_World.story.stage), g_Accent, 18);
+        Wrap(24, 139, 300, Story::Objective(g_World), g_Muted, 14);
+        AddButton(24, 222, 140, 40, L"\uc5ec\uc815", StoryOpen);
+        AddButton(172, 222, 140, 40, L"\uacbd\uc791\uc9c0 \uc785\uc7a5", EnterLevel);
     }
     Box(0, 0, w, 88, Color(.055f, .08f, .075f, .93f));
     Line(0, 88, w, 88, 1, Color(.34f, .39f, .33f, .7f));
-    Text(24, 14, L"\uc7ac\uc758 \ubc29\ub791\uc790", g_Ink, 19);
+    Text(24, 14, L"\uc794\ud5a5\uc758 \uc2dc\ub300", g_Ink, 19);
     Text(24, 46, L"\uc0dd\uba85", g_Muted, 13);
     Bar(66, 55, 162, p.health, Color(.63f, .31f, .28f));
     Text(237, 45, std::to_wstring((int)p.health), g_Ink, 14);
@@ -1003,7 +1226,7 @@ void RenderUI()
     Bar(66, 74, 162, p.stamina, Color(.36f, .57f, .49f));
     if (w > 1120)
     {
-        Text(w * .5f - 90, 18, L"INHERITANCE OF ASH", g_Ink, 17);
+        Text(w * .5f - 70, 18, L"AGE OF ECHOES", g_Ink, 17);
         Text(w * .5f - 44, 49, L"\uacc4\uc2b9\uc758 \ubc95\uce59", g_Muted, 14);
     }
     Text(w - 215, 19, L"\uc774\uc5b4\uc9c4 \uc0dd\uba85  " + std::to_wstring(g_World.npcs.size()), g_Ink, 18);
@@ -1057,23 +1280,31 @@ void RenderUI()
     }
     if (g_Panel)
     {
-        SidePanel();
+        if (g_Panel == 3)
+        {
+            StoryPanel();
+        }
+        else
+        {
+            SidePanel();
+        }
     }
     if (g_Dialog)
     {
         g_Buttons.clear();
         Box(0, 0, w, h, Color(.01f, .025f, .02f, .64f));
-        float dw = 640, dh = 372, x = (w - dw) * .5f, y = (h - dh) * .5f;
+        auto choices = Choices();
+        float dw = 640, dh = std::max(372.f, 184.f + choices.size() * 48.f);
+        float x = (w - dw) * .5f, y = (h - dh) * .5f;
         Box(x, y, dw, dh, Color(.08f, .105f, .10f, .99f));
         Line(x, y, x + dw, y, 2, g_Accent);
         Text(x + 26, y + 22, g_DeathConfirm ? L"\uacc4\uc2b9\uc758 \ubc95\uce59" : TargetName(), g_Ink, 22);
         Wrap(x + 26, y + 67, dw - 52, Description(), g_Muted, 16);
-        auto choices = Choices();
         float by = y + 178;
         for (const auto& c : choices)
         {
-            AddButton(x + 26, by, dw - 52, 44, c.text, c.action, c.enabled);
-            by += 52;
+            AddButton(x + 26, by, dw - 52, 40, c.text, c.action, c.enabled);
+            by += 48;
         }
         g_Buttons.push_back({x + dw - 48, y + 14, 34, 34, Close, true, L"\ub2eb\uae30"});
         Line(x + dw - 37, y + 25, x + dw - 25, y + 37, 1.5f, g_Muted);
@@ -1089,11 +1320,11 @@ void RenderUI()
             );
         }
     }
-    if (g_ToastTime > 0 && !g_Dialog)
+    if (g_ToastTime > 0 && !g_Dialog && !g_Panel)
     {
         float tw = std::min(720.f, w - 48);
-        Box((w - tw) * .5f, 98, tw, 60, Color(.07f, .105f, .09f, .98f));
-        Wrap((w - tw) * .5f + 18, 109, tw - 36, g_Toast, g_Ink, 15);
+        Box((w - tw) * .5f, h - 225, tw, 60, Color(.07f, .105f, .09f, .98f));
+        Wrap((w - tw) * .5f + 18, h - 214, tw - 36, g_Toast, g_Ink, 15);
     }
     g_Renderer->Flush();
 }
@@ -1105,7 +1336,7 @@ void Display()
         return;
     }
     g_Renderer->BeginWorld();
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
         g_LevelView->DrawWorld();
     }
@@ -1115,7 +1346,7 @@ void Display()
         g_Scene->Render(g_TargetKind, g_TargetIndex, g_Sites);
     }
     g_Renderer->EndWorld();
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
         g_LevelView->DrawHud(g_MouseX, g_MouseY);
     }
@@ -1128,13 +1359,13 @@ void Display()
 
 void Update(float dt)
 {
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
-        if (!g_Focused || g_LevelView->paused)
+        if (!g_Focused || g_LevelView->paused || CurrentLevel().judgementPending)
         {
             return;
         }
-        auto& level = g_World.levelOne;
+        auto& level = CurrentLevel();
         int phase = level.phase;
         int kills = level.kills;
         int souls = level.souls;
@@ -1171,14 +1402,25 @@ void Update(float dt)
             g_World.dirty = true;
             if (level.phase == LevelOne::Defeated)
             {
-                Die(g_World);
+                int cause = level.encounter == 1   ? Story::VillageRaid
+                            : level.encounter == 2 ? Story::ChurchBattle
+                            : level.encounter == 3 ? Story::FinalBattle
+                                                   : Story::Field;
+                Die(g_World, cause);
                 Persist();
             }
             else if (level.phase == LevelOne::Cleared)
             {
-                g_World.player.fragments += 3;
-                g_World.player.echo[6] += 12;
-                g_World.Record(FieldCleared);
+                if (level.encounter)
+                {
+                    Story::FinishBattle(g_World);
+                }
+                else
+                {
+                    g_World.player.fragments += 3;
+                    g_World.player.echo[6] += 12;
+                    g_World.Record(FieldCleared);
+                }
                 Persist();
             }
         }
@@ -1189,6 +1431,7 @@ void Update(float dt)
         return;
     }
     g_World.time += dt;
+    Story::UpdateWorld(g_World);
     auto& p = g_World.player;
     float x = 0, y = 0;
     if (g_Keys['w'])
@@ -1334,7 +1577,7 @@ void KeyDown(unsigned char key, int, int)
         return;
     }
     g_Keys[key] = true;
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
         if (key == 27 || key == 'p')
         {
@@ -1349,7 +1592,7 @@ void KeyDown(unsigned char key, int, int)
     }
     if (g_Dialog)
     {
-        if (key >= '1' && key <= '3')
+        if (key >= '1' && key <= '9')
         {
             auto c = Choices();
             size_t i = key - '1';
@@ -1367,6 +1610,10 @@ void KeyDown(unsigned char key, int, int)
     if (key == 'j')
     {
         Act(Journal);
+    }
+    if (key == 'm')
+    {
+        Act(StoryOpen);
     }
     if (key == 'c')
     {
@@ -1393,7 +1640,7 @@ void KeyUp(unsigned char key, int, int)
 
 void SpecialKey(int key, int, int)
 {
-    if (key == GLUT_KEY_F1 && !g_World.levelOne.active)
+    if (key == GLUT_KEY_F1 && !InCombat())
     {
         Act(EnterLevel);
         return;
@@ -1415,7 +1662,7 @@ void Mouse(int button, int state, int x, int y)
     {
         return;
     }
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
         LevelCommand(g_LevelView->Hit(x, y));
         return;
@@ -1439,9 +1686,9 @@ void Motion(int x, int y)
 
 void Wheel(int, int direction, int, int)
 {
-    if (g_World.levelOne.active)
+    if (InCombat())
     {
-        if (!g_LevelView->paused && g_World.levelOne.phase == LevelOne::Fighting)
+        if (!g_LevelView->paused && CurrentLevel().phase == LevelOne::Fighting)
         {
             g_Scene->zoom = std::max(.8f, std::min(2.f, g_Scene->zoom + direction * .1f));
         }
@@ -1497,7 +1744,7 @@ int main(int argc, char** argv)
     g_Height = std::max(600, std::min(g_Height, glutGet(GLUT_SCREEN_HEIGHT) - 140));
     glutInitWindowSize(g_Width, g_Height);
     glutInitWindowPosition(60, 40);
-    glutCreateWindow("Inheritance of Ash");
+    glutCreateWindow("Age of Echoes");
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK || !GLEW_VERSION_3_3)
     {
@@ -1514,11 +1761,16 @@ int main(int argc, char** argv)
     g_Scene->width = g_Width;
     g_Scene->height = g_Height;
     bool loaded = Load(g_World, g_SaveBlocked);
+    Story::PrepareMemories(g_World);
     if (!g_World.levelOne.seed)
     {
         LevelOne::Start(g_World.levelOne, NewLevelSeed(), false);
     }
-    g_LevelView.reset(new LevelOneView(*g_Scene, g_World.levelOne));
+    if (!loaded)
+    {
+        g_World.levelOne.active = false;
+    }
+    g_LevelView.reset(new LevelOneView(*g_Scene, CurrentLevel()));
     if (!loaded)
     {
         g_World.Record(Awakened);
@@ -1543,9 +1795,9 @@ int main(int argc, char** argv)
     }
     RefreshTargets();
     g_LastTick = glutGet(GLUT_ELAPSED_TIME);
-    if (g_World.levelOne.active && !g_SaveBlocked)
+    if (InCombat() && !g_SaveBlocked)
     {
-        LevelOne::Notice(g_World.levelOne, L"\ub808\ubca8 1 \u00b7 \uc7bf\ube5b \uacbd\uc791\uc9c0");
+        LevelOne::Notice(CurrentLevel(), LevelOne::AreaName(CurrentLevel()));
     }
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
     glutIgnoreKeyRepeat(1);

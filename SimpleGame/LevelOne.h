@@ -153,6 +153,12 @@ namespace LevelOne
         std::vector<HitEffect> effects;
         std::wstring notice;
         float noticeTimer = 0;
+        int encounter = 0;
+        int dominantTrait = 6, allies = 0, opponents = 0;
+        bool judgementPending = false, judgementSeen = false, revivalUsed = false;
+        bool phaseTwo = false;
+        float supportTimer = 0;
+        std::vector<Point> memories;
     };
 
     inline float MaxHealth(const Session& s)
@@ -162,7 +168,34 @@ namespace LevelOne
 
     inline float Damage(const Session& s)
     {
-        return 12.0f + (s.level - 1) * 3 + s.weapon * 4;
+        float weapon = (float)s.weapon;
+        if (s.encounter == 3 && s.dominantTrait == 5)
+        {
+            for (const auto& enemy : s.enemies)
+            {
+                if (enemy.kind == Boss && enemy.health <= enemy.maxHealth * .5f)
+                {
+                    weapon *= .25f;
+                }
+            }
+        }
+        float insight = s.encounter == 3 && s.phaseTwo && s.dominantTrait == 3 ? 1.25f : 1.f;
+        return (12.0f + (s.level - 1) * 3 + weapon * 4) * (1 + s.allies * .05f) * insight;
+    }
+
+    inline const wchar_t* AreaName(const Session& s)
+    {
+        return s.encounter == 1   ? L"\ubcc0\ubc29 \ub9c8\uc744 \u00b7 \uc2b5\uaca9"
+               : s.encounter == 2 ? L"\uc131\uacc4\uad50\ub2e8 \u00b7 \ubd89\uc740 \uc608\ubc30\ub2f9"
+               : s.encounter == 3 ? L"\ud0dc\ucd08\uc758 \ubb18\uc9c0"
+                                  : L"\ub808\ubca8 1 \u00b7 \uc7bf\ube5b \uacbd\uc791\uc9c0";
+    }
+
+    inline const wchar_t* BossName(const Session& s)
+    {
+        return s.encounter == 2   ? L"\ubd89\uc740 \uc131\uc790 \uc544\ubca8\ub860"
+               : s.encounter == 3 ? L"\ucd5c\ucd08\uc758 \uacc4\uc2b9\uc790 \uc5d0\ub179"
+                                  : L"\uace1\ucc3d\uc758 \ud30c\uc218\uafbc";
     }
 
     inline float Cooldown(const Session& s)
@@ -457,6 +490,18 @@ namespace LevelOne
         s.effects.push_back({s.p, 0.3f, false});
         if (s.health <= 0)
         {
+            if (s.encounter == 3 && !s.revivalUsed && s.allies > 0 && (s.dominantTrait == 6 || s.dominantTrait == 4))
+            {
+                s.revivalUsed = true;
+                s.health = MaxHealth(s) * .4f;
+                Notice(
+                    s,
+                    s.dominantTrait == 6
+                        ? L"\uacc4\uc2b9\uc790\ub4e4\uc774 \ub2f9\uc2e0\uc744 \ub2e4\uc2dc \uc77c\uc73c\ud0a8\ub2e4."
+                        : L"\uacc4\uc2b9\uc790\uac00 \ubab8\uc744 \ub358\uc838 \uce58\uba85\uc0c1\uc744 \ub9c9\uc558\ub2e4."
+                );
+                return;
+            }
             s.phase = Defeated;
         }
     }
@@ -483,7 +528,7 @@ namespace LevelOne
             s.magnetTimer = 30;
             AddDrop(s, enemy.p, Weapon, 2);
             AddDrop(s, enemy.p, Healing, 2);
-            Notice(s, L"\uace1\ucc3d\uc758 \ud30c\uc218\uafbc\uc744 \uc4f0\ub7ec\ub728\ub838\uc2b5\ub2c8\ub2e4.");
+            Notice(s, std::wstring(BossName(s)) + L"\uc744 \uc4f0\ub7ec\ub728\ub838\ub2e4.");
         }
         else
         {
@@ -595,11 +640,59 @@ namespace LevelOne
             ),
             s.effects.end()
         );
-        if (s.phase != Fighting)
+        if (s.phase != Fighting || s.judgementPending)
         {
             return;
         }
         s.elapsed += dt;
+        if (s.encounter == 3 && !s.phaseTwo)
+        {
+            for (const auto& enemy : s.enemies)
+            {
+                if (enemy.kind == Boss && enemy.health <= enemy.maxHealth * .5f)
+                {
+                    s.phaseTwo = true;
+                    break;
+                }
+            }
+            if (s.phaseTwo)
+            {
+                Notice(
+                    s,
+                    L"\uc5d0\ub179\uc774 \ub2f9\uc2e0\uc774 \ub0a8\uae34 \uc0b6\uc758 \ubc29\ud5a5\uc744 \uc77d\ub294\ub2e4."
+                );
+                if (s.dominantTrait == 0)
+                {
+                    SpawnEnemy(s, Raider, Point(144, 0));
+                    SpawnEnemy(s, Raider, Point(-144, 0));
+                    SpawnEnemy(s, Raider, Point(0, -144));
+                }
+                else if (s.dominantTrait == 1)
+                {
+                    AddDrop(s, s.p, Healing, 3);
+                }
+            }
+        }
+        if (s.encounter == 1 && s.elapsed >= 45)
+        {
+            s.invulnerable = 0;
+            Hurt(s, MaxHealth(s));
+            return;
+        }
+        if (s.encounter == 1 && s.elapsed >= 30 && s.elapsed - dt < 30)
+        {
+            Notice(
+                s,
+                L"\uc131\ubb38\uc774 \ubb34\ub108\uc84c\ub2e4. \ub4a4\ud3b8\uc5d0\uc11c \ub610 \ub2e4\ub978 \uc2b5\uaca9\ub300\uac00 \ubc00\ub824\uc628\ub2e4."
+            );
+        }
+        s.supportTimer = std::max(0.f, s.supportTimer - dt);
+        if (s.encounter == 3 && s.allies > 0 && s.supportTimer <= 0)
+        {
+            s.health = std::min(MaxHealth(s), s.health + s.allies * 2);
+            s.supportTimer = 8;
+            s.effects.push_back({s.p, .35f, true});
+        }
         s.invulnerable = std::max(0.0f, s.invulnerable - dt);
         s.magnetTimer = std::max(0.0f, s.magnetTimer - dt);
         s.shotTimer = std::max(0.0f, s.shotTimer - dt);
@@ -626,7 +719,8 @@ namespace LevelOne
         s.spawnTimer -= dt;
         if (s.spawnTimer <= 0 && s.enemies.size() < 36)
         {
-            s.spawnTimer = s.bossState == 2 ? 4.0f : std::max(0.75f, 2.0f - s.elapsed * 0.009f);
+            s.spawnTimer =
+                s.bossState == 2 ? std::max(1.f, 4.f - s.opponents * .3f) : std::max(0.75f, 2.0f - s.elapsed * 0.009f);
             for (int tries = 0; tries < 80; ++tries)
             {
                 int cell = 1 + s.random() % (CellCount - 2);
@@ -655,7 +749,8 @@ namespace LevelOne
             }
         }
 
-        if (s.bossState == 0 && s.kills >= KillGoal && s.souls >= SoulGoal && s.upgrades > 0 && s.level >= 4)
+        if (s.encounter == 0 && s.bossState == 0 && s.kills >= KillGoal && s.souls >= SoulGoal && s.upgrades > 0 &&
+            s.level >= 4)
         {
             s.bossState = 1;
             s.bossTimer = 3.0f;
@@ -727,6 +822,20 @@ namespace LevelOne
                 if ((enemy.kind == Boss && d < 480 || enemy.kind == Archer && d < 320) && enemy.attackTimer <= 0)
                 {
                     enemy.aim = s.p;
+                    if (enemy.kind == Boss && s.encounter == 3)
+                    {
+                        enemy.aim.x += input.x * 24;
+                        enemy.aim.y += input.y * 24;
+                        if (s.phaseTwo && s.dominantTrait == 2 && !s.memories.empty())
+                        {
+                            enemy.aim = s.memories[(int)(s.elapsed / 4) % s.memories.size()];
+                            enemy.attack &= ~1;
+                        }
+                        if (enemy.health <= enemy.maxHealth * .5f && s.dominantTrait == 0)
+                        {
+                            enemy.attack |= 1;
+                        }
+                    }
                     enemy.windup = enemy.kind == Boss ? 1.2f : 0.75f;
                 }
                 else if (enemy.kind != Archer || d > 190 || !ClearPath(s, enemy.p, s.p))
@@ -810,6 +919,13 @@ namespace LevelOne
                             enemy.health -= shot.damage;
                             enemy.flash = 0.18f;
                             shot.remaining = 0;
+                            if (enemy.kind == Boss && s.encounter == 3 && !s.judgementSeen &&
+                                enemy.health <= enemy.maxHealth * .1f)
+                            {
+                                enemy.health = enemy.maxHealth * .1f;
+                                s.judgementPending = true;
+                                s.invulnerable = .85f;
+                            }
                             if (enemy.health <= 0)
                             {
                                 Kill(s, enemy);
@@ -823,7 +939,7 @@ namespace LevelOne
                     break;
                 }
             }
-            if (s.phase != Fighting)
+            if (s.phase != Fighting || s.judgementPending)
             {
                 break;
             }
@@ -863,7 +979,7 @@ namespace LevelOne
         }
     }
 
-    inline void Write(std::ostream& out, const Session& s)
+    inline void Write(std::ostream& out, const Session& s, bool extended = false)
     {
         out << s.seed << ' ' << s.active << ' ' << s.completedOnce << ' ' << s.phase << ' ' << s.level << ' ' << s.xp
             << ' ' << s.weapon << ' ' << s.kills << ' ' << s.souls << ' ' << s.upgrades << ' ' << s.nextEnemyId << ' '
@@ -889,6 +1005,12 @@ namespace LevelOne
         {
             out << d.p.x << ' ' << d.p.y << ' ' << d.kind << ' ' << d.amount << ' ' << d.attracted << '\n';
         }
+        if (extended)
+        {
+            out << s.encounter << ' ' << s.dominantTrait << ' ' << s.allies << ' ' << s.opponents << ' '
+                << s.judgementPending << ' ' << s.judgementSeen << ' ' << s.revivalUsed << ' ' << s.supportTimer << ' '
+                << s.phaseTwo << '\n';
+        }
     }
 
     inline bool Valid(float value, float low, float high)
@@ -902,7 +1024,7 @@ namespace LevelOne
                std::abs(p.y) < MapSize * CellSize;
     }
 
-    inline bool Read(std::istream& in, Session& s)
+    inline bool Read(std::istream& in, Session& s, bool extended = false)
     {
         Session loaded;
         in >> loaded.seed >> loaded.active >> loaded.completedOnce >> loaded.phase >> loaded.level >> loaded.xp >>
@@ -994,6 +1116,20 @@ namespace LevelOne
                 return false;
             }
             loaded.drops.push_back(d);
+        }
+        if (extended)
+        {
+            in >> loaded.encounter >> loaded.dominantTrait >> loaded.allies >> loaded.opponents >>
+                loaded.judgementPending >> loaded.judgementSeen >> loaded.revivalUsed >> loaded.supportTimer >>
+                loaded.phaseTwo;
+            if (!in || loaded.encounter < 0 || loaded.encounter > 3 || loaded.dominantTrait < 0 ||
+                loaded.dominantTrait > 6 || loaded.allies < 0 || loaded.allies > 8 || loaded.opponents < 0 ||
+                loaded.opponents > 8 || !Valid(loaded.supportTimer, 0, 8) ||
+                (loaded.judgementPending &&
+                 (loaded.encounter != 3 || loaded.judgementSeen || loaded.phase != Fighting || loaded.bossState != 2)))
+            {
+                return false;
+            }
         }
         s = loaded;
         return true;

@@ -171,6 +171,22 @@ public:
         scene.cameraOverride = true;
         scene.camera = Game::Vec(level.p.x, level.p.y);
         scene.r.Terrain((float)level.p.x, (float)level.p.y, scene.zoom, true, (float)(level.seed % 10000));
+        if (level.encounter == 3)
+        {
+            for (size_t i = 0; i < level.memories.size(); ++i)
+            {
+                auto p = Project(level.memories[i]);
+                Ring(level.memories[i], 28, Color(.56f, .73f, .76f, .5f));
+                scene.Rock((float)p.x, (float)p.y, .8f, (unsigned)i + 19);
+                scene.r.Text(
+                    (float)p.x - 18,
+                    (float)p.y - 38 * scene.zoom,
+                    L"\uc8fd\uc74c\uc758 \uc794\ud5a5",
+                    Color(.68f, .77f, .77f),
+                    12
+                );
+            }
+        }
 
         struct Drawable
         {
@@ -180,6 +196,25 @@ public:
         };
 
         std::vector<Drawable> drawables;
+        std::vector<std::pair<int, LevelOne::Point>> witnesses;
+        if (level.encounter == 3)
+        {
+            int friends = 0, rivals = 0;
+            for (size_t i = 0; i < scene.world.npcs.size(); ++i)
+            {
+                const auto& n = scene.world.npcs[i];
+                bool ally = n.relationship > 70 && friends < 4;
+                bool rival = n.relationship < -70 && rivals < 4;
+                if (n.origin != 0 || (!ally && !rival))
+                {
+                    continue;
+                }
+                int slot = ally ? friends++ : rivals++;
+                LevelOne::Point position(ally ? -48 : 48, (slot - 1) * 48);
+                witnesses.push_back({(int)i, position});
+                drawables.push_back({(float)Project(position).y, 3, (int)witnesses.size() - 1});
+            }
+        }
         for (int y = 0; y < LevelOne::MapSize; ++y)
         {
             for (int x = 0; x < LevelOne::MapSize; ++x)
@@ -301,6 +336,25 @@ public:
             {
                 Enemy(level.enemies[drawable.index]);
             }
+            else if (drawable.kind == 3)
+            {
+                const auto& witness = witnesses[drawable.index];
+                const auto& npc = scene.world.npcs[witness.first];
+                Ring(
+                    witness.second,
+                    16,
+                    npc.relationship > 0 ? Color(.42f, .88f, .66f, .6f) : Color(.94f, .38f, .32f, .6f)
+                );
+                scene.Person(
+                    Game::Vec(witness.second.x, witness.second.y),
+                    npc.ability,
+                    false,
+                    npc.archetype,
+                    npc.id,
+                    false,
+                    npc.id == scene.world.story.childId
+                );
+            }
             else if (level.invulnerable <= 0 || (int)(level.invulnerable * 18) % 2 == 0)
             {
                 scene.Person(Game::Vec(level.p.x, level.p.y), Game::Fate, true, 6, 0, true);
@@ -345,7 +399,7 @@ public:
         my = mouseY / scale;
         buttons.clear();
         Rect(0, 0, width, 92, Color(.05f, .075f, .067f, .96f));
-        Text(24, 12, L"\ub808\ubca8 1  \u00b7  \uc7bf\ube5b \uacbd\uc791\uc9c0", Color(.91f, .91f, .85f), 20);
+        Text(24, 12, LevelOne::AreaName(level), Color(.91f, .91f, .85f), 20);
         Text(
             24,
             45,
@@ -395,10 +449,10 @@ public:
             float bw = std::min(540.f, width - 360);
             float bx = (width - bw) * .5f;
             Rect(bx - 14, 108, bw + 28, 62, Color(.09f, .075f, .065f, .95f));
-            Text(bx, 115, L"\uace1\ucc3d\uc758 \ud30c\uc218\uafbc", Color(.92f, .73f, .56f), 18);
+            Text(bx, 115, LevelOne::BossName(level), Color(.92f, .73f, .56f), 18);
             Bar(bx, 151, bw, boss->health / boss->maxHealth, Color(.74f, .32f, .24f));
         }
-        else
+        else if (level.encounter == 0)
         {
             Text(
                 24,
@@ -443,6 +497,34 @@ public:
                 );
             }
         }
+        if (level.encounter == 1 && level.phase == LevelOne::Fighting)
+        {
+            Text(24, 112, L"\ubcc0\ubc29 \ub9c8\uc744\uc744 \uc9c0\ucf1c\ub77c", Color(.91f, .76f, .62f), 18);
+            Text(
+                24,
+                144,
+                L"\ud53c\ub09c\ubbfc\ub4e4\uc774 \uc131\ubb38 \ub4a4\ub85c \ub2ec\uc544\ub098\uace0 \uc788\ub2e4.",
+                Color(.76f, .80f, .72f),
+                14
+            );
+        }
+        if (level.encounter == 3)
+        {
+            Text(
+                24,
+                184,
+                L"\ud568\uaed8 \uc120 \uc774\ub4e4 " + std::to_wstring(level.allies),
+                Color(.61f, .83f, .73f),
+                14
+            );
+            Text(
+                24,
+                208,
+                L"\ub4f1\uc744 \ub3cc\ub9b0 \uc774\ub4e4 " + std::to_wstring(level.opponents),
+                Color(.87f, .55f, .48f),
+                14
+            );
+        }
         MiniMap(width - 186, 112);
         Rect(0, height - 64, width, 64, Color(.05f, .075f, .067f, .96f));
         Text(
@@ -478,7 +560,7 @@ public:
             Rect((width - 600) * .5f, height - 120, 600, 42, Color(.07f, .12f, .09f, .96f));
             Text((width - 600) * .5f + 16, height - 110, level.notice, Color(.84f, .90f, .80f), 15);
         }
-        if (paused || level.phase != LevelOne::Fighting)
+        if (paused || level.phase != LevelOne::Fighting || level.judgementPending)
         {
             buttons.clear();
             Rect(0, 0, width, height, Color(.02f, .04f, .03f, .76f));
@@ -488,9 +570,11 @@ public:
             Text(
                 x + 26,
                 y + 24,
-                level.phase == LevelOne::Cleared    ? L"\ub808\ubca8 1 \uc644\ub8cc"
-                : level.phase == LevelOne::Defeated ? L"\uc774 \uc0b6\uc774 \ub0a8\uae34 \uac83"
-                                                    : L"\uc7a0\uc2dc \uc228\uc744 \uace0\ub978\ub2e4",
+                level.judgementPending ? L"\uc5d0\ub179\uc758 \ub9c8\uc9c0\ub9c9 \uc9c8\ubb38"
+                : level.phase == LevelOne::Cleared && level.encounter ? L"\ub300\uba74\uc744 \ub9c8\ucce4\ub2e4"
+                : level.phase == LevelOne::Cleared                    ? L"\ub808\ubca8 1 \uc644\ub8cc"
+                : level.phase == LevelOne::Defeated                   ? L"\uc774 \uc0b6\uc774 \ub0a8\uae34 \uac83"
+                                                                      : L"\uc7a0\uc2dc \uc228\uc744 \uace0\ub978\ub2e4",
                 Color(.91f, .89f, .78f),
                 25
             );
@@ -505,22 +589,45 @@ public:
             Text(
                 x + 26,
                 y + 110,
-                level.phase == LevelOne::Defeated
-                    ? L"\uc131\uc7a5\uc740 \ub0a8\uace0, \uc138\uacc4\uc5d0\ub294 \uc0c8 \uacc4\uc2b9\uc790\uac00 \ud0dc\uc5b4\ub0ac\ub2e4."
+                level.judgementPending
+                    ? L"\ub0b4\uac00 \uc0ac\ub77c\uc9c0\uba74 \uc8fd\uc74c\uc740 \ub2e4\uc2dc \uc8fd\uc74c\uc774 \ub41c\ub2e4."
+                : level.phase == LevelOne::Defeated
+                    ? (scene.world.story.ending == Story::Destroy
+                           ? L"\uc774 \uc8fd\uc74c\uc5d0\uc11c \uacc4\uc2b9\uc790\ub294 \ud0dc\uc5b4\ub098\uc9c0 \uc54a\uc558\ub2e4."
+                           : L"\ub2f9\uc2e0\uc758 \uc0b6\uc740 \ub05d\ub0ac\ub2e4. \uadf8\ub7ec\ub098 \ub0a8\uae34 \ubc29\ud5a5\uc740 \ub05d\ub098\uc9c0 \uc54a\uc558\ub2e4."
+                      )
                 : level.phase == LevelOne::Cleared
                     ? L"\ubcf4\uc0c1\uc744 \ud68c\uc218\ud588\ub2e4. \uc774\uc81c \ub354 \uba3c \uae38\ub85c \ub098\uc544\uac08 \uc218 \uc788\ub2e4."
                     : L"\uacbd\uc791\uc9c0\uc758 \uc2dc\uac04\ub3c4 \uc7a0\uc2dc \uba48\ucd98\ub2e4.",
                 Color(.65f, .73f, .65f),
                 15
             );
+            if (level.judgementPending)
+            {
+                Text(
+                    x + 26,
+                    y + 133,
+                    L"\ub2e4\uc2dc\ub294 \uadf8 \uc8fd\uc74c\uc5d0\uc11c \ub204\uad70\uac00 \ud0dc\uc5b4\ub098\uc9c0 \uc54a\ub294\ub2e4. \uadf8\ub798\ub3c4?",
+                    Color(.86f, .74f, .62f),
+                    14
+                );
+            }
+            bool leaveStory = level.encounter && (level.phase == LevelOne::Cleared ||
+                                                  (level.encounter == 1 && level.phase == LevelOne::Defeated));
             Button(
                 x + 26,
                 y + 157,
                 468,
                 42,
-                level.phase == LevelOne::Fighting ? L"\uacc4\uc18d\ud55c\ub2e4"
-                                                  : L"\uc0c8 \uacbd\uc791\uc9c0\uc5d0 \ub3c4\uc804\ud55c\ub2e4",
-                level.phase == LevelOne::Fighting ? Resume : Retry
+                level.judgementPending
+                    ? L"\uadf8\ub798\ub3c4 \uc6b0\ub9ac\uc758 \uc120\ud0dd\uc73c\ub85c \ub05d\ub0b4\uaca0\ub2e4"
+                : leaveStory ? L"\uc5ec\uc815\uc73c\ub85c \ub3cc\uc544\uac04\ub2e4"
+                : level.encounter && level.phase == LevelOne::Defeated ? L"\ub2e4\uc2dc \ub300\uba74\ud55c\ub2e4"
+                : level.phase == LevelOne::Fighting                    ? L"\uacc4\uc18d\ud55c\ub2e4"
+                                                    : L"\uc0c8 \uacbd\uc791\uc9c0\uc5d0 \ub3c4\uc804\ud55c\ub2e4",
+                leaveStory                          ? Leave
+                : level.phase == LevelOne::Fighting ? Resume
+                                                    : Retry
             );
             Button(x + 26, y + 209, 226, 42, L"\uc800\uc7a5", SaveGame);
             Button(x + 268, y + 209, 226, 42, L"\uc138\uacc4\ub85c \ub3cc\uc544\uac04\ub2e4", Leave);

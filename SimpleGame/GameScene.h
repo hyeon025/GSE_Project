@@ -174,9 +174,19 @@ public:
         BuildRock(x - 22 * zoom, y + 4 * zoom, .6f, seed, alpha);
     }
 
-    void Person(Game::Vec p, Game::Ability ability, bool player, int archetype = 6, int id = 0, bool crossbow = false)
+    void Person(
+        Game::Vec p,
+        Game::Ability ability,
+        bool player,
+        int archetype = 6,
+        int id = 0,
+        bool crossbow = false,
+        bool child = false
+    )
     {
         Game::Vec s = Project(p);
+        float originalZoom = zoom;
+        zoom *= child ? .65f : 1.f;
         float x = (float)s.x, y = (float)s.y;
         Color cloth = player ? Color(.34f, .39f, .36f) : Shade(AbilityColor(ability), .63f);
         float step = player ? (float)std::sin(walk) * 3 : std::sin((float)world.time * 1.8f + id) * .35f;
@@ -218,6 +228,7 @@ public:
         {
             Stroke(x, y, 12, -26, 15, -8, 2, Color(.62f, .64f, .63f));
         }
+        zoom = originalZoom;
     }
 
     void Fire(float x, float y, bool burning)
@@ -475,7 +486,7 @@ public:
             else if (d.kind == 2)
             {
                 const auto& n = world.npcs[d.index];
-                Person(n.p, n.ability, false, n.archetype, n.id);
+                Person(n.p, n.ability, false, n.archetype, n.id, false, n.id == world.story.childId);
             }
             else
             {

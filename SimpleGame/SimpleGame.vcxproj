@@ -156,6 +156,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameWorld.h" />
+    <ClInclude Include="StoryState.h" />
+    <ClInclude Include="GameStory.h" />
     <ClInclude Include="LevelOne.h" />
     <ClInclude Include="LevelOneView.h" />
     <ClInclude Include="GameScene.h" />

@@ -33,6 +33,12 @@
     <ClInclude Include="GameWorld.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="StoryState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStory.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="LevelOne.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

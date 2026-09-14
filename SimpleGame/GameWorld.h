@@ -7,9 +7,11 @@
 #include <fstream>
 #include <iomanip>
 #include <map>
+#include <set>
 #include <vector>
 #include <ShlObj.h>
 #include "LevelOne.h"
+#include "StoryState.h"
 
 namespace Game
 {
@@ -109,6 +111,8 @@ namespace Game
         int id = 0, archetype = 0, trust = 0;
         Ability ability = Body;
         std::array<int, 7> echo = {};
+        int originDeathId = 0, origin = 0, relationship = 0, power = 20;
+        bool met = false, saved = false, changed = false, freeWill = false;
     };
 
     struct Player
@@ -126,6 +130,8 @@ namespace Game
     {
         Player player;
         LevelOne::Session levelOne;
+        LevelOne::Session storyBattle;
+        Story::State story;
         int deaths = 0;
         double time = 0;
         std::map<Key, SiteState> states;
@@ -133,9 +139,29 @@ namespace Game
         std::vector<int> events;
         bool dirty = false;
 
+        World()
+        {
+            storyBattle.active = false;
+        }
+
         void Record(Event e)
         {
             events.push_back(e);
+            if (story.stage == Story::Prologue)
+            {
+                if (e == Healed || e == Sacrificed)
+                {
+                    story.villageChoices |= 1;
+                }
+                if (e == Robbed || e == Salvaged)
+                {
+                    story.villageChoices |= 2;
+                }
+                if (e == Repaired || e == Rested)
+                {
+                    story.villageChoices |= 4;
+                }
+            }
             dirty = true;
         }
     };
@@ -178,6 +204,14 @@ namespace Game
         {
             s.p = Vec(70, 230);
             s.kind = Shrine;
+        }
+        for (int i = 0; i < AbilityCount; ++i)
+        {
+            if (s.key == Story::RuinKeys()[i])
+            {
+                s.kind = Relic;
+                s.ability = (Ability)i;
+            }
         }
         return s;
     }
@@ -297,11 +331,47 @@ namespace Game
         return text[e];
     }
 
-    inline void Die(World& w)
+    inline void Die(World& w, int cause = Story::Offering)
     {
+        Story::DeathRecord record;
+        record.id = ++w.deaths;
+        record.cause = cause;
+        record.stage = w.story.stage;
+        record.lastAction = w.events.empty() ? Awakened : w.events.back();
+        record.traits = w.player.echo;
+        Vec location = w.player.p;
+        if (w.storyBattle.active)
+        {
+            location = Vec(w.storyBattle.p.x, w.storyBattle.p.y);
+        }
+        else if (w.levelOne.active)
+        {
+            location = Vec(w.levelOne.p.x, w.levelOne.p.y);
+        }
+        record.x = location.x;
+        record.y = location.y;
+        for (const auto& npc : w.npcs)
+        {
+            if (!w.levelOne.active && !w.storyBattle.active && Distance(npc.p, w.player.p) < 100)
+            {
+                record.nearbyNpc = npc.id;
+                break;
+            }
+        }
         Npc n;
-        n.id = ++w.deaths;
+        n.id = (int)w.npcs.size() + 1;
+        n.originDeathId = w.deaths;
         n.echo = w.player.echo;
+        if (w.story.ending == Story::Freedom)
+        {
+            n.freeWill = true;
+            n.echo.fill(0);
+            n.echo[Hash(n.id, 27, 83) % 7] = 12;
+        }
+        else if (w.story.ending == Story::Successor)
+        {
+            n.echo[w.story.worldTrait] += 12;
+        }
         n.archetype = 6;
         int best = 0;
         for (int i = 0; i < 7; ++i)
@@ -315,12 +385,39 @@ namespace Game
         // Innate ability is fixed at birth, independently of inherited personality.
         n.ability = (Ability)(Hash(n.id, 73, 101) % AbilityCount);
         n.p = n.home = w.player.p;
-        w.npcs.push_back(n);
+        if (w.story.stage == Story::Child && w.story.childId == 0)
+        {
+            w.story.childId = n.id;
+            n.p = n.home = Vec(35, 55);
+        }
+        n.power = std::min(100, 20 + best);
+        if (w.story.ending != Story::Destroy)
+        {
+            w.npcs.push_back(n);
+            record.successorId = n.id;
+            w.Record(Born);
+        }
+        else
+        {
+            w.player.bread /= 2;
+            w.player.fragments /= 2;
+            w.levelOne.xp = 0;
+            w.storyBattle.xp = 0;
+        }
+        w.story.deaths.push_back(record);
+        if (w.story.stage == Story::Prologue)
+        {
+            w.story.stage = Story::Successors;
+        }
         w.player.p = w.player.checkpoint;
         w.player.health = w.player.stamina = 100;
+        if (w.story.ending == Story::Destroy)
+        {
+            w.player.health = 50;
+        }
         w.player.echo.fill(0);
         w.player.exploration = 0;
-        w.Record(Born);
+        w.dirty = true;
     }
 
     inline std::wstring SavePath()
@@ -352,7 +449,7 @@ namespace Game
             return false;
         }
         const Player& p = w.player;
-        f << std::setprecision(17) << "GSE_WORLD 2\n" << w.time << ' ' << w.deaths << '\n';
+        f << std::setprecision(17) << "GSE_WORLD 3\n" << w.time << ' ' << w.deaths << '\n';
         f << p.p.x << ' ' << p.p.y << ' ' << p.checkpoint.x << ' ' << p.checkpoint.y << ' ' << p.health << ' '
           << p.stamina << ' ' << p.bread << ' ' << p.herbs << ' ' << p.wood << ' ' << p.fragments << ' '
           << (int)p.ability << ' ' << p.exploration << '\n';
@@ -381,6 +478,8 @@ namespace Game
             {
                 f << e << ' ';
             }
+            f << n.originDeathId << ' ' << n.origin << ' ' << n.relationship << ' ' << n.power << ' ' << n.met << ' '
+              << n.saved << ' ' << n.changed << ' ' << n.freeWill;
             f << '\n';
         }
         f << w.events.size() << '\n';
@@ -390,7 +489,9 @@ namespace Game
         }
         f << '\n';
         // Keep the original world fields in order so version-one saves remain readable.
-        LevelOne::Write(f, w.levelOne);
+        LevelOne::Write(f, w.levelOne, true);
+        Story::Write(f, w.story);
+        LevelOne::Write(f, w.storyBattle, true);
         f.flush();
         bool ok = f.good();
         f.close();
@@ -427,7 +528,7 @@ namespace Game
         Player& p = result.player;
         std::string magic;
         int version = 0, ability = 0;
-        if (!(f >> magic >> version) || magic != "GSE_WORLD" || (version != 1 && version != 2))
+        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 3)
         {
             return false;
         }
@@ -485,10 +586,11 @@ namespace Game
                 return false;
             }
         }
-        if (!(f >> count) || count != (size_t)result.deaths)
+        if (!(f >> count) || count > 200000 || (version < 3 && count != (size_t)result.deaths))
         {
             return false;
         }
+        std::set<int> originDeaths;
         for (size_t i = 0; i < count; ++i)
         {
             Npc n;
@@ -506,6 +608,26 @@ namespace Game
                 {
                     return false;
                 }
+            }
+            if (version >= 3)
+            {
+                f >> n.originDeathId >> n.origin >> n.relationship >> n.power >> n.met >> n.saved >> n.changed >>
+                    n.freeWill;
+                if (!f || n.originDeathId < 0 || n.originDeathId > result.deaths || n.origin < 0 || n.origin > 2 ||
+                    n.relationship < -100 || n.relationship > 100 || n.power < 0 || n.power > 100 ||
+                    (n.origin == 0) != (n.originDeathId > 0))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                n.originDeathId = n.id;
+                n.relationship = n.trust * 25;
+            }
+            if (n.origin == 0 && !originDeaths.insert(n.originDeathId).second)
+            {
+                return false;
             }
             result.npcs.push_back(n);
         }
@@ -527,9 +649,37 @@ namespace Game
         {
             return false;
         }
-        if (version >= 2 && !LevelOne::Read(f, result.levelOne))
+        if (version >= 2 && !LevelOne::Read(f, result.levelOne, version >= 3))
         {
             return false;
+        }
+        if (version >= 3)
+        {
+            if (!Story::Read(f, result.story) || !LevelOne::Read(f, result.storyBattle, true) ||
+                (result.levelOne.active && result.storyBattle.active) || result.levelOne.encounter != 0 ||
+                result.story.childId > (int)result.npcs.size())
+            {
+                return false;
+            }
+            if (result.story.childId && result.npcs[result.story.childId - 1].origin != 0)
+            {
+                return false;
+            }
+            for (const auto& death : result.story.deaths)
+            {
+                if (death.id > result.deaths || death.successorId > (int)result.npcs.size() ||
+                    death.nearbyNpc > (int)result.npcs.size() ||
+                    (death.successorId && result.npcs[death.successorId - 1].originDeathId != death.id))
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            result.story.stage = result.deaths ? Story::Successors : Story::Prologue;
+            result.story.villageChoices = result.levelOne.completedOnce ? 7 : 0;
+            // Older saves have no death history; never invent missing memories.
         }
         w = result;
         damaged = false;
