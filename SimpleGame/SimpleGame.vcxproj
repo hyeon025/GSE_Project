@@ -156,6 +156,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameWorld.h" />
+    <ClInclude Include="SocietyState.h" />
+    <ClInclude Include="WorldSimulation.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="WorldActors.h" />

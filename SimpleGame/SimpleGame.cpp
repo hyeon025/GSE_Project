@@ -30,6 +30,7 @@ int g_JournalOffset = 0;
 Ability g_Secondary = Matter;
 int g_MouseX = 0, g_MouseY = 0;
 bool g_Dialog = false, g_DeathConfirm = false, g_SaveBlocked = false, g_Focused = true;
+bool g_NpcEconomy = false;
 double g_Autosave = 0;
 float g_UiScale = 1;
 std::wstring g_Toast;
@@ -90,7 +91,12 @@ enum Action
     ThreatenNpc,
     EndDestroy,
     EndSuccessor,
-    EndFreedom
+    EndFreedom,
+    NpcEconomy,
+    NpcSocial,
+    BuyFood,
+    SellHerb,
+    AttackNpc
 };
 
 void AbilityUse(bool secondary);
@@ -181,6 +187,10 @@ void RefreshTargets()
     }
     for (size_t i = 0; i < g_World.npcs.size(); ++i)
     {
+        if (!g_World.npcs[i].life.alive)
+        {
+            continue;
+        }
         double d = Distance(g_World.player.p, g_World.npcs[i].p);
         if (d < best)
         {
@@ -297,8 +307,9 @@ std::wstring TargetName()
         {
             return L"\uae30\uc5b5\uc758 \ud30c\ud3b8\uc744 \uc9c0\ub2cc \uc544\uc774";
         }
-        return std::wstring(Personality(g_World.npcs[g_TargetIndex].archetype)) + L" \u00b7 " +
-               std::to_wstring(g_World.npcs[g_TargetIndex].id) + L"\ubc88\uc9f8 \uacc4\uc2b9\uc790";
+        const auto& n = g_World.npcs[g_TargetIndex];
+        return std::wstring(Society::JobName(n.life.job)) + L" #" + std::to_wstring(n.id) +
+               (n.origin == 0 ? L"  \uacc4\uc2b9\uc790" : L"");
     }
     return L"";
 }
@@ -317,6 +328,31 @@ std::vector<Choice> Choices()
     if (g_TargetKind == 2)
     {
         const auto& n = g_World.npcs[g_TargetIndex];
+        if (!n.life.alive || Distance(n.p, p.p) > 90)
+        {
+            return c;
+        }
+        if (g_NpcEconomy)
+        {
+            bool trade = Society::CanTrade(g_World, n);
+            c.push_back(
+                {L"\ube75 \uad6c\ub9e4  /  \uc740\ud654 4",
+                 BuyFood,
+                 trade && n.life.goods > 0 && g_World.society.gold >= 4}
+            );
+            c.push_back(
+                {L"\uc57d\ucd08 \ud310\ub9e4  /  \uc740\ud654 3", SellHerb, trade && p.herbs > 0 && n.life.gold >= 3}
+            );
+            c.push_back(
+                {L"\uacf5\uaca9",
+                 AttackNpc,
+                 g_World.society.playerCooldown <= 0 && Distance(n.p, p.p) <= 65 &&
+                     (n.id != g_World.story.childId || g_World.story.childComplete)}
+            );
+            c.push_back({L"\ub300\ud654", NpcSocial, true});
+            return c;
+        }
+        c.push_back({L"\uac70\ub798 / \uc804\ud22c", NpcEconomy, true});
         c.push_back({L"\uc0b4\uc544\uc628 \uc774\uc57c\uae30\ub97c \ub4e3\ub294\ub2e4", Talk, true});
         c.push_back({L"\ube75\uc744 \ub098\ub208\ub2e4  \u00b7  \ube75 1", Share, p.bread > 0 && n.relationship < 100});
         bool related = Adjacent(p.ability, n.ability);
@@ -442,7 +478,7 @@ std::wstring Description()
     if (g_TargetKind == 2)
     {
         auto& n = g_World.npcs[g_TargetIndex];
-        return Story::NpcLine(g_World, n) + L"\n" + AbilityName(n.ability) + L" \u00b7 " + Story::Faction(n.archetype);
+        return Society::Status(n) + L"\n" + AbilityName(n.ability) + L" / " + Society::VillageName(n.life.village);
     }
     const auto& s = g_Sites[g_TargetIndex];
     auto st = State(g_World, s.key);
@@ -560,6 +596,7 @@ void Act(int action)
     }
     if (action == Open)
     {
+        g_NpcEconomy = false;
         RefreshTargets();
         if (g_TargetKind < 0)
         {
@@ -604,6 +641,25 @@ void Act(int action)
     if (g_TargetKind == 2)
     {
         auto& n = g_World.npcs[g_TargetIndex];
+        if (action == NpcEconomy || action == NpcSocial)
+        {
+            g_NpcEconomy = action == NpcEconomy;
+            return;
+        }
+        if (action == BuyFood || action == SellHerb)
+        {
+            Society::PlayerTrade(g_World, n, action == BuyFood);
+            Persist();
+            return;
+        }
+        if (action == AttackNpc)
+        {
+            Society::PlayerAttack(g_World, n.id);
+            g_Dialog = false;
+            RefreshTargets();
+            Persist();
+            return;
+        }
         if (action == Talk)
         {
             Story::Talk(g_World, n);
@@ -613,6 +669,7 @@ void Act(int action)
         if (action == Share)
         {
             --p.bread;
+            n.life.health = std::min(n.life.maxHealth, n.life.health + 12);
             n.relationship = std::min(100, n.relationship + 25);
             n.trust = std::min(3, std::max(0, n.relationship / 25));
             p.echo[1] += 5;
@@ -632,6 +689,7 @@ void Act(int action)
         {
             --p.herbs;
             n.saved = true;
+            n.life.health = n.life.maxHealth;
             n.relationship = std::min(100, n.relationship + 35);
             n.power = std::min(100, n.power + 10);
             p.echo[1] += 10;
@@ -644,6 +702,9 @@ void Act(int action)
         {
             p.wood -= 2;
             n.changed = n.freeWill = true;
+            n.life.job = Society::Hunter;
+            n.life.raidWeight = 0;
+            n.life.target = 0;
             n.archetype = (n.archetype + 3) % 7;
             n.relationship = std::min(100, n.relationship + 15);
             n.power = std::min(100, n.power + 30);
@@ -1006,7 +1067,14 @@ void Map()
     }
     for (const auto& n : g_World.npcs)
     {
-        mark(n.p, Color(.68f, .67f, .82f), 2.5f);
+        if (n.life.alive)
+        {
+            mark(n.p, n.life.target ? Color(.82f, .36f, .28f) : Color(.58f, .74f, .72f), 2.5f);
+        }
+    }
+    for (int village = 0; village < 3; ++village)
+    {
+        mark(VillageCenter(village), Color(.88f, .81f, .52f), 5);
     }
     mark(g_World.player.p, g_Ink, 3.5f);
     Text(x + 8, y + 7, L"N", g_Ink, 13);
@@ -1215,6 +1283,29 @@ void RenderUI()
         Wrap(24, 139, 300, Story::Objective(g_World), g_Muted, 14);
         AddButton(24, 222, 140, 40, L"\uc5ec\uc815", StoryOpen);
         AddButton(172, 222, 140, 40, L"\uacbd\uc791\uc9c0 \uc785\uc7a5", EnterLevel);
+        int village = Society::NearestVillage(p.p);
+        const auto& market = g_World.society.villages[village];
+        Text(
+            24,
+            280,
+            std::wstring(Society::VillageName(village)) + L"  /  " +
+                std::to_wstring((int)Distance(p.p, VillageCenter(village))) + L"m",
+            g_Ink,
+            15
+        );
+        Text(
+            24,
+            305,
+            L"\uc2dc\uc7a5 \ubb3c\ud488 " + std::to_wstring(market.stock) + L"  \uacf5\ub3d9 \uae08\uace0 " +
+                std::to_wstring(market.treasury),
+            g_Muted,
+            13
+        );
+        int row = 0;
+        for (auto it = g_World.society.events.rbegin(); it != g_World.society.events.rend() && row < 3; ++it, ++row)
+        {
+            Text(24, 336 + row * 22.f, Society::EventText(*it), g_Muted, 13);
+        }
     }
     Box(0, 0, w, 88, Color(.055f, .08f, .075f, .93f));
     Line(0, 88, w, 88, 1, Color(.34f, .39f, .33f, .7f));
@@ -1224,12 +1315,21 @@ void RenderUI()
     Text(237, 45, std::to_wstring((int)p.health), g_Ink, 14);
     Text(24, 66, L"\uae30\ub825", g_Muted, 12);
     Bar(66, 74, 162, p.stamina, Color(.36f, .57f, .49f));
+    Text(300, 46, L"\uc740\ud654 " + std::to_wstring(g_World.society.gold), g_Accent, 16);
     if (w > 1120)
     {
         Text(w * .5f - 70, 18, L"AGE OF ECHOES", g_Ink, 17);
         Text(w * .5f - 44, 49, L"\uacc4\uc2b9\uc758 \ubc95\uce59", g_Muted, 14);
     }
-    Text(w - 215, 19, L"\uc774\uc5b4\uc9c4 \uc0dd\uba85  " + std::to_wstring(g_World.npcs.size()), g_Ink, 18);
+    size_t alive = (size_t)std::count_if(
+        g_World.npcs.begin(),
+        g_World.npcs.end(),
+        [](const Npc& n)
+        {
+            return n.life.alive;
+        }
+    );
+    Text(w - 215, 19, L"\uc0b4\uc544\uc788\ub294 \uc8fc\ubbfc  " + std::to_wstring(alive), g_Ink, 18);
     Text(w - 215, 49, L"\ub098\uc758 \uc8fd\uc74c  " + std::to_wstring(g_World.deaths), g_Muted, 14);
     if (!g_Panel && !g_Dialog)
     {
@@ -1373,6 +1473,7 @@ void Update(float dt)
             return;
         }
         auto& level = CurrentLevel();
+        g_Scene->UpdateSociety(dt, false);
         int phase = level.phase;
         int kills = level.kills;
         int souls = level.souls;
@@ -1432,12 +1533,30 @@ void Update(float dt)
         }
         return;
     }
-    if (!g_Focused || g_Dialog || g_Panel)
+    if (!g_Focused)
     {
         return;
     }
     g_World.time += dt;
+    int previousDeaths = g_World.deaths;
+    g_Scene->UpdateSociety(dt, true);
     Story::UpdateWorld(g_World);
+    if (g_World.deaths != previousDeaths)
+    {
+        g_Dialog = g_DeathConfirm = false;
+        g_Panel = 0;
+        Notify(Story::DeathMessage(g_World));
+    }
+    if (g_Dialog && g_TargetKind == 2 &&
+        (!g_World.npcs[g_TargetIndex].life.alive || Distance(g_World.npcs[g_TargetIndex].p, g_World.player.p) > 90))
+    {
+        g_Dialog = false;
+    }
+    if (g_Dialog || g_Panel)
+    {
+        g_Scene->playerMotion.Stop();
+        return;
+    }
     float x = 0, y = 0;
     if (g_Keys['w'])
     {
@@ -1471,7 +1590,7 @@ void Idle()
     g_ToastTime = std::max(0.f, g_ToastTime - dt);
     Update(dt);
     g_Autosave += dt;
-    if (g_Autosave >= 15 && !g_Dialog)
+    if (g_Autosave >= 15)
     {
         g_Autosave = 0;
         if (!g_SaveBlocked)
@@ -1537,6 +1656,21 @@ void KeyDown(unsigned char key, int, int)
     if (key == 'e')
     {
         Act(Open);
+    }
+    if (key == 'f' && !g_Panel)
+    {
+        int target = 0;
+        double nearest = 65;
+        for (const auto& n : g_World.npcs)
+        {
+            double distance = Distance(n.p, g_World.player.p);
+            if (n.life.alive && distance < nearest && (n.id != g_World.story.childId || g_World.story.childComplete))
+            {
+                nearest = distance;
+                target = n.id;
+            }
+        }
+        Society::PlayerAttack(g_World, target);
     }
     if (key == 'j')
     {
@@ -1692,6 +1826,17 @@ int main(int argc, char** argv)
     g_Scene->width = g_Width;
     g_Scene->height = g_Height;
     bool loaded = Load(g_World, g_SaveBlocked);
+    Society::Initialize(g_World);
+    if (!Walkable(g_World.player.p))
+    {
+        g_World.player.p = VillageCenter(Society::NearestVillage(g_World.player.p));
+        g_World.dirty = true;
+    }
+    if (!Walkable(g_World.player.checkpoint))
+    {
+        g_World.player.checkpoint = VillageCenter(Society::NearestVillage(g_World.player.checkpoint));
+        g_World.dirty = true;
+    }
     Story::PrepareMemories(g_World);
     if (!g_World.levelOne.seed)
     {

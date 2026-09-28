@@ -90,42 +90,8 @@ protected:
             return;
         }
         auto& n = world.npcs[modelIndex];
-        const auto& p = world.player;
-        if (Game::Distance(n.p, p.p) > 1100)
-        {
-            return;
-        }
-        Game::Vec goal(
-            n.home.x + std::sin(world.time * .10 + n.id) * 28,
-            n.home.y + std::cos(world.time * .08 + n.id) * 28
-        );
-        double d = Game::Distance(n.p, p.p);
-        if (n.trust > 0 && (n.archetype == 1 || n.archetype == 4 || n.archetype == 6) && d > 46 && d < 250)
-        {
-            goal = p.p;
-        }
-        if (n.archetype == 2 && d < 85)
-        {
-            goal = Game::Vec(n.p.x + (n.p.x - p.p.x), n.p.y + (n.p.y - p.p.y));
-        }
-        if (n.archetype == 3)
-        {
-            goal = Game::Vec(
-                n.home.x + std::sin(world.time * .07 + n.id) * 90,
-                n.home.y + std::cos(world.time * .09 + n.id) * 90
-            );
-        }
-        double remaining = Game::Distance(n.p, goal);
-        if (remaining > 3)
-        {
-            double step = std::min(remaining, dt * 22.0);
-            Game::Vec next(n.p.x + (goal.x - n.p.x) / remaining * step, n.p.y + (goal.y - n.p.y) / remaining * step);
-            if (Game::Walkable(next))
-            {
-                n.p = next;
-            }
-        }
-
+        // Simulation runs independently of visibility. This actor only synchronizes presentation.
+        visible = n.life.alive;
         data = n;
         auto pose = LocalTransform();
         pose.x = n.p.x;

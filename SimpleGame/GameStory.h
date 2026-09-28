@@ -8,7 +8,7 @@ namespace Story
         int count = 0;
         for (const auto& n : w.npcs)
         {
-            if (n.origin != 0)
+            if (n.origin != 0 || (condition >= 4 && !n.life.alive))
             {
                 continue;
             }

@@ -12,6 +12,8 @@
 #include <ShlObj.h>
 #include "LevelOne.h"
 #include "StoryState.h"
+#include "SocietyState.h"
+#include "CharacterMotion.h"
 
 namespace Game
 {
@@ -107,6 +109,8 @@ namespace Game
 
     struct Npc
     {
+        Society::Life life;
+        CharacterMotion motion;
         Vec p, home;
         int id = 0, archetype = 0, trust = 0;
         Ability ability = Body;
@@ -132,6 +136,7 @@ namespace Game
         LevelOne::Session levelOne;
         LevelOne::Session storyBattle;
         Story::State story;
+        Society::State society;
         int deaths = 0;
         double time = 0;
         std::map<Key, SiteState> states;
@@ -241,10 +246,68 @@ namespace Game
         return result;
     }
 
+    inline Vec VillageCenter(int index)
+    {
+        static const Vec centers[] = {Vec(0, 0), Vec(480, 480), Vec(-480, -480)};
+        return centers[index];
+    }
+
+    inline Vec HuntingGround(int index)
+    {
+        Vec p = VillageCenter(index);
+        return Vec(p.x + 190, p.y - 190);
+    }
+
+    inline Vec MeditationGround(int index)
+    {
+        Vec p = VillageCenter(index);
+        return Vec(p.x - 135, p.y + 135);
+    }
+
+    inline Vec VillageBuilding(int village, int building)
+    {
+        static const Vec offsets[] = {Vec(-95, 65), Vec(110, 45), Vec(25, -115)};
+        Vec p = VillageCenter(village);
+        return Vec(p.x + offsets[building].x, p.y + offsets[building].y);
+    }
+
+    inline double SegmentDistance(Vec p, Vec a, Vec b)
+    {
+        double x = b.x - a.x, y = b.y - a.y;
+        double t = std::max(0.0, std::min(1.0, ((p.x - a.x) * x + (p.y - a.y) * y) / (x * x + y * y)));
+        return Distance(p, Vec(a.x + x * t, a.y + y * t));
+    }
+
+    inline bool SettlementClearing(Vec p)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            Vec c = VillageCenter(i);
+            if (Distance(p, c) < 155 || Distance(p, HuntingGround(i)) < 60 || Distance(p, MeditationGround(i)) < 45 ||
+                SegmentDistance(p, c, HuntingGround(i)) < 36 || SegmentDistance(p, c, MeditationGround(i)) < 36)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline int VillageAt(Vec p)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            if (Distance(p, VillageCenter(i)) < 145)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     inline bool Obstacle(int tx, int ty)
     {
         Vec p(tx * 32.0 + 16, ty * 32.0 + 16);
-        if (Road(p) < 50 || Hash(tx, ty, 37) % 100 >= 14)
+        if (SettlementClearing(p) || Road(p) < 50 || Hash(tx, ty, 37) % 100 >= 14)
         {
             return false;
         }
@@ -265,6 +328,17 @@ namespace Game
 
     inline bool Walkable(Vec p)
     {
+        for (int v = 0; v < 3; ++v)
+        {
+            for (int b = 0; b < 3; ++b)
+            {
+                Vec c = VillageBuilding(v, b);
+                if (std::abs(p.x - c.x) < 25 && std::abs(p.y - c.y) < 23)
+                {
+                    return false;
+                }
+            }
+        }
         int tx = (int)std::floor(p.x / 32), ty = (int)std::floor(p.y / 32);
         for (int y = ty - 1; y <= ty + 1; ++y)
         {
@@ -449,7 +523,7 @@ namespace Game
             return false;
         }
         const Player& p = w.player;
-        f << std::setprecision(17) << "GSE_WORLD 3\n" << w.time << ' ' << w.deaths << '\n';
+        f << std::setprecision(17) << "GSE_WORLD 4\n" << w.time << ' ' << w.deaths << '\n';
         f << p.p.x << ' ' << p.p.y << ' ' << p.checkpoint.x << ' ' << p.checkpoint.y << ' ' << p.health << ' '
           << p.stamina << ' ' << p.bread << ' ' << p.herbs << ' ' << p.wood << ' ' << p.fragments << ' '
           << (int)p.ability << ' ' << p.exploration << '\n';
@@ -481,6 +555,7 @@ namespace Game
             f << n.originDeathId << ' ' << n.origin << ' ' << n.relationship << ' ' << n.power << ' ' << n.met << ' '
               << n.saved << ' ' << n.changed << ' ' << n.freeWill;
             f << '\n';
+            Society::WriteLife(f, n.life);
         }
         f << w.events.size() << '\n';
         for (int e : w.events)
@@ -492,6 +567,7 @@ namespace Game
         LevelOne::Write(f, w.levelOne, true);
         Story::Write(f, w.story);
         LevelOne::Write(f, w.storyBattle, true);
+        Society::Write(f, w.society);
         f.flush();
         bool ok = f.good();
         f.close();
@@ -528,7 +604,7 @@ namespace Game
         Player& p = result.player;
         std::string magic;
         int version = 0, ability = 0;
-        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 3)
+        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 4)
         {
             return false;
         }
@@ -629,6 +705,10 @@ namespace Game
             {
                 return false;
             }
+            if (version >= 4 && !Society::ReadLife(f, n.life, (int)count))
+            {
+                return false;
+            }
             result.npcs.push_back(n);
         }
         if (!(f >> count) || count > 1000000)
@@ -680,6 +760,19 @@ namespace Game
             result.story.stage = result.deaths ? Story::Successors : Story::Prologue;
             result.story.villageChoices = result.levelOne.completedOnce ? 7 : 0;
             // Older saves have no death history; never invent missing memories.
+        }
+        if (version >= 4 && !Society::Read(f, result.society, (int)result.npcs.size()))
+        {
+            return false;
+        }
+        for (const auto& n : result.npcs)
+        {
+            if (n.life.parentId >= n.id ||
+                (n.life.successorId && (n.life.alive || n.life.successorId <= n.id ||
+                                        result.npcs[n.life.successorId - 1].life.parentId != n.id)))
+            {
+                return false;
+            }
         }
         w = result;
         damaged = false;

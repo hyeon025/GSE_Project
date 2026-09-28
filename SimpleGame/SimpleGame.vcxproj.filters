@@ -45,6 +45,12 @@
     <ClInclude Include="GameWorld.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="SocietyState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldSimulation.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="Actor.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

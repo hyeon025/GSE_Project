@@ -3,6 +3,7 @@
 #include "SceneGraph.h"
 #include "WorldActors.h"
 #include "CharacterMesh.h"
+#include "WorldSimulation.h"
 
 class GameScene
 {
@@ -23,6 +24,7 @@ public:
 
     SceneGraph graph;
     SceneGraph interfaceGraph;
+    SceneGraph simulationGraph;
 
     enum NodeKind
     {
@@ -36,7 +38,11 @@ public:
         GrassNode,
         SiteNode,
         TargetNode,
-        HudNode
+        HudNode,
+        VillageNode,
+        BuildingNode,
+        WorksiteNode,
+        SimulationNode
     };
 
     Game::Vec Project(Game::Vec p) const
@@ -141,6 +147,17 @@ public:
 
     WorldPlayerActor& SyncCharacters()
     {
+        m_InspectedNpc = 0;
+        double nearest = 90;
+        for (const auto& n : world.npcs)
+        {
+            double distance = Game::Distance(n.p, world.player.p);
+            if (n.life.alive && distance < nearest)
+            {
+                nearest = distance;
+                m_InspectedNpc = n.id;
+            }
+        }
         auto root = graph.Group({Root}).Id();
         auto parent = graph.Group({Characters}, root).Id();
         auto& player = graph.GetOrCreate<WorldPlayerActor>(
@@ -167,7 +184,7 @@ public:
         for (size_t i = 0; i < world.npcs.size(); ++i)
         {
             const auto& n = world.npcs[i];
-            if (Game::Distance(n.p, world.player.p) >= 1400)
+            if (!n.life.alive || Game::Distance(n.p, world.player.p) >= 1400)
             {
                 continue;
             }
@@ -187,14 +204,47 @@ public:
                                 false,
                                 data.archetype,
                                 data.id,
-                                false,
-                                data.id == world.story.childId
+                                data.life.job == Society::Hunter,
+                                data.id == world.story.childId,
+                                &data.motion
                             );
+                            auto p = Project({});
+                            Color color = data.life.target ? Color(.88f, .35f, .29f) : Color(.65f, .80f, .65f);
+                            bool inspected = data.id == m_InspectedNpc;
+                            if (inspected || data.life.health < data.life.maxHealth)
+                            {
+                                r.Rect(
+                                    (float)p.x - 17 * zoom,
+                                    (float)p.y - 72 * zoom,
+                                    34 * zoom,
+                                    3 * zoom,
+                                    Color(.08f, .09f, .08f)
+                                );
+                                r.Rect(
+                                    (float)p.x - 17 * zoom,
+                                    (float)p.y - 72 * zoom,
+                                    34 * zoom * data.life.health / data.life.maxHealth,
+                                    3 * zoom,
+                                    color
+                                );
+                            }
+                            if (inspected)
+                            {
+                                r.Text(
+                                    (float)p.x - 27 * zoom,
+                                    (float)p.y - 89 * zoom,
+                                    std::wstring(Society::JobName(data.life.job)) + L" / " +
+                                        Society::ActivityName(data.life.activity),
+                                    color,
+                                    12
+                                );
+                            }
                         }
                     );
                 }
             );
             npc.data = n;
+            npc.visible = true;
             npc.modelIndex = i;
             pose = npc.LocalTransform();
             pose.x = n.p.x;
@@ -211,6 +261,158 @@ public:
         player.movement = movement;
         player.sprinting = sprinting;
         graph.Update(dt);
+    }
+
+    void DrawVillageBuilding(int kind)
+    {
+        auto p = Project({});
+        r.CachedMesh(
+            Renderer::MeshKind::VillageBuilding,
+            kind + 1,
+            (float)p.x,
+            (float)p.y,
+            zoom,
+            1,
+            [this, kind]
+            {
+                GameScene mesh(r, world);
+                mesh.zoom = 1;
+                Color stone(.39f, .42f, .40f), shade(.22f, .27f, .27f);
+                Color roof = kind == 2 ? Color(.29f, .43f, .38f) : Color(.37f, .32f, .31f);
+                mesh.Oval(0, 0, 13, 4, 53, 23, Color(.02f, .03f, .03f, .42f), Color(.02f, .03f, .03f, 0));
+                mesh.Tri(0, 0, -40, -18, 0, 2, 0, -47, stone, shade, stone);
+                mesh.Tri(0, 0, -40, -18, 0, -47, -40, -67, stone, stone, shade);
+                mesh.Tri(0, 0, 0, 2, 40, -18, 40, -67, shade, stone, stone);
+                mesh.Tri(0, 0, 0, 2, 40, -67, 0, -47, shade, stone, shade);
+                mesh.Tri(0, 0, -45, -66, 0, -43, 1, -95, roof, mesh.Shade(roof, .8f), mesh.Shade(roof, 1.3f));
+                mesh.Tri(0, 0, 0, -43, 45, -67, 1, -95, mesh.Shade(roof, .8f), roof, mesh.Shade(roof, 1.3f));
+                mesh.Stroke(0, 0, 14, -9, 14, -35, 12, Color(.12f, .15f, .14f));
+                mesh.Stroke(0, 0, -22, -41, -22, -49, 7, Color(.78f, .65f, .38f));
+                for (int row = 0; row < 3; ++row)
+                {
+                    mesh.Stroke(0, 0, -38, -27 - row * 11.f, -2, -9 - row * 11.f, .8f, shade);
+                }
+            }
+        );
+    }
+
+    void SyncVillages(ActorId scenery)
+    {
+        for (int village = 0; village < 3; ++village)
+        {
+            auto center = Game::VillageCenter(village);
+            if (Game::Distance(center, world.player.p) > 1800)
+            {
+                continue;
+            }
+            Place(
+                graph,
+                {VillageNode, village},
+                scenery,
+                center,
+                village,
+                [this](int v)
+                {
+                    auto p = Project({});
+                    r.Ellipse(
+                        (float)p.x,
+                        (float)p.y,
+                        160 * zoom,
+                        80 * zoom,
+                        Color(.34f, .36f, .31f, .78f),
+                        Color(.25f, .31f, .27f, 0)
+                    );
+                    auto hunt = Project(Game::Vec(190, -190));
+                    auto shrine = Project(Game::Vec(-135, 135));
+                    r.Line(
+                        (float)hunt.x,
+                        (float)hunt.y,
+                        (float)shrine.x,
+                        (float)shrine.y,
+                        18 * zoom,
+                        Color(.38f, .38f, .32f, .65f)
+                    );
+                    r.Text(
+                        (float)p.x - 38 * zoom,
+                        (float)p.y + 35 * zoom,
+                        Society::VillageName(v),
+                        Color(.85f, .83f, .70f),
+                        15
+                    );
+                },
+                ActorLayer::Ground
+            );
+            for (int building = 0; building < 3; ++building)
+            {
+                Place(
+                    graph,
+                    {BuildingNode, village, building},
+                    scenery,
+                    Game::VillageBuilding(village, building),
+                    building,
+                    [this](int b)
+                    {
+                        DrawVillageBuilding(b);
+                    }
+                );
+            }
+            for (int type = 0; type < 2; ++type)
+            {
+                Place(
+                    graph,
+                    {WorksiteNode, village, type},
+                    scenery,
+                    type == 0 ? Game::HuntingGround(village) : Game::MeditationGround(village),
+                    type,
+                    [this](int kind)
+                    {
+                        auto p = Project({});
+                        float x = (float)p.x, y = (float)p.y;
+                        Oval(x, y, 0, 0, 45, 21, Color(.33f, .37f, .29f, .65f), Color(.25f, .29f, .25f, 0));
+                        if (kind == 0)
+                        {
+                            Stroke(x, y, -16, 0, -16, -32, 3, Color(.37f, .31f, .24f));
+                            Stroke(x, y, 16, 0, 16, -32, 3, Color(.37f, .31f, .24f));
+                            Stroke(x, y, -20, -30, 20, -30, 3, Color(.45f, .37f, .28f));
+                            Tri(x,
+                                y,
+                                -12,
+                                -29,
+                                12,
+                                -29,
+                                0,
+                                -7,
+                                Color(.47f, .40f, .33f),
+                                Color(.40f, .33f, .27f),
+                                Color(.30f, .27f, .24f));
+                        }
+                        else
+                        {
+                            Oval(x, y, 0, -5, 15, 8, Color(.53f, .56f, .51f), Color(.31f, .36f, .34f));
+                            Fire(x, y - 8 * zoom, true);
+                        }
+                        r.Text(
+                            x - 24 * zoom,
+                            y + 12 * zoom,
+                            kind == 0 ? L"\uc0ac\ub0e5\ud130" : L"\uba85\uc0c1\ud130",
+                            Color(.72f, .76f, .66f),
+                            12
+                        );
+                    }
+                );
+            }
+        }
+    }
+
+    void UpdateSociety(float dt, bool playerPresent)
+    {
+        auto& simulation = simulationGraph.GetOrCreate<CallbackActor>({SimulationNode}, 0);
+        simulation.renderable = false;
+        simulation.update = [this, playerPresent](float step)
+        {
+            Society::Update(world, step, playerPresent);
+        };
+        simulationGraph.Update(dt);
     }
 
     Color Shade(Color c, float light, float alpha = 1)
@@ -369,7 +571,8 @@ public:
         int archetype = 6,
         int id = 0,
         bool crossbow = false,
-        bool child = false
+        bool child = false,
+        const CharacterMotion* motion = nullptr
     )
     {
         Game::Vec screen = Project(p);
@@ -377,6 +580,11 @@ public:
         CharacterMesh::Appearance appearance;
         appearance.facing = player ? playerMotion.facing : CharacterFacing::Front;
         appearance.pose = player ? playerMotion.Pose() : CharacterMotion::IdlePose;
+        if (motion && !player)
+        {
+            appearance.facing = motion->facing;
+            appearance.pose = motion->Pose();
+        }
         appearance.ability = (unsigned)ability;
         appearance.player = player;
         appearance.crossbow = crossbow;
@@ -583,6 +791,7 @@ public:
             r.Terrain((float)world.player.p.x, (float)world.player.p.y, zoom);
         };
         SyncCharacters();
+        SyncVillages(scenery);
         int radius = (int)((width * .5f + height) / zoom / 64) + 6;
         int tx = (int)std::floor(world.player.p.x / 32), ty = (int)std::floor(world.player.p.y / 32);
         for (int y = ty - radius; y <= ty + radius; ++y)
@@ -701,6 +910,7 @@ public:
     }
 
 private:
+    int m_InspectedNpc = 0;
     const ActorTransform* m_ActorTransform = nullptr;
     float m_ProjectionZoom = 1;
 

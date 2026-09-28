@@ -51,7 +51,8 @@ public:
         UnitTriangle = 4,
         UnitQuad = 5,
         UnitEllipse = 6,
-        Character = 7
+        Character = 7,
+        VillageBuilding = 8
     };
 
     Renderer(int width, int height);
