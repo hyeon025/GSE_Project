@@ -1335,6 +1335,7 @@ void Display()
     {
         return;
     }
+    g_Renderer->BeginFrame();
     g_Renderer->BeginWorld();
     if (InCombat())
     {
@@ -1346,14 +1347,20 @@ void Display()
         g_Scene->Render(g_TargetKind, g_TargetIndex, g_Sites);
     }
     g_Renderer->EndWorld();
-    if (InCombat())
-    {
-        g_LevelView->DrawHud(g_MouseX, g_MouseY);
-    }
-    else
-    {
-        RenderUI();
-    }
+    g_Scene->DrawOverlay(
+        []
+        {
+            if (InCombat())
+            {
+                g_LevelView->DrawHud(g_MouseX, g_MouseY);
+            }
+            else
+            {
+                RenderUI();
+            }
+        }
+    );
+    g_Renderer->EndFrame();
     glutSwapBuffers();
 }
 
@@ -1391,9 +1398,8 @@ void Update(float dt)
             movement.x += 1;
             movement.y -= 1;
         }
-        LevelOne::Update(level, dt, movement, g_Keys[' ']);
-        double travel = LevelOne::Distance(previous, level.p);
-        g_Scene->walk = travel > 0 ? g_Scene->walk + travel * .17 : 0;
+        g_LevelView->Update(dt, movement, g_Keys[' ']);
+        g_Scene->playerMotion.Update(movement.x, movement.y, level.p.x - previous.x, level.p.y - previous.y);
         g_World.player.echo[0] += (level.kills - kills) * 3;
         g_World.player.echo[3] += level.souls - souls;
         if (phase == LevelOne::Fighting)
@@ -1432,7 +1438,6 @@ void Update(float dt)
     }
     g_World.time += dt;
     Story::UpdateWorld(g_World);
-    auto& p = g_World.player;
     float x = 0, y = 0;
     if (g_Keys['w'])
     {
@@ -1454,81 +1459,7 @@ void Update(float dt)
         x += 1;
         y -= 1;
     }
-    float len = std::sqrt(x * x + y * y);
-    if (len > 0)
-    {
-        bool sprint = g_Keys[' '] && p.stamina > 2;
-        float speed = sprint ? 138.f : 85.f;
-        Vec before = p.p, next = p.p;
-        next.x += x / len * speed * dt;
-        if (Walkable(next))
-        {
-            p.p = next;
-        }
-        next = p.p;
-        next.y += y / len * speed * dt;
-        if (Walkable(next))
-        {
-            p.p = next;
-        }
-        double travel = Distance(before, p.p);
-        p.exploration += travel;
-        g_Scene->walk += travel * .17;
-        while (p.exploration >= 160)
-        {
-            p.exploration -= 160;
-            ++p.echo[3];
-        }
-        if (travel > 0 && sprint)
-        {
-            p.stamina = std::max(0.f, p.stamina - dt * 18);
-        }
-        if (travel > 0)
-        {
-            g_World.dirty = true;
-        }
-    }
-    else
-    {
-        g_Scene->walk = 0;
-    }
-    p.stamina = std::min(100.f, p.stamina + dt * 6);
-    for (auto& n : g_World.npcs)
-    {
-        if (Distance(n.p, p.p) > 1100)
-        {
-            continue;
-        }
-        Vec goal(
-            n.home.x + std::sin(g_World.time * .10 + n.id) * 28,
-            n.home.y + std::cos(g_World.time * .08 + n.id) * 28
-        );
-        double d = Distance(n.p, p.p);
-        if (n.trust > 0 && (n.archetype == 1 || n.archetype == 4 || n.archetype == 6) && d > 46 && d < 250)
-        {
-            goal = p.p;
-        }
-        if (n.archetype == 2 && d < 85)
-        {
-            goal = Vec(n.p.x + (n.p.x - p.p.x), n.p.y + (n.p.y - p.p.y));
-        }
-        if (n.archetype == 3)
-        {
-            goal =
-                Vec(n.home.x + std::sin(g_World.time * .07 + n.id) * 90,
-                    n.home.y + std::cos(g_World.time * .09 + n.id) * 90);
-        }
-        double remaining = Distance(n.p, goal);
-        if (remaining > 3)
-        {
-            double step = std::min(remaining, dt * 22.0);
-            Vec next(n.p.x + (goal.x - n.p.x) / remaining * step, n.p.y + (goal.y - n.p.y) / remaining * step);
-            if (Walkable(next))
-            {
-                n.p = next;
-            }
-        }
-    }
+    g_Scene->Update(dt, Vec(x, y), g_Keys[' ']);
     RefreshTargets();
 }
 

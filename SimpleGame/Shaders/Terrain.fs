@@ -53,10 +53,30 @@ void main()
         }
     }
     vec2 cell = floor(p / 9.0), local = fract(p / 9.0) - 0.5;
-    float stone = (1.0 - smoothstep(0.10, 0.24, length(local * vec2(1.0, 1.5)))) * step(0.76, hash(cell));
-    color = mix(color, vec3(0.46, 0.46, 0.42) * (0.85 + local.y * 0.3), stone * (1.0 - dirt * 0.8));
+    float stoneRadius = length(local * vec2(1.0, 1.5));
+    float stone = (1.0 - smoothstep(0.10, 0.24, stoneRadius)) * step(0.76, hash(cell));
+    float exposedStone = stone * (1.0-dirt*.8);
+    vec3 stoneColor = mix(vec3(.30,.33,.33), vec3(.49,.50,.47), hash(cell+17.0));
+    color = mix(color, stoneColor, exposedStone);
     float damp = smoothstep(0.66, 0.83, noise(p * 0.018)) * smoothstep(0.45, 0.65, broad);
     color = mix(color, vec3(0.16, 0.21, 0.205), damp * 0.55);
+    // Shading-only micro-relief: navigation and collision still use the existing flat map.
+    float relief = fine*.9 + noise(p*.065)*1.8 + exposedStone*1.25;
+    if (u_Farming)
+    {
+        relief += sin((p.x+p.y*.12)*.24)*dirt*.55;
+    }
+    vec3 surface = vec3(p, relief);
+    vec3 normal = normalize(cross(dFdx(surface), dFdy(surface)));
+    if (normal.z < 0.0) normal = -normal;
+    vec3 light = normalize(vec3(-.45,.55,.85));
+    vec3 view = normalize(vec3(1.0,1.0,1.5));
+    float diffuse = max(dot(normal,light),0.0);
+    float cavity = 1.0 - (1.0-fine)*.08 - (1.0-stone)*exposedStone*.12;
+    color *= (.40+.72*diffuse)*cavity;
+    float wet = damp*(1.0-dirt*.7);
+    float specular = pow(max(dot(normal,normalize(light+view)),0.0),24.0)*wet*.075;
+    color += vec3(.66,.73,.75)*specular;
     if (u_LinearOutput)
     {
         color = pow(max(color, 0.0), vec3(2.2));

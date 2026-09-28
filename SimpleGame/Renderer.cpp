@@ -9,38 +9,25 @@
 #include <cstring>
 #include <array>
 #include <stdexcept>
+#include <iomanip>
+#include <sstream>
 #include "Renderer.h"
 
 Renderer::Renderer(int width, int height)
     : m_Width(width),
       m_Height(height)
 {
-    m_Program = Program("SolidRect.vs", "SolidRect.fs");
     m_Terrain = Program("Terrain.vs", "Terrain.fs");
     m_Downsample = Program("PostProcess.vs", "Downsample.fs");
     m_Blur = Program("PostProcess.vs", "Blur.fs");
     m_Composite = Program("PostProcess.vs", "PostProcess.fs");
     glGenVertexArrays(1, &m_Array);
-    glGenBuffers(1, &m_Buffer);
-    ConfigureVertices(m_Array, m_Buffer);
+    InitializeBatch();
+    InitializeStorage();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
-    m_Vertices.reserve(100000);
     RecreateTargets();
-}
-
-void Renderer::ConfigureVertices(GLuint array, GLuint buffer)
-{
-    glBindVertexArray(array);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    for (int i = 0; i < 3; ++i)
-    {
-        glEnableVertexAttribArray(i);
-    }
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 2));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 6));
 }
 
 Renderer::~Renderer()
@@ -50,13 +37,9 @@ Renderer::~Renderer()
     glDeleteProgram(m_Downsample);
     glDeleteProgram(m_Blur);
     glDeleteProgram(m_Composite);
-    for (const auto& entry : m_Text)
-    {
-        glDeleteTextures(1, &entry.second.id);
-    }
-    glDeleteBuffers(1, &m_Buffer);
+    ReleaseText();
+    ReleaseBatch();
     glDeleteVertexArrays(1, &m_Array);
-    glDeleteProgram(m_Program);
     glDeleteProgram(m_Terrain);
 }
 
@@ -95,6 +78,10 @@ GLuint Renderer::Program(const char* vertexPath, const char* fragmentPath)
             std::cerr << "Missing shader: " << paths[i] << '\n';
             glDeleteProgram(program);
             return 0;
+        }
+        for (unsigned char value : source)
+        {
+            m_ShaderFingerprint = (m_ShaderFingerprint ^ value) * 1099511628211ull;
         }
         GLuint shader = glCreateShader(types[i]);
         const char* data = source.c_str();
@@ -258,7 +245,8 @@ void Renderer::SetPostProcessing(const PostProcessingSettings& settings)
 
 void Renderer::BeginWorld()
 {
-    Flush();
+    FlushBatch(BatchBreak::Pass);
+    m_Pass = Pass::World;
     m_RenderingHdr = m_TargetsReady;
     glBindFramebuffer(GL_FRAMEBUFFER, m_TargetsReady ? (m_MsaaFbo ? m_MsaaFbo : m_Scene.fbo) : 0);
     glViewport(0, 0, m_Width, m_Height);
@@ -279,7 +267,7 @@ void Renderer::Fullscreen(GLuint program, GLuint destination, int width, int hei
     glBindTexture(GL_TEXTURE_2D, source);
     glUniform1i(glGetUniformLocation(program, "u_Source"), 0);
     glBindVertexArray(m_Array);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    DrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void Renderer::Filter(GLuint source, RenderTarget* targets, bool highlights, float radius)
@@ -301,11 +289,13 @@ void Renderer::Filter(GLuint source, RenderTarget* targets, bool highlights, flo
 
 void Renderer::EndWorld()
 {
-    Flush();
+    FlushBatch(BatchBreak::Pass);
     if (!m_RenderingHdr)
     {
+        m_Pass = Pass::Interface;
         return;
     }
+    m_Pass = Pass::Post;
     if (m_MsaaFbo)
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, m_MsaaFbo);
@@ -355,279 +345,19 @@ void Renderer::EndWorld()
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     m_RenderingHdr = false;
+    m_Pass = Pass::Interface;
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Renderer::UseGeometry(float x, float y, float scale, float opacity, GLuint texture)
-{
-    glUseProgram(m_Program);
-    glUniform2f(glGetUniformLocation(m_Program, "u_Viewport"), (float)m_Width, (float)m_Height);
-    glUniform3f(glGetUniformLocation(m_Program, "u_OffsetScale"), x, y, scale);
-    glUniform1f(glGetUniformLocation(m_Program, "u_Opacity"), opacity);
-    glUniform1i(glGetUniformLocation(m_Program, "u_Textured"), texture ? 1 : 0);
-    glUniform1i(glGetUniformLocation(m_Program, "u_LinearOutput"), m_RenderingHdr ? 1 : 0);
-    glUniform1i(glGetUniformLocation(m_Program, "u_Texture"), 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-}
-
-void Renderer::Submit(const Vertex* vertices, size_t count, GLuint texture)
-{
-    UseGeometry(0, 0, 1, 1, texture);
-    glBindVertexArray(m_Array);
-    glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
-    glBufferData(GL_ARRAY_BUFFER, count * sizeof(Vertex), vertices, GL_STREAM_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)count);
-}
-
-void Renderer::ReleaseMeshes()
-{
-    for (const auto& entry : m_Meshes)
-    {
-        glDeleteBuffers(1, &entry.second.buffer);
-        glDeleteVertexArrays(1, &entry.second.array);
-    }
-    m_Meshes.clear();
-}
-
-void Renderer::CachedMesh(
-    MeshKind kind,
-    std::uint64_t variant,
-    float x,
-    float y,
-    float scale,
-    float opacity,
-    const std::function<void()>& build
-)
-{
-    if (m_Capture)
-    {
-        throw std::logic_error("CachedMesh builders must emit primitives, not nested cached draws.");
-    }
-
-    // Preserve the painter order between dynamic batches and static meshes.
-    Flush();
-    auto key = std::make_pair(kind, variant);
-    auto found = m_Meshes.find(key);
-    if (found == m_Meshes.end())
-    {
-        std::vector<Vertex> vertices;
-        m_Capture = &vertices;
-        try
-        {
-            build();
-        }
-        catch (...)
-        {
-            m_Capture = nullptr;
-            throw;
-        }
-        m_Capture = nullptr;
-        if (vertices.empty())
-        {
-            return;
-        }
-
-        // An expanding world must not retain every visited mesh indefinitely.
-        if (m_Meshes.size() >= MeshCacheCapacity)
-        {
-            auto oldest = std::min_element(
-                m_Meshes.begin(),
-                m_Meshes.end(),
-                [](const auto& a, const auto& b)
-                {
-                    return a.second.lastUsed < b.second.lastUsed;
-                }
-            );
-            glDeleteBuffers(1, &oldest->second.buffer);
-            glDeleteVertexArrays(1, &oldest->second.array);
-            m_Meshes.erase(oldest);
-        }
-
-        found = m_Meshes.emplace(key, Mesh()).first;
-        auto& mesh = found->second;
-        mesh.count = (GLsizei)vertices.size();
-        glGenVertexArrays(1, &mesh.array);
-        glGenBuffers(1, &mesh.buffer);
-        ConfigureVertices(mesh.array, mesh.buffer);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-    }
-
-    auto& mesh = found->second;
-    mesh.lastUsed = ++m_MeshClock;
-    UseGeometry(x, y, scale, opacity);
-    glBindVertexArray(mesh.array);
-    glDrawArrays(GL_TRIANGLES, 0, mesh.count);
-}
-
-void Renderer::Flush()
-{
-    if (!m_Vertices.empty())
-    {
-        Submit(m_Vertices.data(), m_Vertices.size());
-        m_Vertices.clear();
-    }
-}
-
-void Renderer::Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c)
-{
-    auto& vertices = m_Capture ? *m_Capture : m_Vertices;
-    vertices.push_back({ax, ay, a.r, a.g, a.b, a.a, 0, 0});
-    vertices.push_back({bx, by, b.r, b.g, b.b, b.a, 0, 0});
-    vertices.push_back({cx, cy, c.r, c.g, c.b, c.a, 0, 0});
-}
-
-void Renderer::Rect(float x, float y, float w, float h, Color c)
-{
-    Triangle(x, y, x + w, y, x + w, y + h, c, c, c);
-    Triangle(x, y, x + w, y + h, x, y + h, c, c, c);
-}
-
-void Renderer::Ellipse(float x, float y, float rx, float ry, Color c, Color edge)
-{
-    static const auto circle = []
-    {
-        std::array<std::array<float, 2>, 33> points = {};
-        for (int i = 0; i < 32; ++i)
-        {
-            float angle = i * 6.2831853f / 32;
-            points[i] = {std::cos(angle), std::sin(angle)};
-        }
-        points[32] = points[0];
-        return points;
-    }();
-    for (int i = 0; i < 32; ++i)
-    {
-        Triangle(
-            x,
-            y,
-            x + circle[i][0] * rx,
-            y + circle[i][1] * ry,
-            x + circle[i + 1][0] * rx,
-            y + circle[i + 1][1] * ry,
-            c,
-            edge,
-            edge
-        );
-    }
-}
-
-void Renderer::Line(float ax, float ay, float bx, float by, float width, Color c)
-{
-    float dx = bx - ax, dy = by - ay, length = std::sqrt(dx * dx + dy * dy);
-    if (length < 0.01f)
-    {
-        return;
-    }
-    float nx = -dy / length * width * 0.5f, ny = dx / length * width * 0.5f;
-    Triangle(ax + nx, ay + ny, ax - nx, ay - ny, bx - nx, by - ny, c, c, c);
-    Triangle(ax + nx, ay + ny, bx - nx, by - ny, bx + nx, by + ny, c, c, c);
-}
-
-void Renderer::Text(float x, float y, const std::wstring& text, Color color, int size)
-{
-    if (text.empty())
-    {
-        return;
-    }
-    Flush();
-    auto key = std::make_pair(text, size);
-    auto found = m_Text.find(key);
-    if (found == m_Text.end())
-    {
-        // GDI rasterizes Unicode with Korean font fallback; cache the resulting textures.
-        if (m_Text.size() >= 256)
-        {
-            for (const auto& e : m_Text)
-            {
-                glDeleteTextures(1, &e.second.id);
-            }
-            m_Text.clear();
-        }
-        HDC dc = CreateCompatibleDC(nullptr);
-        if (!dc)
-        {
-            return;
-        }
-        HFONT font = CreateFontW(
-            -size,
-            0,
-            0,
-            0,
-            FW_NORMAL,
-            FALSE,
-            FALSE,
-            FALSE,
-            DEFAULT_CHARSET,
-            OUT_DEFAULT_PRECIS,
-            CLIP_DEFAULT_PRECIS,
-            ANTIALIASED_QUALITY,
-            DEFAULT_PITCH,
-            L"Malgun Gothic"
-        );
-        HGDIOBJ oldFont = SelectObject(dc, font);
-        SIZE extent = {};
-        GetTextExtentPoint32W(dc, text.c_str(), (int)text.size(), &extent);
-        int w = std::max(1L, extent.cx + 4), h = std::max((LONG)size + 6, extent.cy + 4);
-        BITMAPINFO info = {};
-        info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        info.bmiHeader.biWidth = w;
-        info.bmiHeader.biHeight = -h;
-        info.bmiHeader.biPlanes = 1;
-        info.bmiHeader.biBitCount = 32;
-        void* bits = nullptr;
-        HBITMAP bitmap = CreateDIBSection(dc, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
-        if (!bitmap)
-        {
-            SelectObject(dc, oldFont);
-            DeleteObject(font);
-            DeleteDC(dc);
-            return;
-        }
-        HGDIOBJ oldBitmap = SelectObject(dc, bitmap);
-        memset(bits, 0, (size_t)w * h * 4);
-        SetBkColor(dc, RGB(0, 0, 0));
-        SetTextColor(dc, RGB(255, 255, 255));
-        TextOutW(dc, 1, 1, text.c_str(), (int)text.size());
-        GdiFlush();
-        auto pixels = static_cast<unsigned char*>(bits);
-        for (int i = 0; i < w * h; ++i)
-        {
-            pixels[i * 4 + 3] = pixels[i * 4];
-            pixels[i * 4] = pixels[i * 4 + 1] = pixels[i * 4 + 2] = 255;
-        }
-        TextTexture t = {0, w, h};
-        glGenTextures(1, &t.id);
-        glBindTexture(GL_TEXTURE_2D, t.id);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bits);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        SelectObject(dc, oldBitmap);
-        SelectObject(dc, oldFont);
-        DeleteObject(bitmap);
-        DeleteObject(font);
-        DeleteDC(dc);
-        found = m_Text.insert(std::make_pair(key, t)).first;
-    }
-    const auto& t = found->second;
-    float r = color.r, g = color.g, b = color.b, a = color.a, right = x + t.width, bottom = y + t.height;
-    Vertex v[] = {
-        {x, y, r, g, b, a, 0, 0},
-        {right, y, r, g, b, a, 1, 0},
-        {right, bottom, r, g, b, a, 1, 1},
-        {x, y, r, g, b, a, 0, 0},
-        {right, bottom, r, g, b, a, 1, 1},
-        {x, bottom, r, g, b, a, 0, 1}
-    };
-    Submit(v, 6, t.id);
-}
-
 void Renderer::Terrain(float cameraX, float cameraY, float zoom, bool farming, float seed)
 {
-    Flush();
+    FlushBatch(BatchBreak::Pass);
+    m_ProfileCombat = farming;
+    m_ProfileCameraX = cameraX;
+    m_ProfileCameraY = cameraY;
+    m_ProfileZoom = zoom;
+    m_ProfileSeed = seed;
     glUseProgram(m_Terrain);
     glUniform2f(glGetUniformLocation(m_Terrain, "u_Viewport"), (float)m_Width, (float)m_Height);
     glUniform1i(glGetUniformLocation(m_Terrain, "u_LinearOutput"), m_RenderingHdr ? 1 : 0);
@@ -636,7 +366,7 @@ void Renderer::Terrain(float cameraX, float cameraY, float zoom, bool farming, f
     glUniform1i(glGetUniformLocation(m_Terrain, "u_Farming"), farming ? 1 : 0);
     glUniform1f(glGetUniformLocation(m_Terrain, "u_Seed"), seed);
     glBindVertexArray(m_Array);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    DrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)

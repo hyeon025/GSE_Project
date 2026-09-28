@@ -4,6 +4,10 @@
 #include <map>
 #include <cstdint>
 #include <functional>
+#include <chrono>
+#include <fstream>
+#include "RenderMetrics.h"
+#include "RenderMeshCache.h"
 #include "Dependencies/glew.h"
 
 struct Color
@@ -40,10 +44,14 @@ class Renderer
 public:
     enum class MeshKind
     {
-        Rock,
-        Tree,
-        Wall,
-        LevelBlock
+        Rock = 0,
+        Tree = 1,
+        Wall = 2,
+        LevelBlock = 3,
+        UnitTriangle = 4,
+        UnitQuad = 5,
+        UnitEllipse = 6,
+        Character = 7
     };
 
     Renderer(int width, int height);
@@ -53,10 +61,21 @@ public:
 
     bool IsInitialized() const
     {
-        return m_Program != 0 && m_Terrain != 0;
+        return m_Terrain != 0 && m_InstancedProgram != 0;
     }
 
     void Resize(int width, int height);
+    void BeginFrame();
+    void EndFrame();
+
+    std::uint64_t GetFrameDrawCalls() const
+    {
+        return m_FrameDrawCalls;
+    }
+
+    // Zero logs every frame; the default one-second window limits console overhead.
+    void SetProfilingLogInterval(double seconds);
+
     void BeginWorld();
     void EndWorld();
 
@@ -67,7 +86,8 @@ public:
 
     void SetPostProcessing(const PostProcessingSettings& settings);
     void Flush();
-    // Build local-space geometry with Triangle/Rect/Ellipse/Line only, on a cache miss.
+    // Queue in painter order; Flush submits compatible instances together.
+    // Build local-space geometry only on a memory and disk cache miss.
     void CachedMesh(
         MeshKind kind,
         std::uint64_t variant,
@@ -87,23 +107,58 @@ public:
     void DrawSolidRectSize(float x, float y, float z, float width, float height, float r, float g, float b, float a);
 
 private:
-    struct Vertex
-    {
-        float x, y, r, g, b, a, u, v;
-    };
+    using Vertex = RenderMeshCache::Vertex;
+    using MeshKey = std::pair<MeshKind, std::uint64_t>;
 
     struct TextTexture
     {
-        GLuint id;
-        int width, height;
+        GLuint id = 0;
+        int width = 0, height = 0;
+        float u = 0, v = 0, du = 1, dv = 1;
+        bool standalone = false;
+    };
+
+    struct TextPage
+    {
+        GLuint texture = 0;
+        int x = 1, y = 1, rowHeight = 0;
     };
 
     struct Mesh
     {
-        GLuint array = 0, buffer = 0;
+        GLint offset = 0;
         GLsizei count = 0;
-        std::uint64_t lastUsed = 0;
     };
+
+    struct Instance
+    {
+        float matrix[4] = {1, 0, 0, 1};
+        float placement[4] = {};
+        Color colors[3] = {Color(1, 1, 1), Color(1, 1, 1), Color(1, 1, 1)};
+        float options[4] = {0, 1, 0, 0};
+        float uv[4] = {0, 0, 1, 1};
+    };
+    enum class Pass
+    {
+        World,
+        Post,
+        Interface
+    };
+
+    void InitializeBatch();
+    void ReleaseBatch();
+    Mesh& GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void()>& build);
+    void QueueInstance(const Mesh& mesh, Instance instance, GLuint texture = 0);
+    void FlushBatch(BatchBreak reason);
+    void RecordDraw(bool instanced);
+    void InitializeStorage();
+    bool LoadMeshFile(MeshKey key, std::vector<Vertex>& vertices);
+    void SaveMeshFile(MeshKey key, const std::vector<Vertex>& vertices);
+    void CacheEvent(const char* event, MeshKey key, size_t vertices = 0, std::uint64_t elapsedUs = 0);
+    void OpenProfileSegment();
+    void WriteProfileFrame(double renderMs);
+    void ReleaseText();
+    bool UploadText(TextTexture& text, const void* pixels);
 
     struct RenderTarget
     {
@@ -111,27 +166,50 @@ private:
     };
 
     GLuint Program(const char* vertexPath, const char* fragmentPath);
-    void ConfigureVertices(GLuint array, GLuint buffer);
-    void UseGeometry(float x, float y, float scale, float opacity, GLuint texture = 0);
     void ReleaseMeshes();
-    void Submit(const Vertex* vertices, size_t count, GLuint texture = 0);
+    void DrawArrays(GLenum mode, GLint first, GLsizei count);
     bool CreateTarget(RenderTarget& target, int width, int height);
     void ReleaseTargets();
     void RecreateTargets();
     void Fullscreen(GLuint program, GLuint destination, int width, int height, GLuint source);
     void Filter(GLuint source, RenderTarget* targets, bool highlights, float radius);
     int m_Width, m_Height;
-    GLuint m_Program = 0, m_Terrain = 0, m_Buffer = 0, m_Array = 0;
+    GLuint m_Terrain = 0, m_Array = 0;
     GLuint m_Downsample = 0, m_Blur = 0, m_Composite = 0;
     GLuint m_MsaaFbo = 0, m_MsaaColor = 0;
     RenderTarget m_Scene, m_Bloom[2], m_SoftScene[2];
     int m_FilterWidth = 1, m_FilterHeight = 1;
     bool m_TargetsReady = false, m_RenderingHdr = false;
     PostProcessingSettings m_PostSettings;
-    std::vector<Vertex> m_Vertices;
     std::vector<Vertex>* m_Capture = nullptr;
-    std::map<std::pair<MeshKind, std::uint64_t>, Mesh> m_Meshes;
-    std::uint64_t m_MeshClock = 0;
-    static constexpr size_t MeshCacheCapacity = 512;
+    std::map<MeshKey, Mesh> m_Meshes;
+    GLuint m_InstancedProgram = 0, m_InstanceArray = 0, m_InstanceBuffer = 0;
+    GLuint m_MeshBuffer = 0, m_MeshTexture = 0, m_BatchTexture = 0;
+    size_t m_MeshCapacity = 0, m_MeshUsed = 0;
+    static constexpr size_t MeshCacheCapacity = 2048;
+    std::vector<Instance> m_Instances;
+    GLsizei m_BatchMaxVertices = 0;
+    std::uint64_t m_BatchUsefulVertices = 0;
     std::map<std::pair<std::wstring, int>, TextTexture> m_Text;
+    std::vector<TextPage> m_TextPages;
+    int m_TextPageSize = 2048, m_MaxTextureSize = 2048;
+    RenderFrameStats m_Stats;
+    Pass m_Pass = Pass::World;
+    std::wstring m_CacheDirectory, m_LogBase;
+    size_t m_DiskCacheFiles = 0;
+    std::ofstream m_FrameLog, m_EventLog;
+    unsigned m_LogSegment = 0, m_EventSegment = 0;
+    bool m_LogFailed = false;
+    std::uint64_t m_ShaderFingerprint = 14695981039346656037ull;
+    std::chrono::steady_clock::time_point m_FrameStart;
+    std::chrono::steady_clock::time_point m_SessionStart, m_PreviousFrameStart;
+    double m_FrameElapsedMs = 0, m_FrameIntervalMs = 0;
+    double m_PreviousLogMs = 0;
+    bool m_ProfileCombat = false;
+    float m_ProfileCameraX = 0, m_ProfileCameraY = 0, m_ProfileZoom = 1, m_ProfileSeed = 0;
+    std::uint64_t m_FrameNumber = 0, m_FrameDrawCalls = 0;
+    std::uint64_t m_ProfileFrames = 0, m_ProfileDrawCalls = 0;
+    std::uint64_t m_ProfileMinDrawCalls = 0, m_ProfileMaxDrawCalls = 0;
+    std::chrono::steady_clock::time_point m_ProfileStart;
+    double m_ProfileLogInterval = 1.0;
 };

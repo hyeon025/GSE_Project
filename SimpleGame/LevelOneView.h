@@ -2,6 +2,7 @@
 #include <cwchar>
 #include "GameScene.h"
 #include "LevelOne.h"
+#include "CombatActors.h"
 
 class LevelOneView
 {
@@ -45,8 +46,7 @@ public:
 
     void Block(int x, int y)
     {
-        auto center = LevelOne::CenterOf(x, y);
-        auto p = Project(center);
+        auto p = Project({});
         unsigned variant = Game::Hash(x, y, level.seed) % 17;
         float h = (20 + variant) * scene.zoom;
         scene.r.CachedMesh(
@@ -166,53 +166,149 @@ public:
         }
     }
 
+    SceneGraph graph;
+
+    enum NodeKind
+    {
+        Root = 1,
+        Simulation,
+        TerrainNode,
+        Scenery,
+        Characters,
+        PlayerNode,
+        EnemyNode,
+        BlockNode,
+        GrassNode,
+        DropNode,
+        ProjectileNode,
+        EffectNode,
+        MemoryNode,
+        WitnessNode,
+        RangeNode,
+        BossWarningNode,
+        WindupNode,
+        LevelFlashNode
+    };
+
+    void EnsureSession()
+    {
+        if (m_Generation != level.generation)
+        {
+            graph.Clear();
+            scene.playerMotion.Stop();
+            m_Generation = level.generation;
+        }
+    }
+
+    void Update(float dt, LevelOne::Point movement, bool sprinting)
+    {
+        EnsureSession();
+        auto root = graph.Group({Root}).Id();
+        auto& simulation = graph.GetOrCreate<CombatSimulationActor>({Simulation}, root, level);
+        simulation.movement = movement;
+        simulation.sprinting = sprinting;
+        graph.Update(dt);
+    }
+
+    template <class Data, class Draw>
+    VisualActor<Data>& Place(
+        ActorKey key,
+        ActorId parent,
+        LevelOne::Point position,
+        const Data& data,
+        Draw draw,
+        ActorLayer layer = ActorLayer::Objects
+    )
+    {
+        return scene.Place(graph, key, parent, Game::Vec(position.x, position.y), data, draw, layer);
+    }
+
+    template <class Data> void AssignIds(std::vector<Data>& items)
+    {
+        for (auto& item : items)
+        {
+            if (!item.actorId)
+            {
+                item.actorId = ++level.nextActorId;
+            }
+        }
+    }
+
     void DrawWorld()
     {
+        EnsureSession();
         scene.cameraOverride = true;
         scene.camera = Game::Vec(level.p.x, level.p.y);
-        scene.r.Terrain((float)level.p.x, (float)level.p.y, scene.zoom, true, (float)(level.seed % 10000));
+        AssignIds(level.drops);
+        AssignIds(level.projectiles);
+        AssignIds(level.effects);
+        graph.BeginSync();
+        auto root = graph.Group({Root}).Id();
+        auto scenery = graph.Group({Scenery}, root).Id();
+        auto characters = graph.Group({Characters}, root).Id();
+        auto& terrain = graph.GetOrCreate<CallbackActor>({TerrainNode}, root);
+        terrain.layer = ActorLayer::Background;
+        terrain.draw = [this](const ActorTransform&)
+        {
+            scene.r.Terrain((float)level.p.x, (float)level.p.y, scene.zoom, true, (float)(level.seed % 10000));
+        };
         if (level.encounter == 3)
         {
             for (size_t i = 0; i < level.memories.size(); ++i)
             {
-                auto p = Project(level.memories[i]);
-                Ring(level.memories[i], 28, Color(.56f, .73f, .76f, .5f));
-                scene.Rock((float)p.x, (float)p.y, .8f, (unsigned)i + 19);
-                scene.r.Text(
-                    (float)p.x - 18,
-                    (float)p.y - 38 * scene.zoom,
-                    L"\uc8fd\uc74c\uc758 \uc794\ud5a5",
-                    Color(.68f, .77f, .77f),
-                    12
+                Place(
+                    {MemoryNode, (std::int64_t)i},
+                    scenery,
+                    level.memories[i],
+                    (unsigned)i,
+                    [this](unsigned index)
+                    {
+                        auto p = Project({});
+                        Ring({}, 28, Color(.56f, .73f, .76f, .5f));
+                        scene.Rock((float)p.x, (float)p.y, .8f, index + 19);
+                        scene.r.Text(
+                            (float)p.x - 18,
+                            (float)p.y - 38 * scene.zoom,
+                            L"\uc8fd\uc74c\uc758 \uc794\ud5a5",
+                            Color(.68f, .77f, .77f),
+                            12
+                        );
+                    }
                 );
             }
-        }
-
-        struct Drawable
-        {
-            float depth;
-            int kind;
-            int index;
-        };
-
-        std::vector<Drawable> drawables;
-        std::vector<std::pair<int, LevelOne::Point>> witnesses;
-        if (level.encounter == 3)
-        {
             int friends = 0, rivals = 0;
-            for (size_t i = 0; i < scene.world.npcs.size(); ++i)
+            for (const auto& npc : scene.world.npcs)
             {
-                const auto& n = scene.world.npcs[i];
-                bool ally = n.relationship > 70 && friends < 4;
-                bool rival = n.relationship < -70 && rivals < 4;
-                if (n.origin != 0 || (!ally && !rival))
+                bool ally = npc.relationship > 70 && friends < 4;
+                bool rival = npc.relationship < -70 && rivals < 4;
+                if (npc.origin != 0 || (!ally && !rival))
                 {
                     continue;
                 }
                 int slot = ally ? friends++ : rivals++;
-                LevelOne::Point position(ally ? -48 : 48, (slot - 1) * 48);
-                witnesses.push_back({(int)i, position});
-                drawables.push_back({(float)Project(position).y, 3, (int)witnesses.size() - 1});
+                Place(
+                    {WitnessNode, npc.id},
+                    characters,
+                    {ally ? -48.0 : 48.0, (slot - 1) * 48.0},
+                    npc,
+                    [this](const Game::Npc& data)
+                    {
+                        Ring(
+                            {},
+                            16,
+                            data.relationship > 0 ? Color(.42f, .88f, .66f, .6f) : Color(.94f, .38f, .32f, .6f)
+                        );
+                        scene.Person(
+                            {},
+                            data.ability,
+                            false,
+                            data.archetype,
+                            data.id,
+                            false,
+                            data.id == scene.world.story.childId
+                        );
+                    }
+                );
             }
         }
         for (int y = 0; y < LevelOne::MapSize; ++y)
@@ -225,169 +321,189 @@ public:
                 {
                     continue;
                 }
-                int at = y * LevelOne::MapSize + x;
-                if (level.blocked[at])
+                if (level.blocked[y * LevelOne::MapSize + x])
                 {
-                    drawables.push_back({(float)p.y + 24 * scene.zoom, 0, at});
+                    auto& block = Place(
+                        {BlockNode, x, y},
+                        scenery,
+                        center,
+                        std::make_pair(x, y),
+                        [this](const std::pair<int, int>& tile)
+                        {
+                            Block(tile.first, tile.second);
+                        }
+                    );
+                    block.depthOffset = 24 * scene.zoom;
                 }
                 else if ((std::abs(x - LevelOne::Center) > 2 && std::abs(y - LevelOne::Center) > 2) && (x + y) % 3 == 0)
                 {
-                    for (int i = -2; i <= 2; ++i)
-                    {
-                        scene.Stroke(
-                            (float)p.x,
-                            (float)p.y,
-                            (float)i * 9,
-                            0,
-                            (float)i * 9 - 4,
-                            -7,
-                            .8f,
-                            Color(.42f, .43f, .28f, .6f)
-                        );
-                    }
-                }
-            }
-        }
-        Ring(level.p, LevelOne::Range(level), Color(.73f, .79f, .63f, .12f));
-        if (level.bossState == 1)
-        {
-            Ring(LevelOne::CenterOf(LevelOne::Center, LevelOne::Center + 9), 72, Color(1, .38f, .20f, .9f), 2);
-        }
-        for (const auto& enemy : level.enemies)
-        {
-            if (enemy.windup <= 0)
-            {
-                continue;
-            }
-            if (enemy.kind == LevelOne::Boss && enemy.attack % 2 == 0)
-            {
-                Ring(enemy.aim, 90, Color(.94f, .25f, .17f, .85f), 2);
-                Ring(enemy.aim, 90 * (1 - enemy.windup / 1.2f), Color(.94f, .42f, .23f, .55f));
-            }
-            else
-            {
-                Ring(enemy.p, enemy.kind == LevelOne::Boss ? 70.f : 25.f, Color(.86f, .38f, .24f, .8f), 2);
-                if (enemy.kind == LevelOne::Archer)
-                {
-                    auto from = Project(enemy.p);
-                    auto to = Project(enemy.aim);
-                    scene.r.Line(
-                        (float)from.x,
-                        (float)from.y - 24 * scene.zoom,
-                        (float)to.x,
-                        (float)to.y - 24 * scene.zoom,
-                        1,
-                        Color(.88f, .35f, .26f, .45f)
+                    Place(
+                        {GrassNode, x, y},
+                        scenery,
+                        center,
+                        0,
+                        [this](int)
+                        {
+                            auto p = Project({});
+                            for (int i = -2; i <= 2; ++i)
+                            {
+                                scene.Stroke(
+                                    (float)p.x,
+                                    (float)p.y,
+                                    (float)i * 9,
+                                    0,
+                                    (float)i * 9 - 4,
+                                    -7,
+                                    .8f,
+                                    Color(.42f, .43f, .28f, .6f)
+                                );
+                            }
+                        },
+                        ActorLayer::Ground
                     );
                 }
             }
         }
-        for (const auto& drop : level.drops)
-        {
-            auto p = Project(drop.p);
-            float x = (float)p.x, y = (float)p.y - 6 * scene.zoom;
-            Color color = drop.kind == LevelOne::Soul      ? Color(.49f, 1.35f, 1.1f)
-                          : drop.kind == LevelOne::Weapon  ? Color(1.4f, 1.05f, .42f)
-                          : drop.kind == LevelOne::Healing ? Color(.92f, .31f, .29f)
-                                                           : Color(.66f, .70f, 1.4f);
-            scene.Shadow(x, y + 7 * scene.zoom, 7, 3);
-            if (drop.kind == LevelOne::Healing)
+        auto& player = Place(
+            {PlayerNode},
+            characters,
+            level.p,
+            0,
+            [this](int)
             {
-                scene.Stroke(x, y, -4, 0, 4, 0, 3, color);
-                scene.Stroke(x, y, 0, -4, 0, 4, 3, color);
-            }
-            else if (drop.kind == LevelOne::Weapon)
-            {
-                scene.Stroke(x, y, -4, 4, 4, -6, 2.8f, color);
-                scene.Stroke(x, y, -5, -1, 1, 3, 2, color);
-            }
-            else if (drop.kind == LevelOne::Magnet)
-            {
-                scene.Stroke(x, y, -4, -4, -4, 3, 2, color);
-                scene.Stroke(x, y, 4, -4, 4, 3, 2, color);
-                scene.Stroke(x, y, -4, 3, 4, 3, 2, color);
-            }
-            else
-            {
-                scene.Tri(x, y, 0, -6, -4, 0, 0, 5, color, scene.Shade(color, .5f), scene.Shade(color, .6f));
-                scene.Tri(x, y, 0, -6, 0, 5, 4, 0, color, scene.Shade(color, .6f), color);
-            }
-        }
-        for (size_t i = 0; i < level.enemies.size(); ++i)
-        {
-            drawables.push_back({(float)Project(level.enemies[i].p).y, 1, (int)i});
-        }
-        drawables.push_back({(float)Project(level.p).y, 2, 0});
-        std::stable_sort(
-            drawables.begin(),
-            drawables.end(),
-            [](const Drawable& a, const Drawable& b)
-            {
-                return a.depth < b.depth;
+                scene.Person({}, Game::Fate, true, 6, 0, true);
             }
         );
-        for (const auto& drawable : drawables)
+        // Blink only the player's body; child range and level-up effects remain visible.
+        player.renderable = level.invulnerable <= 0 || (int)(level.invulnerable * 18) % 2 == 0;
+        auto& range = Place(
+            {RangeNode},
+            player.Id(),
+            {},
+            LevelOne::Range(level),
+            [this](float radius)
+            {
+                Ring({}, radius, Color(.73f, .79f, .63f, .12f));
+            },
+            ActorLayer::Ground
+        );
+        range.order = 1;
+        if (level.bossState == 1)
         {
-            if (drawable.kind == 0)
+            auto& warning = Place(
+                {BossWarningNode},
+                root,
+                LevelOne::CenterOf(LevelOne::Center, LevelOne::Center + 9),
+                0,
+                [this](int)
+                {
+                    Ring({}, 72, Color(1, .38f, .20f, .9f), 2);
+                },
+                ActorLayer::Ground
+            );
+            warning.order = 1;
+        }
+        for (const auto& enemy : level.enemies)
+        {
+            auto local = enemy;
+            local.aim = {enemy.aim.x - enemy.p.x, enemy.aim.y - enemy.p.y};
+            local.p = {};
+            auto& actor = Place(
+                {EnemyNode, enemy.id},
+                characters,
+                enemy.p,
+                local,
+                [this](const LevelOne::Enemy& data)
+                {
+                    Enemy(data);
+                }
+            );
+            if (enemy.windup > 0)
             {
-                Block(drawable.index % LevelOne::MapSize, drawable.index / LevelOne::MapSize);
-            }
-            else if (drawable.kind == 1)
-            {
-                Enemy(level.enemies[drawable.index]);
-            }
-            else if (drawable.kind == 3)
-            {
-                const auto& witness = witnesses[drawable.index];
-                const auto& npc = scene.world.npcs[witness.first];
-                Ring(
-                    witness.second,
-                    16,
-                    npc.relationship > 0 ? Color(.42f, .88f, .66f, .6f) : Color(.94f, .38f, .32f, .6f)
+                auto& warning = Place(
+                    {WindupNode, enemy.id},
+                    actor.Id(),
+                    {},
+                    local,
+                    [this](const LevelOne::Enemy& data)
+                    {
+                        DrawWindup(data);
+                    },
+                    ActorLayer::Ground
                 );
-                scene.Person(
-                    Game::Vec(witness.second.x, witness.second.y),
-                    npc.ability,
-                    false,
-                    npc.archetype,
-                    npc.id,
-                    false,
-                    npc.id == scene.world.story.childId
-                );
+                warning.order = 1;
             }
-            else if (level.invulnerable <= 0 || (int)(level.invulnerable * 18) % 2 == 0)
-            {
-                scene.Person(Game::Vec(level.p.x, level.p.y), Game::Fate, true, 6, 0, true);
-            }
+        }
+        for (const auto& drop : level.drops)
+        {
+            auto local = drop;
+            local.p = {};
+            auto& actor = Place(
+                {DropNode, drop.actorId},
+                root,
+                drop.p,
+                local,
+                [this](const LevelOne::Drop& data)
+                {
+                    DrawDrop(data);
+                },
+                ActorLayer::Ground
+            );
+            actor.order = 2;
         }
         for (const auto& shot : level.projectiles)
         {
-            auto p = Project(shot.p);
-            auto tail = Project(LevelOne::Point(shot.p.x - shot.direction.x * 12, shot.p.y - shot.direction.y * 12));
-            Color c = shot.hostile ? Color(2.5f, .45f, .20f) : Color(2.2f, 1.8f, .75f);
-            scene.r.Line(
-                (float)tail.x,
-                (float)tail.y - 24 * scene.zoom,
-                (float)p.x,
-                (float)p.y - 24 * scene.zoom,
-                2 * scene.zoom,
-                c
+            auto local = shot;
+            local.p = {};
+            Place(
+                {ProjectileNode, shot.actorId},
+                root,
+                shot.p,
+                local,
+                [this](const LevelOne::Projectile& data)
+                {
+                    DrawProjectile(data);
+                },
+                ActorLayer::Effects
             );
         }
         for (const auto& effect : level.effects)
         {
-            Ring(
+            auto& actor = Place(
+                {EffectNode, effect.actorId},
+                root,
                 effect.p,
-                (.4f - effect.time) * 90,
-                effect.healing ? Color(.5f, 1.2f, .6f, effect.time * 2) : Color(1.8f, .9f, .5f, effect.time * 2),
-                2
+                effect,
+                [this](const LevelOne::HitEffect& data)
+                {
+                    Ring(
+                        {},
+                        (.4f - data.time) * 90,
+                        data.healing ? Color(.5f, 1.2f, .6f, data.time * 2) : Color(1.8f, .9f, .5f, data.time * 2),
+                        2
+                    );
+                },
+                ActorLayer::Effects
             );
+            actor.order = 1;
         }
         if (level.levelFlash > 0)
         {
-            Ring(level.p, (1.2f - level.levelFlash) * 100, Color(.62f, 1.3f, 1.1f, level.levelFlash * .4f), 2);
+            auto& flash = Place(
+                {LevelFlashNode},
+                player.Id(),
+                {},
+                level.levelFlash,
+                [this](float time)
+                {
+                    Ring({}, (1.2f - time) * 100, Color(.62f, 1.3f, 1.1f, time * .4f), 2);
+                },
+                ActorLayer::Effects
+            );
+            flash.order = 2;
         }
-        scene.r.Flush();
+        graph.EndSync();
+        scene.RenderGraph(graph);
     }
 
     void DrawHud(int mouseX, int mouseY)
@@ -653,6 +769,81 @@ public:
     }
 
 private:
+    std::uint64_t m_Generation = ~std::uint64_t(0);
+
+    void DrawDrop(const LevelOne::Drop& drop)
+    {
+        auto p = Project(drop.p);
+        float x = (float)p.x, y = (float)p.y - 6 * scene.zoom;
+        Color color = drop.kind == LevelOne::Soul      ? Color(.49f, 1.35f, 1.1f)
+                      : drop.kind == LevelOne::Weapon  ? Color(1.4f, 1.05f, .42f)
+                      : drop.kind == LevelOne::Healing ? Color(.92f, .31f, .29f)
+                                                       : Color(.66f, .70f, 1.4f);
+        scene.Shadow(x, y + 7 * scene.zoom, 7, 3);
+        if (drop.kind == LevelOne::Healing)
+        {
+            scene.Stroke(x, y, -4, 0, 4, 0, 3, color);
+            scene.Stroke(x, y, 0, -4, 0, 4, 3, color);
+        }
+        else if (drop.kind == LevelOne::Weapon)
+        {
+            scene.Stroke(x, y, -4, 4, 4, -6, 2.8f, color);
+            scene.Stroke(x, y, -5, -1, 1, 3, 2, color);
+        }
+        else if (drop.kind == LevelOne::Magnet)
+        {
+            scene.Stroke(x, y, -4, -4, -4, 3, 2, color);
+            scene.Stroke(x, y, 4, -4, 4, 3, 2, color);
+            scene.Stroke(x, y, -4, 3, 4, 3, 2, color);
+        }
+        else
+        {
+            scene.Tri(x, y, 0, -6, -4, 0, 0, 5, color, scene.Shade(color, .5f), scene.Shade(color, .6f));
+            scene.Tri(x, y, 0, -6, 0, 5, 4, 0, color, scene.Shade(color, .6f), color);
+        }
+    }
+
+    void DrawWindup(const LevelOne::Enemy& enemy)
+    {
+        if (enemy.kind == LevelOne::Boss && enemy.attack % 2 == 0)
+        {
+            Ring(enemy.aim, 90, Color(.94f, .25f, .17f, .85f), 2);
+            Ring(enemy.aim, 90 * (1 - enemy.windup / 1.2f), Color(.94f, .42f, .23f, .55f));
+        }
+        else
+        {
+            Ring(enemy.p, enemy.kind == LevelOne::Boss ? 70.f : 25.f, Color(.86f, .38f, .24f, .8f), 2);
+            if (enemy.kind == LevelOne::Archer)
+            {
+                auto from = Project(enemy.p);
+                auto to = Project(enemy.aim);
+                scene.r.Line(
+                    (float)from.x,
+                    (float)from.y - 24 * scene.zoom,
+                    (float)to.x,
+                    (float)to.y - 24 * scene.zoom,
+                    1,
+                    Color(.88f, .35f, .26f, .45f)
+                );
+            }
+        }
+    }
+
+    void DrawProjectile(const LevelOne::Projectile& shot)
+    {
+        auto p = Project(shot.p);
+        auto tail = Project(LevelOne::Point(shot.p.x - shot.direction.x * 12, shot.p.y - shot.direction.y * 12));
+        Color c = shot.hostile ? Color(2.5f, .45f, .20f) : Color(2.2f, 1.8f, .75f);
+        scene.r.Line(
+            (float)tail.x,
+            (float)tail.y - 24 * scene.zoom,
+            (float)p.x,
+            (float)p.y - 24 * scene.zoom,
+            2 * scene.zoom,
+            c
+        );
+    }
+
     struct Region
     {
         float x, y, w, h;

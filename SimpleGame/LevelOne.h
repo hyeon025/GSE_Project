@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <istream>
 #include <ostream>
 #include <queue>
@@ -99,6 +100,7 @@ namespace LevelOne
         float damage = 0;
         float speed = 0;
         bool hostile = false;
+        std::int64_t actorId = 0;
     };
 
     struct Drop
@@ -107,6 +109,7 @@ namespace LevelOne
         int kind = Soul;
         int amount = 1;
         bool attracted = false;
+        std::int64_t actorId = 0;
     };
 
     struct HitEffect
@@ -114,6 +117,7 @@ namespace LevelOne
         Point p;
         float time = 0.25f;
         bool healing = false;
+        std::int64_t actorId = 0;
     };
 
     struct Session
@@ -159,6 +163,8 @@ namespace LevelOne
         bool phaseTwo = false;
         float supportTimer = 0;
         std::vector<Point> memories;
+        std::int64_t nextActorId = 0;
+        std::uint64_t generation = 0;
     };
 
     inline float MaxHealth(const Session& s)
@@ -462,7 +468,9 @@ namespace LevelOne
         int xp = keepGrowth ? s.xp : 0;
         int weapon = keepGrowth ? s.weapon : 0;
         bool completed = s.completedOnce;
+        auto generation = s.generation + 1;
         s = Session();
+        s.generation = generation;
         s.seed = seed ? seed : 1;
         s.random.seed(s.seed ^ 0xa17e391u);
         s.level = level;
@@ -1131,6 +1139,7 @@ namespace LevelOne
                 return false;
             }
         }
+        loaded.generation = s.generation + 1;
         s = loaded;
         return true;
     }

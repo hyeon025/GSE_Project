@@ -1,5 +1,8 @@
 #pragma once
 #include "GameWorld.h"
+#include "SceneGraph.h"
+#include "WorldActors.h"
+#include "CharacterMesh.h"
 
 class GameScene
 {
@@ -8,7 +11,7 @@ public:
     Game::World& world;
     int width = 1440, height = 900;
     float zoom = 1.4f;
-    double walk = 0;
+    CharacterMotion playerMotion;
     bool cameraOverride = false;
     Game::Vec camera;
 
@@ -18,11 +21,196 @@ public:
     {
     }
 
+    SceneGraph graph;
+    SceneGraph interfaceGraph;
+
+    enum NodeKind
+    {
+        Root = 1,
+        TerrainNode,
+        Scenery,
+        Characters,
+        PlayerNode,
+        NpcNode,
+        ObstacleNode,
+        GrassNode,
+        SiteNode,
+        TargetNode,
+        HudNode
+    };
+
     Game::Vec Project(Game::Vec p) const
     {
+        float projectionZoom = zoom;
+        double elevation = 0;
+        if (m_ActorTransform)
+        {
+            auto point = ActorTransform::Compose(*m_ActorTransform, {p.x, p.y});
+            p = Game::Vec(point.x, point.y);
+            elevation = point.height;
+            projectionZoom = m_ProjectionZoom;
+        }
         const Game::Vec& origin = cameraOverride ? camera : world.player.p;
         double dx = p.x - origin.x, dy = p.y - origin.y;
-        return Game::Vec(width * 0.5 + (dx - dy) * zoom, height * 0.55 - (dx + dy) * 0.5 * zoom);
+        return Game::Vec(
+            width * .5 + (dx - dy) * projectionZoom,
+            height * .55 - (dx + dy) * .5 * projectionZoom - elevation * projectionZoom
+        );
+    }
+
+    template <class Draw> void DrawAt(const ActorTransform& transform, Draw draw)
+    {
+        struct Scope
+        {
+            GameScene& scene;
+            float zoom, projectionZoom;
+            const ActorTransform* transform;
+
+            ~Scope()
+            {
+                scene.zoom = zoom;
+                scene.m_ProjectionZoom = projectionZoom;
+                scene.m_ActorTransform = transform;
+            }
+        } scope{*this, zoom, m_ProjectionZoom, m_ActorTransform};
+
+        m_ProjectionZoom = zoom;
+        m_ActorTransform = &transform;
+        zoom *= (float)transform.scale;
+        draw();
+    }
+
+    template <class Data, class Draw>
+    VisualActor<Data>& Place(
+        SceneGraph& nodes,
+        ActorKey key,
+        ActorId parent,
+        Game::Vec position,
+        const Data& data,
+        Draw draw,
+        ActorLayer layer = ActorLayer::Objects
+    )
+    {
+        auto& actor = nodes.GetOrCreate<VisualActor<Data>>(
+            key,
+            parent,
+            [this, draw](const Data& snapshot, const ActorTransform& transform)
+            {
+                DrawAt(
+                    transform,
+                    [&]
+                    {
+                        draw(snapshot);
+                    }
+                );
+            }
+        );
+        actor.data = data;
+        auto pose = actor.LocalTransform();
+        pose.x = position.x;
+        pose.y = position.y;
+        actor.SetLocalTransform(pose);
+        actor.layer = layer;
+        actor.streamed = true;
+        return actor;
+    }
+
+    void RenderGraph(SceneGraph& nodes)
+    {
+        nodes.Render(
+            [this](const ActorTransform& transform)
+            {
+                // Sort at the ground contact point even when a billboard is elevated.
+                return Project(Game::Vec(transform.x, transform.y)).y;
+            }
+        );
+        r.Flush();
+    }
+
+    void DrawOverlay(const std::function<void()>& draw)
+    {
+        auto& hud = interfaceGraph.GetOrCreate<CallbackActor>({HudNode}, 0);
+        hud.layer = ActorLayer::Interface;
+        hud.draw = [draw](const ActorTransform&)
+        {
+            draw();
+        };
+        interfaceGraph.Render();
+        r.Flush();
+    }
+
+    WorldPlayerActor& SyncCharacters()
+    {
+        auto root = graph.Group({Root}).Id();
+        auto parent = graph.Group({Characters}, root).Id();
+        auto& player = graph.GetOrCreate<WorldPlayerActor>(
+            {PlayerNode},
+            parent,
+            world,
+            playerMotion,
+            [this](const Game::Player& p, const ActorTransform& transform)
+            {
+                DrawAt(
+                    transform,
+                    [&]
+                    {
+                        Person({}, p.ability, true);
+                    }
+                );
+            }
+        );
+        player.data = world.player;
+        auto pose = player.LocalTransform();
+        pose.x = world.player.p.x;
+        pose.y = world.player.p.y;
+        player.SetLocalTransform(pose);
+        for (size_t i = 0; i < world.npcs.size(); ++i)
+        {
+            const auto& n = world.npcs[i];
+            if (Game::Distance(n.p, world.player.p) >= 1400)
+            {
+                continue;
+            }
+            auto& npc = graph.GetOrCreate<WorldNpcActor>(
+                {NpcNode, n.id},
+                parent,
+                world,
+                [this](const Game::Npc& data, const ActorTransform& transform)
+                {
+                    DrawAt(
+                        transform,
+                        [&]
+                        {
+                            Person(
+                                {},
+                                data.ability,
+                                false,
+                                data.archetype,
+                                data.id,
+                                false,
+                                data.id == world.story.childId
+                            );
+                        }
+                    );
+                }
+            );
+            npc.data = n;
+            npc.modelIndex = i;
+            pose = npc.LocalTransform();
+            pose.x = n.p.x;
+            pose.y = n.p.y;
+            npc.SetLocalTransform(pose);
+            npc.streamed = true;
+        }
+        return player;
+    }
+
+    void Update(float dt, Game::Vec movement, bool sprinting)
+    {
+        auto& player = SyncCharacters();
+        player.movement = movement;
+        player.sprinting = sprinting;
+        graph.Update(dt);
     }
 
     Color Shade(Color c, float light, float alpha = 1)
@@ -184,51 +372,61 @@ public:
         bool child = false
     )
     {
-        Game::Vec s = Project(p);
-        float originalZoom = zoom;
-        zoom *= child ? .65f : 1.f;
-        float x = (float)s.x, y = (float)s.y;
-        Color cloth = player ? Color(.34f, .39f, .36f) : Shade(AbilityColor(ability), .63f);
-        float step = player ? (float)std::sin(walk) * 3 : std::sin((float)world.time * 1.8f + id) * .35f;
-        Shadow(x, y, 20, 7);
-        Stroke(x, y, -4, -16, -5 + step, -2, 4, Color(.16f, .17f, .16f));
-        Stroke(x, y, 4, -16, 5 - step, -1, 4, Color(.12f, .14f, .13f));
-        Oval(x, y, -5 + step, -1, 4, 2, Color(.22f, .21f, .18f), Color(.10f, .11f, .10f));
-        Oval(x, y, 5 - step, 0, 4, 2, Color(.22f, .21f, .18f), Color(.10f, .11f, .10f));
-        Tri(x, y, -6, -39, -12, -10, 0, -13, Shade(cloth, 1.35f), Shade(cloth, .62f), cloth);
-        Tri(x, y, -6, -39, 0, -13, 10, -11, Shade(cloth, 1.35f), cloth, Shade(cloth, .65f));
-        Tri(x, y, -6, -39, 10, -11, 7, -37, Shade(cloth, 1.35f), Shade(cloth, .65f), cloth);
-        Stroke(x, y, -6, -32, -12, -20 + step * .3f, 4, Shade(cloth, .82f));
-        Stroke(x, y, 7, -33, 12, -22 - step * .3f, 4, Shade(cloth, 1.2f));
-        Color skin(.64f, .51f, .40f);
-        Oval(x, y, 12, -21 - step * .3f, 2, 3, skin, Shade(skin, .65f));
-        Stroke(x, y, -7, -22, 7, -23, 2, Color(.25f, .21f, .16f));
-        Stroke(x, y, 5, -38, -5, -22, 1.6f, Color(.47f, .40f, .28f));
-        Oval(x, y, -8, -24, 4, 5, Color(.33f, .27f, .18f), Color(.17f, .17f, .14f));
-        Oval(x, y, 0, -44, 7, 9, Shade(cloth, .60f), Shade(cloth, .35f));
-        Oval(x, y, 1, -43, 4, 6, skin, Shade(skin, .65f));
-        Tri(x, y, -7, -44, 0, -54, 8, -43, Shade(cloth, 1.4f), cloth, Shade(cloth, .6f));
-        Stroke(x, y, 1, -44, 3, -44, .75f, Color(.12f, .13f, .12f));
-        if (player)
-        {
-            if (crossbow)
+        Game::Vec screen = Project(p);
+        float scale = zoom * (child ? .65f : 1.f);
+        CharacterMesh::Appearance appearance;
+        appearance.facing = player ? playerMotion.facing : CharacterFacing::Front;
+        appearance.pose = player ? playerMotion.Pose() : CharacterMotion::IdlePose;
+        appearance.ability = (unsigned)ability;
+        appearance.player = player;
+        appearance.crossbow = crossbow;
+        appearance.armed = !player && archetype == 0;
+        float x = (float)screen.x, y = (float)screen.y;
+        r.Ellipse(
+            x + 12 * scale,
+            y + 5 * scale,
+            25 * scale,
+            8 * scale,
+            Color(.02f, .025f, .025f, .23f),
+            Color(.02f, .025f, .025f, 0)
+        );
+        r.Ellipse(
+            x,
+            y + scale,
+            8 * scale,
+            3.5f * scale,
+            Color(.015f, .019f, .019f, .48f),
+            Color(.02f, .025f, .025f, 0)
+        );
+        r.CachedMesh(
+            Renderer::MeshKind::Character,
+            CharacterMesh::Key(appearance),
+            x,
+            y,
+            scale,
+            1,
+            [this, appearance]
             {
-                Stroke(x, y, 7, -27, 22, -22, 3.0f, Color(.48f, .40f, .28f));
-                Stroke(x, y, 13, -33, 17, -17, 1.8f, Color(.62f, .65f, .58f));
-                Stroke(x, y, 13, -33, 20, -24, .8f, Color(.71f, .69f, .57f));
-                Stroke(x, y, 20, -24, 17, -17, .8f, Color(.71f, .69f, .57f));
+                const auto vertices = CharacterMesh::Build(appearance);
+                for (size_t i = 0; i < vertices.size(); i += 3)
+                {
+                    const auto& a = vertices[i];
+                    const auto& b = vertices[i + 1];
+                    const auto& c = vertices[i + 2];
+                    r.Triangle(
+                        a.x,
+                        a.y,
+                        b.x,
+                        b.y,
+                        c.x,
+                        c.y,
+                        Color(a.r, a.g, a.b, a.a),
+                        Color(b.r, b.g, b.b, b.a),
+                        Color(c.r, c.g, c.b, c.a)
+                    );
+                }
             }
-            else
-            {
-                Stroke(x, y, -12, -25, -16, 0, 1.6f, Color(.40f, .34f, .25f));
-            }
-            Oval(x, y, 3, -34, 1.6f, 1.6f, AbilityColor(ability), Shade(AbilityColor(ability), .5f));
-        }
-        else if (archetype == 0)
-        {
-            Stroke(x, y, 12, -26, 15, -8, 2, Color(.62f, .64f, .63f));
-        }
-        zoom = originalZoom;
+        );
     }
 
     void Fire(float x, float y, bool burning)
@@ -375,124 +573,155 @@ public:
 
     void Render(int targetKind, int targetIndex, const std::vector<Game::Site>& sites)
     {
-        r.Terrain((float)world.player.p.x, (float)world.player.p.y, zoom);
-
-        struct Draw
+        graph.BeginSync();
+        auto root = graph.Group({Root}).Id();
+        auto scenery = graph.Group({Scenery}, root).Id();
+        auto& terrain = graph.GetOrCreate<CallbackActor>({TerrainNode}, root);
+        terrain.layer = ActorLayer::Background;
+        terrain.draw = [this](const ActorTransform&)
         {
-            float depth;
-            int kind, index, tx, ty;
+            r.Terrain((float)world.player.p.x, (float)world.player.p.y, zoom);
         };
-
-        std::vector<Draw> list;
+        SyncCharacters();
         int radius = (int)((width * .5f + height) / zoom / 64) + 6;
         int tx = (int)std::floor(world.player.p.x / 32), ty = (int)std::floor(world.player.p.y / 32);
         for (int y = ty - radius; y <= ty + radius; ++y)
         {
             for (int x = tx - radius; x <= tx + radius; ++x)
             {
-                auto s = Project(Game::Vec(x * 32.0 + 16, y * 32.0 + 16));
-                if (s.x < -90 || s.x > width + 90 || s.y < -50 || s.y > height + 150)
+                Game::Vec position(x * 32.0 + 16, y * 32.0 + 16);
+                auto screen = Project(position);
+                if (screen.x < -90 || screen.x > width + 90 || screen.y < -50 || screen.y > height + 150)
                 {
                     continue;
                 }
                 if (Game::Obstacle(x, y))
                 {
-                    list.push_back({(float)s.y, 0, 0, x, y});
+                    Place(
+                        graph,
+                        {ObstacleNode, x, y},
+                        scenery,
+                        position,
+                        Game::Hash(x, y, 37),
+                        [this](unsigned seed)
+                        {
+                            DrawObstacle(seed);
+                        }
+                    );
                 }
-                else if (Game::Road(Game::Vec(x * 32.0 + 16, y * 32.0 + 16)) > 40)
+                else if (Game::Road(position) > 40)
                 {
-                    unsigned h = Game::Hash(x, y, 29);
-                    for (int i = 0; i < 3; ++i)
-                    {
-                        float dx = (int)((h >> (i * 4)) % 21) - 10.f;
-                        Stroke(
-                            (float)s.x,
-                            (float)s.y,
-                            dx,
-                            0,
-                            dx - 2,
-                            -3 - (h % 5),
-                            .65f,
-                            Color(.35f, .40f, .29f, .55f)
-                        );
-                    }
+                    Place(
+                        graph,
+                        {GrassNode, x, y},
+                        scenery,
+                        position,
+                        Game::Hash(x, y, 29),
+                        [this](unsigned seed)
+                        {
+                            auto p = Project({});
+                            for (int i = 0; i < 3; ++i)
+                            {
+                                float dx = (int)((seed >> (i * 4)) % 21) - 10.f;
+                                Stroke(
+                                    (float)p.x,
+                                    (float)p.y,
+                                    dx,
+                                    0,
+                                    dx - 2,
+                                    -3 - (seed % 5),
+                                    .65f,
+                                    Color(.35f, .40f, .29f, .55f)
+                                );
+                            }
+                        },
+                        ActorLayer::Ground
+                    );
                 }
             }
         }
+        ActorId target = 0;
         for (size_t i = 0; i < sites.size(); ++i)
         {
-            list.push_back({(float)Project(sites[i].p).y, 1, (int)i, 0, 0});
-        }
-        for (size_t i = 0; i < world.npcs.size(); ++i)
-        {
-            if (Game::Distance(world.npcs[i].p, world.player.p) < 1400)
-            {
-                list.push_back({(float)Project(world.npcs[i].p).y, 2, (int)i, 0, 0});
-            }
-        }
-        list.push_back({(float)Project(world.player.p).y, 3, 0, 0, 0});
-        if (targetKind >= 0)
-        {
-            auto p = Project(targetKind == 1 ? sites[targetIndex].p : world.npcs[targetIndex].p);
-            r.Ellipse(
-                (float)p.x,
-                (float)p.y,
-                26 * zoom,
-                11 * zoom,
-                Color(.83f, .76f, .48f, .03f),
-                Color(.83f, .76f, .48f, .36f)
-            );
-        }
-        std::stable_sort(
-            list.begin(),
-            list.end(),
-            [](const Draw& a, const Draw& b)
-            {
-                return a.depth < b.depth;
-            }
-        );
-        for (const auto& d : list)
-        {
-            if (d.depth < -120 || d.depth > height + 160)
-            {
-                continue;
-            }
-            if (d.kind == 0)
-            {
-                auto p = Project(Game::Vec(d.tx * 32.0 + 16, d.ty * 32.0 + 16));
-                unsigned h = Game::Hash(d.tx, d.ty, 37);
-                float alpha =
-                    (std::abs(p.x - width * .5) < 36 * zoom && p.y > height * .55 && p.y < height * .55 + 90 * zoom)
-                        ? .30f
-                        : 1.f;
-                switch ((h / 101) % 3)
+            const auto& site = sites[i];
+            auto& actor = Place(
+                graph,
+                {SiteNode, site.key.first, site.key.second},
+                scenery,
+                site.p,
+                site,
+                [this](Game::Site data)
                 {
-                    case 0:
-                        Tree((float)p.x, (float)p.y, h, alpha);
-                        break;
-                    case 1:
-                        Shadow((float)p.x, (float)p.y);
-                        Rock((float)p.x, (float)p.y, 1.15f, h, alpha);
-                        break;
-                    case 2:
-                        Wall((float)p.x, (float)p.y, h, alpha);
-                        break;
+                    data.p = {};
+                    DrawSite(data);
+                }
+            );
+            if (targetKind == 1 && targetIndex == (int)i)
+            {
+                target = actor.Id();
+            }
+        }
+        if (targetKind == 2 && targetIndex >= 0 && targetIndex < (int)world.npcs.size())
+        {
+            const auto& npc = world.npcs[targetIndex];
+            if (Game::Distance(npc.p, world.player.p) < 1400)
+            {
+                if (auto* actor = graph.Find(ActorKey{NpcNode, npc.id}))
+                {
+                    target = actor->Id();
                 }
             }
-            else if (d.kind == 1)
-            {
-                DrawSite(sites[d.index]);
-            }
-            else if (d.kind == 2)
-            {
-                const auto& n = world.npcs[d.index];
-                Person(n.p, n.ability, false, n.archetype, n.id, false, n.id == world.story.childId);
-            }
-            else
-            {
-                Person(world.player.p, world.player.ability, true);
-            }
         }
-        r.Flush();
+        if (target)
+        {
+            auto& marker = Place(
+                graph,
+                {TargetNode},
+                target,
+                {},
+                0,
+                [this](int)
+                {
+                    auto p = Project({});
+                    r.Ellipse(
+                        (float)p.x,
+                        (float)p.y,
+                        26 * zoom,
+                        11 * zoom,
+                        Color(.83f, .76f, .48f, .03f),
+                        Color(.83f, .76f, .48f, .36f)
+                    );
+                },
+                ActorLayer::Ground
+            );
+            marker.order = 1;
+        }
+        graph.EndSync();
+        RenderGraph(graph);
+    }
+
+private:
+    const ActorTransform* m_ActorTransform = nullptr;
+    float m_ProjectionZoom = 1;
+
+    void DrawObstacle(unsigned seed)
+    {
+        auto p = Project({});
+        float alpha = (std::abs(p.x - width * .5) < 36 * zoom && p.y > height * .55 && p.y < height * .55 + 90 * zoom)
+                          ? .30f
+                          : 1.f;
+        switch ((seed / 101) % 3)
+        {
+            case 0:
+                Tree((float)p.x, (float)p.y, seed, alpha);
+                break;
+            case 1:
+                Shadow((float)p.x, (float)p.y);
+                Rock((float)p.x, (float)p.y, 1.15f, seed, alpha);
+                break;
+            case 2:
+                Wall((float)p.x, (float)p.y, seed, alpha);
+                break;
+        }
     }
 };
