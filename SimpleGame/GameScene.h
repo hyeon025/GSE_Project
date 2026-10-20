@@ -4,6 +4,8 @@
 #include "WorldActors.h"
 #include "CharacterMesh.h"
 #include "WorldSimulation.h"
+#include "IsometricView.h"
+#include "ArtPresentation.h"
 
 class GameScene
 {
@@ -11,7 +13,7 @@ public:
     Renderer& r;
     Game::World& world;
     int width = 1440, height = 900;
-    float zoom = 1.4f;
+    float zoom = IsometricView::DefaultZoom;
     CharacterMotion playerMotion;
     bool cameraOverride = false;
     Game::Vec camera;
@@ -42,7 +44,8 @@ public:
         VillageNode,
         BuildingNode,
         WorksiteNode,
-        SimulationNode
+        SimulationNode,
+        HouseNode
     };
 
     Game::Vec Project(Game::Vec p) const
@@ -57,10 +60,57 @@ public:
             projectionZoom = m_ProjectionZoom;
         }
         const Game::Vec& origin = cameraOverride ? camera : world.player.p;
-        double dx = p.x - origin.x, dy = p.y - origin.y;
+        auto projected = IsometricView::Project({p.x - origin.x, p.y - origin.y, elevation});
         return Game::Vec(
-            width * .5 + (dx - dy) * projectionZoom,
-            height * .55 - (dx + dy) * .5 * projectionZoom - elevation * projectionZoom
+            width * .5 + projected.x * projectionZoom,
+            height * IsometricView::AnchorY + projected.y * projectionZoom
+        );
+    }
+
+    float SceneryOpacity(Game::Vec ground, float halfWidth, float above, float below = 0) const
+    {
+        return IsometricView::OccluderOpacity(
+            {(ground.x - width * .5) / zoom, (ground.y - height * IsometricView::AnchorY) / zoom},
+            halfWidth,
+            above,
+            below
+        );
+    }
+
+    void Surface(IsometricView::Vertex a, IsometricView::Vertex b, IsometricView::Vertex c, Color color)
+    {
+        auto pa = IsometricView::Project(a), pb = IsometricView::Project(b), pc = IsometricView::Project(c);
+        Tri(0, 0, (float)pa.x, (float)pa.y, (float)pb.x, (float)pb.y, (float)pc.x, (float)pc.y, color, color, color);
+    }
+
+    void Surface(
+        IsometricView::Vertex a,
+        IsometricView::Vertex b,
+        IsometricView::Vertex c,
+        IsometricView::Vertex d,
+        Color color
+    )
+    {
+        Surface(a, b, c, color);
+        Surface(a, c, d, color);
+    }
+
+    void Edge(IsometricView::Vertex a, IsometricView::Vertex b, float thickness, Color color)
+    {
+        auto pa = IsometricView::Project(a), pb = IsometricView::Project(b);
+        Stroke(0, 0, (float)pa.x, (float)pa.y, (float)pb.x, (float)pb.y, thickness, color);
+    }
+
+    void Prism(float halfX, float halfY, float height, Color left, Color right, Color top)
+    {
+        Surface({-halfX, halfY, 0}, {-halfX, -halfY, 0}, {-halfX, -halfY, height}, {-halfX, halfY, height}, left);
+        Surface({-halfX, -halfY, 0}, {halfX, -halfY, 0}, {halfX, -halfY, height}, {-halfX, -halfY, height}, right);
+        Surface(
+            {-halfX, -halfY, height},
+            {halfX, -halfY, height},
+            {halfX, halfY, height},
+            {-halfX, halfY, height},
+            top
         );
     }
 
@@ -147,6 +197,20 @@ public:
 
     WorldPlayerActor& SyncCharacters()
     {
+        for (auto& npc : world.npcs)
+        {
+            if (!npc.artParts.empty())
+            {
+                continue;
+            }
+            auto parts = Art::Assets().Recipe((unsigned)npc.id);
+            if (!parts.empty())
+            {
+                npc.artParts = std::move(parts);
+                npc.artCatalogVersion = 1;
+                world.dirty = true;
+            }
+        }
         m_InspectedNpc = 0;
         double nearest = 90;
         for (const auto& n : world.npcs)
@@ -230,11 +294,12 @@ public:
                             }
                             if (inspected)
                             {
+                                r.Text((float)p.x - 27 * zoom, (float)p.y - 108 * zoom, data.Name(), color, 12);
                                 r.Text(
-                                    (float)p.x - 27 * zoom,
-                                    (float)p.y - 89 * zoom,
-                                    std::wstring(Society::JobName(data.life.job)) + L" / " +
-                                        Society::ActivityName(data.life.activity),
+                                    (float)p.x - 42 * zoom,
+                                    (float)p.y - 91 * zoom,
+                                    std::wstring(Society::VillageName(data.life.village)) + L" / " +
+                                        Society::JobName(data.life.job),
                                     color,
                                     12
                                 );
@@ -266,42 +331,75 @@ public:
     void DrawVillageBuilding(int kind)
     {
         auto p = Project({});
+        const char* ids[] = {"SM_ENV_Building_01_Cottage", "SM_ENV_Building_02_Smithy", "SM_ENV_Building_03_Market"};
+        if (Art::Environment(r, ids[kind % 3], (float)p.x, (float)p.y, zoom, 8, SceneryOpacity(p, 56, 130, 32)))
+        {
+            return;
+        }
         r.CachedMesh(
             Renderer::MeshKind::VillageBuilding,
-            kind + 1,
+            (std::uint64_t(IsometricView::MeshRevision) << 32) | (kind + 1),
             (float)p.x,
             (float)p.y,
             zoom,
-            1,
+            SceneryOpacity(p, 56, 130, (float)IsometricView::GroundHalfExtents({25, 23}).y),
             [this, kind]
             {
                 GameScene mesh(r, world);
                 mesh.zoom = 1;
-                Color stone(.39f, .42f, .40f), shade(.22f, .27f, .27f);
+                Color stone(.48f, .49f, .44f), shade(.28f, .33f, .32f), mortar(.20f, .24f, .23f);
                 Color roof = kind == 2 ? Color(.29f, .43f, .38f) : Color(.37f, .32f, .31f);
-                mesh.Oval(0, 0, 13, 4, 53, 23, Color(.02f, .03f, .03f, .42f), Color(.02f, .03f, .03f, 0));
-                mesh.Tri(0, 0, -40, -18, 0, 2, 0, -47, stone, shade, stone);
-                mesh.Tri(0, 0, -40, -18, 0, -47, -40, -67, stone, stone, shade);
-                mesh.Tri(0, 0, 0, 2, 40, -18, 40, -67, shade, stone, stone);
-                mesh.Tri(0, 0, 0, 2, 40, -67, 0, -47, shade, stone, shade);
-                mesh.Tri(0, 0, -45, -66, 0, -43, 1, -95, roof, mesh.Shade(roof, .8f), mesh.Shade(roof, 1.3f));
-                mesh.Tri(0, 0, 0, -43, 45, -67, 1, -95, mesh.Shade(roof, .8f), roof, mesh.Shade(roof, 1.3f));
-                mesh.Stroke(0, 0, 14, -9, 14, -35, 12, Color(.12f, .15f, .14f));
-                mesh.Stroke(0, 0, -22, -41, -22, -49, 7, Color(.78f, .65f, .38f));
-                for (int row = 0; row < 3; ++row)
+                mesh.Oval(0, 0, 18, 9, 65, 32, Color(.02f, .03f, .03f, .42f), Color(.02f, .03f, .03f, 0));
+                // The foundation matches the existing +/-25 by +/-23 collision footprint.
+                mesh.Prism(25, 23, 72, stone, shade, stone);
+                for (int z = 12; z < 72; z += 12)
                 {
-                    mesh.Stroke(0, 0, -38, -27 - row * 11.f, -2, -9 - row * 11.f, .8f, shade);
+                    mesh.Edge({-25, -23, (double)z}, {25, -23, (double)z}, .65f, mortar);
+                    mesh.Edge({-25, -23, (double)z}, {-25, 23, (double)z}, .65f, mesh.Shade(stone, .7f));
+                    for (int x = -20 + (z / 12 % 2) * 7; x < 25; x += 14)
+                    {
+                        mesh.Edge({(double)x, -23, (double)z - 12}, {(double)x, -23, (double)z}, .55f, mortar);
+                    }
                 }
+                Color timber(.16f, .18f, .16f), glow(.83f, .67f, .36f);
+                mesh.Surface({-9, -23, 0}, {9, -23, 0}, {9, -23, 54}, {-9, -23, 54}, timber);
+                mesh.Edge({-9, -23, 54}, {9, -23, 54}, 2, mesh.Shade(stone, 1.2f));
+                mesh.Edge({-9, -23, 0}, {-9, -23, 54}, 1.5f, stone);
+                mesh.Edge({9, -23, 0}, {9, -23, 54}, 1.5f, stone);
+                mesh.Edge({0, -23, 1}, {0, -23, 53}, .8f, mesh.Shade(timber, .6f));
+                mesh.Surface({-25, -10, 33}, {-25, 5, 33}, {-25, 5, 51}, {-25, -10, 51}, glow);
+                mesh.Edge({-25, -2.5, 33}, {-25, -2.5, 51}, 1.7f, timber);
+                mesh.Edge({-25, -10, 42}, {-25, 5, 42}, 1.7f, timber);
+                mesh.Surface({-25, -23, 72}, {-25, 23, 72}, {-25, 0, 95}, mesh.Shade(stone, .9f));
+                mesh.Surface({-29, 27, 68}, {29, 27, 68}, {29, 0, 95}, {-29, 0, 95}, mesh.Shade(roof, 1.15f));
+                mesh.Surface({-29, -27, 68}, {29, -27, 68}, {29, 0, 95}, {-29, 0, 95}, mesh.Shade(roof, .78f));
+                for (int x = -22; x < 29; x += 8)
+                {
+                    mesh.Edge({(double)x, -27, 68}, {(double)x, 0, 95}, .6f, mesh.Shade(roof, .58f));
+                    mesh.Edge({(double)x, 27, 68}, {(double)x, 0, 95}, .6f, mesh.Shade(roof, .85f));
+                }
+                for (int y = 7; y < 27; y += 7)
+                {
+                    mesh.Edge({-29, (double)-y, (double)95 - y}, {29, (double)-y, (double)95 - y}, .65f, roof);
+                    mesh.Edge(
+                        {-29, (double)y, (double)95 - y},
+                        {29, (double)y, (double)95 - y},
+                        .65f,
+                        mesh.Shade(roof, 1.3f)
+                    );
+                }
+                mesh.Edge({-29, 0, 95}, {29, 0, 95}, 1.7f, mesh.Shade(roof, 1.35f));
+                mesh.Edge({-29, -27, 68}, {29, -27, 68}, 2, timber);
             }
         );
     }
 
     void SyncVillages(ActorId scenery)
     {
-        for (int village = 0; village < 3; ++village)
+        for (int village = 0; village < Society::VillageCount; ++village)
         {
             auto center = Game::VillageCenter(village);
-            if (Game::Distance(center, world.player.p) > 1800)
+            if (Game::Distance(center, world.player.p) > 2400)
             {
                 continue;
             }
@@ -317,8 +415,8 @@ public:
                     r.Ellipse(
                         (float)p.x,
                         (float)p.y,
-                        160 * zoom,
-                        80 * zoom,
+                        (float)Society::VillageRadius * zoom,
+                        (float)Society::VillageRadius * IsometricView::GroundDepth * zoom,
                         Color(.34f, .36f, .31f, .78f),
                         Color(.25f, .31f, .27f, 0)
                     );
@@ -342,9 +440,49 @@ public:
                 },
                 ActorLayer::Ground
             );
+            for (int lot = 0; lot < Society::HousingCapacity; ++lot)
+            {
+                auto position = Game::HousePosition(village, lot);
+                auto screen = Project(position);
+                if (screen.x < -120 || screen.x > width + 120 || screen.y < -100 || screen.y > height + 160)
+                {
+                    continue;
+                }
+                auto& house = Place(
+                    graph,
+                    {HouseNode, village, lot},
+                    scenery,
+                    position,
+                    lot,
+                    [this, village](int plot)
+                    {
+                        DrawVillageBuilding(plot % 3);
+                        if (Game::Distance(world.player.p, Game::HouseEntrance(village, plot)) < 90)
+                        {
+                            for (const auto& owner : world.npcs)
+                            {
+                                if (!owner.life.alive || owner.life.village != village || owner.life.houseLot != plot)
+                                {
+                                    continue;
+                                }
+                                auto p = Project({});
+                                r.Text(
+                                    (float)p.x - 35 * zoom,
+                                    (float)p.y - 120 * zoom,
+                                    owner.Name(),
+                                    Color(.9f, .86f, .7f),
+                                    12
+                                );
+                                break;
+                            }
+                        }
+                    }
+                );
+                house.depthOffset = IsometricView::GroundHalfExtents({25, 23}).y * zoom;
+            }
             for (int building = 0; building < 3; ++building)
             {
-                Place(
+                auto& actor = Place(
                     graph,
                     {BuildingNode, village, building},
                     scenery,
@@ -355,6 +493,7 @@ public:
                         DrawVillageBuilding(b);
                     }
                 );
+                actor.depthOffset = IsometricView::GroundHalfExtents({25, 23}).y * zoom;
             }
             for (int type = 0; type < 2; ++type)
             {
@@ -453,8 +592,46 @@ public:
         return colors[(int)a];
     }
 
+    void Grass(unsigned seed)
+    {
+        auto p = Project({});
+        unsigned variant = seed % 16;
+        r.CachedMesh(
+            Renderer::MeshKind::Grass,
+            (std::uint64_t(IsometricView::MeshRevision) << 32) | variant,
+            (float)p.x,
+            (float)p.y,
+            zoom,
+            .85f,
+            [this, variant]
+            {
+                // Five tapered, bent blades per cached tuft, with shaded roots and lighter tips.
+                for (int blade = 0; blade < 5; ++blade)
+                {
+                    unsigned h = Game::Hash(variant, blade, 137);
+                    double bx = (int)(h % 17) - 8;
+                    double by = (int)((h / 17) % 13) - 6;
+                    float height = 3.5f + (h / 221 % 7) * .65f;
+                    float lean = ((int)(h / 1547 % 11) - 5) * .55f;
+                    auto base = IsometricView::Project({bx, by, 0});
+                    float x = (float)base.x, y = (float)base.y;
+                    float midX = x + lean * .35f, midY = y - height * .6f;
+                    Color root(.10f, .24f, .075f), middle(.20f, .37f, .11f);
+                    Color tip(.32f + (variant % 3) * .015f, .49f, .18f);
+                    r.Triangle(x - .7f, y, x + .7f, y, midX + .45f, midY, root, root, middle);
+                    r.Triangle(x - .7f, y, midX + .45f, midY, midX - .45f, midY, root, middle, middle);
+                    r.Triangle(midX - .45f, midY, midX + .45f, midY, x + lean, y - height, middle, middle, tip);
+                }
+            }
+        );
+    }
+
     void Rock(float x, float y, float scale, unsigned seed, float opacity = 1)
     {
+        if (Art::Environment(r, "SM_ENV_Rock_02_Medium", x, y, zoom * scale, 20, opacity))
+        {
+            return;
+        }
         r.CachedMesh(
             Renderer::MeshKind::Rock,
             seed % 9,
@@ -488,6 +665,12 @@ public:
 
     void Tree(float x, float y, unsigned seed, float alpha)
     {
+        const char* ids[] =
+            {"SM_ENV_Tree_01_Oak", "SM_ENV_Tree_02_Pine", "SM_ENV_Tree_03_Dead", "SM_ENV_Tree_04_Young"};
+        if (Art::Environment(r, ids[seed % 4], x, y, zoom, 26, alpha))
+        {
+            return;
+        }
         Shadow(x, y, 40, 10);
         r.CachedMesh(
             Renderer::MeshKind::Tree,
@@ -527,10 +710,14 @@ public:
 
     void Wall(float x, float y, unsigned seed, float alpha = 1)
     {
+        if (Art::Environment(r, "SM_ENV_Ruin_02_WallBroken", x, y, zoom, 16, alpha))
+        {
+            return;
+        }
         Shadow(x, y, 34, 11);
         r.CachedMesh(
             Renderer::MeshKind::Wall,
-            seed % 9,
+            (std::uint64_t(IsometricView::MeshRevision) << 32) | (seed % 9),
             x,
             y,
             zoom,
@@ -539,29 +726,29 @@ public:
             {
                 GameScene mesh(r, world);
                 mesh.zoom = 1;
-                mesh.BuildWall(0, 0, seed, 1);
+                mesh.BuildWall(seed, 1);
             }
         );
     }
 
-    void BuildWall(float x, float y, unsigned seed, float alpha)
+    void BuildWall(unsigned seed, float alpha)
     {
-        for (int row = 0; row < 4; ++row)
+        float height = 28 + seed % 3 * 5.f;
+        Color front(.37f, .39f, .36f, alpha), top(.54f, .54f, .49f, alpha), side(.24f, .27f, .26f, alpha);
+        Prism(20, 6, height, front, side, top);
+        for (int row = 1; row <= 3; ++row)
         {
+            double z = row * 8;
+            Edge({-20, -6, z}, {20, -6, z}, .7f, Shade(side, .6f));
+            Edge({-20, -6, z}, {-20, 6, z}, .7f, Shade(front, .6f));
             for (int col = 0; col < 3; ++col)
             {
-                if (row == 3 && col == (int)(seed % 3))
-                {
-                    continue;
-                }
-                float a = -24 + col * 15 + (row % 2) * 3, b = -row * 9;
-                Color front(.37f, .39f, .36f, alpha), top(.54f, .54f, .49f, alpha), side(.24f, .27f, .26f, alpha);
-                Tri(x, y, a, b, a, b - 8, a + 14, b - 8, front, top, front);
-                Tri(x, y, a, b, a + 14, b - 8, a + 14, b, front, front, side);
-                Stroke(x, y, a + 1, b - 7, a + 13, b - 7, .65f, top);
+                double x = -14 + col * 13 + row % 2 * 4;
+                Edge({x, -6, z - 8}, {x, -6, z}, .6f, Shade(side, .6f));
             }
         }
-        BuildRock(x - 22 * zoom, y + 4 * zoom, .6f, seed, alpha);
+        Edge({-20, -6, height}, {20, -6, height}, .9f, Shade(top, 1.15f));
+        BuildRock(-22 * zoom, 4 * zoom, .6f, seed, alpha);
     }
 
     void Person(
@@ -590,6 +777,22 @@ public:
         appearance.crossbow = crossbow;
         appearance.armed = !player && archetype == 0;
         float x = (float)screen.x, y = (float)screen.y;
+        Art::DrawRequest imported;
+        imported.assets = (!cameraOverride && id > 0 && id <= (int)world.npcs.size())
+                              ? world.npcs[id - 1].artParts
+                              : Art::Assets().Recipe(player ? 0 : (unsigned)id);
+        imported.x = x;
+        imported.y = y;
+        imported.scale = scale;
+        imported.yaw = Art::FacingYaw(appearance.facing);
+        bool moving = player ? playerMotion.moving : (motion && motion->moving);
+        bool sprinting = player ? playerMotion.sprinting : (motion && motion->sprinting);
+        imported.clip = moving ? (sprinting ? "Run" : "Walk") : "Idle";
+        imported.seconds = world.time;
+        if (Art::Draw(r, imported))
+        {
+            return;
+        }
         r.Ellipse(
             x + 12 * scale,
             y + 5 * scale,
@@ -806,43 +1009,42 @@ public:
                 }
                 if (Game::Obstacle(x, y))
                 {
-                    Place(
+                    unsigned seed = Game::Hash(x, y, 37);
+                    auto& obstacle = Place(
                         graph,
                         {ObstacleNode, x, y},
                         scenery,
                         position,
-                        Game::Hash(x, y, 37),
+                        seed,
                         [this](unsigned seed)
                         {
                             DrawObstacle(seed);
                         }
                     );
+                    obstacle.depthOffset =
+                        (seed / 101) % 3 == 2 ? IsometricView::GroundHalfExtents({20, 6}).y * zoom : 0;
                 }
-                else if (Game::Road(position) > 40)
+                else if (Game::Road(position) > 55 && !Game::SettlementClearing(position))
                 {
+                    unsigned seed = Game::Hash(x, y, 29);
+                    if (seed % 100 >= 62)
+                    {
+                        continue;
+                    }
+                    Game::Vec tuft(position.x + (int)(seed / 100 % 23) - 11, position.y + (int)(seed / 2300 % 23) - 11);
+                    if (Game::Road(tuft) < 45 || Game::SettlementClearing(tuft))
+                    {
+                        continue;
+                    }
                     Place(
                         graph,
                         {GrassNode, x, y},
                         scenery,
-                        position,
-                        Game::Hash(x, y, 29),
+                        tuft,
+                        seed,
                         [this](unsigned seed)
                         {
-                            auto p = Project({});
-                            for (int i = 0; i < 3; ++i)
-                            {
-                                float dx = (int)((seed >> (i * 4)) % 21) - 10.f;
-                                Stroke(
-                                    (float)p.x,
-                                    (float)p.y,
-                                    dx,
-                                    0,
-                                    dx - 2,
-                                    -3 - (seed % 5),
-                                    .65f,
-                                    Color(.35f, .40f, .29f, .55f)
-                                );
-                            }
+                            Grass(seed);
                         },
                         ActorLayer::Ground
                     );
@@ -917,21 +1119,20 @@ private:
     void DrawObstacle(unsigned seed)
     {
         auto p = Project({});
-        float alpha = (std::abs(p.x - width * .5) < 36 * zoom && p.y > height * .55 && p.y < height * .55 + 90 * zoom)
-                          ? .30f
-                          : 1.f;
         switch ((seed / 101) % 3)
         {
             case 0:
-                Tree((float)p.x, (float)p.y, seed, alpha);
+                Tree((float)p.x, (float)p.y, seed, SceneryOpacity(p, 40, 120));
                 break;
             case 1:
                 Shadow((float)p.x, (float)p.y);
-                Rock((float)p.x, (float)p.y, 1.15f, seed, alpha);
+                Rock((float)p.x, (float)p.y, 1.15f, seed, SceneryOpacity(p, 20, 26));
                 break;
-            case 2:
-                Wall((float)p.x, (float)p.y, seed, alpha);
+            case 2: {
+                auto bounds = IsometricView::GroundHalfExtents({20, 6});
+                Wall((float)p.x, (float)p.y, seed, SceneryOpacity(p, (float)bounds.x, 60, (float)bounds.y));
                 break;
+            }
         }
     }
 };

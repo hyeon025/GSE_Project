@@ -1,0 +1,671 @@
+{
+  "color_space": "linear",
+  "notes_ko": "기존 NPC와 추가 동물/망자의 재질 및 대체 팔레트.",
+  "materials": [
+    {
+      "material_id": "MAT_AOE_Amber",
+      "palette_key": "Amber",
+      "base_color_linear_rgba": [
+        0.9551045894622803,
+        0.2846466898918152,
+        0.021980946883559227,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        0.3100000023841858,
+        0.03500000014901161,
+        1.0
+      ],
+      "emission_strength": 0.5
+    },
+    {
+      "material_id": "MAT_AOE_BearFur",
+      "palette_key": "BearFur",
+      "base_color_linear_rgba": [
+        0.06838485598564148,
+        0.036306485533714294,
+        0.01960664801299572,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_BearLight",
+      "palette_key": "BearLight",
+      "base_color_linear_rgba": [
+        0.17064493894577026,
+        0.0889815241098404,
+        0.03968190774321556,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_BoarFur",
+      "palette_key": "BoarFur",
+      "base_color_linear_rgba": [
+        0.05497173219919205,
+        0.03310476616024971,
+        0.020774012431502342,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Brass",
+      "palette_key": "Brass",
+      "base_color_linear_rgba": [
+        0.2846466898918152,
+        0.1259673833847046,
+        0.021980946883559227,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Bristle",
+      "palette_key": "Bristle",
+      "base_color_linear_rgba": [
+        0.01960664801299572,
+        0.015325203537940979,
+        0.010816383175551891,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Cloth",
+      "palette_key": "Cloth",
+      "base_color_linear_rgba": [
+        0.03968190774321556,
+        0.06372379511594772,
+        0.059253521263599396,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_DeerFur",
+      "palette_key": "DeerFur",
+      "base_color_linear_rgba": [
+        0.19599418342113495,
+        0.08353512734174728,
+        0.0300741046667099,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_DeerLight",
+      "palette_key": "DeerLight",
+      "base_color_linear_rgba": [
+        0.4200332760810852,
+        0.295699805021286,
+        0.13286831974983215,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Earth",
+      "palette_key": "Earth",
+      "base_color_linear_rgba": [
+        0.043233636766672134,
+        0.03310476616024971,
+        0.018478473648428917,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Eye",
+      "palette_key": "Eye",
+      "base_color_linear_rgba": [
+        0.0027089782524853945,
+        0.0022445819340646267,
+        0.001934984466060996,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_EyeBlood",
+      "palette_key": "EyeBlood",
+      "base_color_linear_rgba": [
+        0.2632734179496765,
+        0.010022825561463833,
+        0.005422868765890598,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Fang",
+      "palette_key": "Fang",
+      "base_color_linear_rgba": [
+        0.5542217493057251,
+        0.47699978947639465,
+        0.27383843064308167,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_GhoulCloth",
+      "palette_key": "GhoulCloth",
+      "base_color_linear_rgba": [
+        0.04696420207619667,
+        0.03968190774321556,
+        0.027211781591176987,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_GhoulSkin",
+      "palette_key": "GhoulSkin",
+      "base_color_linear_rgba": [
+        0.11280478537082672,
+        0.1399848908185959,
+        0.09462962299585342,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_GoatDark",
+      "palette_key": "GoatDark",
+      "base_color_linear_rgba": [
+        0.05087608844041824,
+        0.04696420207619667,
+        0.03310476616024971,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_GoatFur",
+      "palette_key": "GoatFur",
+      "base_color_linear_rgba": [
+        0.21404114365577698,
+        0.19599418342113495,
+        0.1259673833847046,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Hair",
+      "palette_key": "Hair",
+      "base_color_linear_rgba": [
+        0.0134117491543293,
+        0.006213310174643993,
+        0.0033353136386722326,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_HareFur",
+      "palette_key": "HareFur",
+      "base_color_linear_rgba": [
+        0.16264718770980835,
+        0.13286831974983215,
+        0.08353512734174728,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_HareLight",
+      "palette_key": "HareLight",
+      "base_color_linear_rgba": [
+        0.38005632162094116,
+        0.33034372329711914,
+        0.2049017697572708,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Hoof",
+      "palette_key": "Hoof",
+      "base_color_linear_rgba": [
+        0.017389101907610893,
+        0.015325203537940979,
+        0.011645430698990822,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Horn",
+      "palette_key": "Horn",
+      "base_color_linear_rgba": [
+        0.36724647879600525,
+        0.295699805021286,
+        0.15487249195575714,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Iron",
+      "palette_key": "Iron",
+      "base_color_linear_rgba": [
+        0.06372379511594772,
+        0.08353512734174728,
+        0.0889815241098404,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_IronEdge",
+      "palette_key": "IronEdge",
+      "base_color_linear_rgba": [
+        0.19599418342113495,
+        0.21404114365577698,
+        0.1873166710138321,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Leather",
+      "palette_key": "Leather",
+      "base_color_linear_rgba": [
+        0.04696420207619667,
+        0.01633814536035061,
+        0.006331374868750572,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_LeatherLight",
+      "palette_key": "LeatherLight",
+      "base_color_linear_rgba": [
+        0.1259673833847046,
+        0.04696420207619667,
+        0.0134117491543293,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Linen",
+      "palette_key": "Linen",
+      "base_color_linear_rgba": [
+        0.1873166710138321,
+        0.16264718770980835,
+        0.0889815241098404,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_MossCloth",
+      "palette_key": "MossCloth",
+      "base_color_linear_rgba": [
+        0.03968190774321556,
+        0.07323895394802094,
+        0.0300741046667099,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Skin",
+      "palette_key": "Skin",
+      "base_color_linear_rgba": [
+        0.2846466898918152,
+        0.10653922706842422,
+        0.04696420207619667,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_StoneLight",
+      "palette_key": "StoneLight",
+      "base_color_linear_rgba": [
+        0.17886750400066376,
+        0.17886750400066376,
+        0.11928018927574158,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Wine",
+      "palette_key": "Wine",
+      "base_color_linear_rgba": [
+        0.06838485598564148,
+        0.010816383175551891,
+        0.010022825561463833,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_WolfFur",
+      "palette_key": "WolfFur",
+      "base_color_linear_rgba": [
+        0.07323895394802094,
+        0.08353512734174728,
+        0.07323895394802094,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_WolfLight",
+      "palette_key": "WolfLight",
+      "base_color_linear_rgba": [
+        0.2049017697572708,
+        0.19599418342113495,
+        0.13286831974983215,
+        1.0
+      ],
+      "roughness": 0.949999988079071,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_Wood",
+      "palette_key": "Wood",
+      "base_color_linear_rgba": [
+        0.05087608844041824,
+        0.021980946883559227,
+        0.00854038167744875,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_WoodLight",
+      "palette_key": "WoodLight",
+      "base_color_linear_rgba": [
+        0.1259673833847046,
+        0.059253521263599396,
+        0.017389101907610893,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0
+    }
+  ]
+}

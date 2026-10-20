@@ -61,7 +61,8 @@ void Renderer::ReleaseMeshes()
     m_MeshUsed = 0;
 }
 
-Renderer::Mesh& Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void()>& build)
+Renderer::Mesh&
+Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void()>& build, bool persistent)
 {
     MeshKey key(kind, variant);
     auto found = m_Meshes.find(key);
@@ -72,7 +73,7 @@ Renderer::Mesh& Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const st
     }
     m_Stats.Add(RenderCounter::MeshMisses);
     std::vector<Vertex> vertices;
-    if (!LoadMeshFile(key, vertices))
+    if (!persistent || !LoadMeshFile(key, vertices))
     {
         auto start = std::chrono::steady_clock::now();
         m_Capture = &vertices;
@@ -95,7 +96,10 @@ Renderer::Mesh& Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const st
             throw std::runtime_error("Mesh builder returned invalid or oversized geometry.");
         }
         CacheEvent("build", key, vertices.size(), buildUs);
-        SaveMeshFile(key, vertices);
+        if (persistent)
+        {
+            SaveMeshFile(key, vertices);
+        }
     }
     if (vertices.size() > m_MeshCapacity)
     {
@@ -202,14 +206,15 @@ void Renderer::CachedMesh(
     float y,
     float scale,
     float opacity,
-    const std::function<void()>& build
+    const std::function<void()>& build,
+    bool persistent
 )
 {
     if (m_Capture)
     {
         throw std::logic_error("Nested cached mesh capture is not supported.");
     }
-    const auto& mesh = GetMesh(kind, variant, build);
+    const auto& mesh = GetMesh(kind, variant, build, persistent);
     Instance instance;
     instance.matrix[0] = instance.matrix[3] = scale;
     instance.placement[0] = x;

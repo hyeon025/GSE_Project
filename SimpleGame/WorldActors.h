@@ -26,7 +26,7 @@ protected:
         if (len > 0)
         {
             bool sprint = sprinting && p.stamina > 2;
-            float speed = sprint ? 138.f : 85.f;
+            float speed = sprint ? 138.f : (float)Society::WalkingSpeed;
             Game::Vec before = p.p, next = p.p;
             next.x += x / len * speed * dt;
             if (Game::Walkable(next))
@@ -56,6 +56,7 @@ protected:
             }
         }
         motion.Update(x, y, p.p.x - previous.x, p.p.y - previous.y);
+        motion.sprinting = sprinting && motion.moving && p.stamina > 2;
         p.stamina = std::min(100.f, p.stamina + dt * 6);
 
         data = p;

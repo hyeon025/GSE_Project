@@ -1,0 +1,78 @@
+{
+  "revision": 2,
+  "status": "PASS",
+  "reference": "User-provided standing dog side-view silhouette",
+  "changes": [
+    "Shorter three-section hind chain",
+    "Compact thigh inside rump silhouette",
+    "Slim lower leg and distinct hock/metatarsal",
+    "All 18 existing clips rebaked against the revised rest skeleton"
+  ],
+  "errors": [],
+  "rigs": [
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "species": "Wolf",
+      "bones": 21,
+      "new_hind_chain_length_m": 0.5915312032420391,
+      "previous_hind_chain_length_m": 0.613595747347337,
+      "max_ankle_target_error_m": 0,
+      "loop_seam_matrix_error": 0,
+      "bone_length_error_m": 1.472135262026164e-07
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "species": "Boar",
+      "bones": 21,
+      "new_hind_chain_length_m": 0.3928094664774173,
+      "previous_hind_chain_length_m": 0.43829519732572614,
+      "max_ankle_target_error_m": 0,
+      "loop_seam_matrix_error": 0,
+      "bone_length_error_m": 6.713362046828486e-08,
+      "pre_turn_retime_target_error_m": 0.03764974887494356,
+      "turn_90_paw_steps": 3,
+      "turn_45_paw_steps": 2
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "species": "Bear",
+      "bones": 21,
+      "new_hind_chain_length_m": 0.6825244436100281,
+      "previous_hind_chain_length_m": 0.7089350160251712,
+      "max_ankle_target_error_m": 0.00048557669330167837,
+      "loop_seam_matrix_error": 0,
+      "bone_length_error_m": 2.9738945384050197e-07
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "species": "Stag",
+      "bones": 21,
+      "new_hind_chain_length_m": 0.933167810408956,
+      "previous_hind_chain_length_m": 0.9319208935319077,
+      "max_ankle_target_error_m": 0,
+      "loop_seam_matrix_error": 0,
+      "bone_length_error_m": 2.0178380927271533e-07
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "species": "Goat",
+      "bones": 21,
+      "new_hind_chain_length_m": 0.5613918273016878,
+      "previous_hind_chain_length_m": 0.5852984390542495,
+      "max_ankle_target_error_m": 0.0016182464667352729,
+      "loop_seam_matrix_error": 0,
+      "bone_length_error_m": 9.292045785591618e-08
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "species": "Hare",
+      "bones": 21,
+      "new_hind_chain_length_m": 0.23507342898696668,
+      "previous_hind_chain_length_m": 0.2604530789483427,
+      "max_ankle_target_error_m": 0,
+      "loop_seam_matrix_error": 0,
+      "bone_length_error_m": 2.4798680738069567e-07
+    }
+  ],
+  "boar_run_pelvis_height_correction_max_m": 0.012464725113399355
+}

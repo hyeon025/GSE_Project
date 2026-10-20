@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
+#include "IsometricView.h"
 
 enum class CharacterFacing : std::uint32_t
 {
@@ -15,6 +16,7 @@ struct CharacterMotion
     CharacterFacing facing = CharacterFacing::Front;
     double phase = 0;
     bool moving = false;
+    bool sprinting = false;
     static constexpr unsigned IdlePose = 8;
 
     void Update(double inputX, double inputY, double deltaX, double deltaY)
@@ -24,8 +26,9 @@ struct CharacterMotion
         double x = moving ? deltaX : inputX;
         double y = moving ? deltaY : inputY;
         // Compare screen-space axes, compensating for isometric vertical compression.
-        double horizontal = x - y;
-        double vertical = -(x + y);
+        auto projected = IsometricView::Project({x, y, 0});
+        double horizontal = projected.x;
+        double vertical = projected.y / IsometricView::GroundDepth;
         if (std::abs(horizontal) > .0001 || std::abs(vertical) > .0001)
         {
             if (std::abs(horizontal) > std::abs(vertical) * 1.05)
@@ -55,6 +58,7 @@ struct CharacterMotion
 
     void Stop()
     {
+        sprinting = false;
         moving = false;
         phase = 0;
     }

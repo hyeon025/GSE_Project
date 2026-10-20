@@ -52,7 +52,9 @@ public:
         UnitQuad = 5,
         UnitEllipse = 6,
         Character = 7,
-        VillageBuilding = 8
+        VillageBuilding = 8,
+        Grass = 9,
+        Imported = 10
     };
 
     Renderer(int width, int height);
@@ -96,7 +98,8 @@ public:
         float y,
         float scale,
         float opacity,
-        const std::function<void()>& build
+        const std::function<void()>& build,
+        bool persistent = true
     );
     void Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c);
     void Rect(float x, float y, float width, float height, Color color);
@@ -148,7 +151,7 @@ private:
 
     void InitializeBatch();
     void ReleaseBatch();
-    Mesh& GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void()>& build);
+    Mesh& GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void()>& build, bool persistent = true);
     void QueueInstance(const Mesh& mesh, Instance instance, GLuint texture = 0);
     void FlushBatch(BatchBreak reason);
     void RecordDraw(bool instanced);

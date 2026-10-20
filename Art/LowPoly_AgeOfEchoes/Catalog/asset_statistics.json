@@ -1,0 +1,182 @@
+{
+  "unique_meshes": 63,
+  "npc_part_meshes": 37,
+  "environment_meshes": 26,
+  "example_appearances": 40,
+  "npc_triangles_by_recipe": [
+    {
+      "appearance_id": "AOE_LOOK_001",
+      "triangles": 1156
+    },
+    {
+      "appearance_id": "AOE_LOOK_002",
+      "triangles": 1408
+    },
+    {
+      "appearance_id": "AOE_LOOK_003",
+      "triangles": 1420
+    },
+    {
+      "appearance_id": "AOE_LOOK_004",
+      "triangles": 1288
+    },
+    {
+      "appearance_id": "AOE_LOOK_005",
+      "triangles": 1216
+    },
+    {
+      "appearance_id": "AOE_LOOK_006",
+      "triangles": 1644
+    },
+    {
+      "appearance_id": "AOE_LOOK_007",
+      "triangles": 1404
+    },
+    {
+      "appearance_id": "AOE_LOOK_008",
+      "triangles": 1600
+    },
+    {
+      "appearance_id": "AOE_LOOK_009",
+      "triangles": 1112
+    },
+    {
+      "appearance_id": "AOE_LOOK_010",
+      "triangles": 1452
+    },
+    {
+      "appearance_id": "AOE_LOOK_011",
+      "triangles": 1420
+    },
+    {
+      "appearance_id": "AOE_LOOK_012",
+      "triangles": 1288
+    },
+    {
+      "appearance_id": "AOE_LOOK_013",
+      "triangles": 1216
+    },
+    {
+      "appearance_id": "AOE_LOOK_014",
+      "triangles": 1644
+    },
+    {
+      "appearance_id": "AOE_LOOK_015",
+      "triangles": 1360
+    },
+    {
+      "appearance_id": "AOE_LOOK_016",
+      "triangles": 1644
+    },
+    {
+      "appearance_id": "AOE_LOOK_017",
+      "triangles": 1112
+    },
+    {
+      "appearance_id": "AOE_LOOK_018",
+      "triangles": 1408
+    },
+    {
+      "appearance_id": "AOE_LOOK_019",
+      "triangles": 1464
+    },
+    {
+      "appearance_id": "AOE_LOOK_020",
+      "triangles": 1288
+    },
+    {
+      "appearance_id": "AOE_LOOK_021",
+      "triangles": 1216
+    },
+    {
+      "appearance_id": "AOE_LOOK_022",
+      "triangles": 1644
+    },
+    {
+      "appearance_id": "AOE_LOOK_023",
+      "triangles": 1360
+    },
+    {
+      "appearance_id": "AOE_LOOK_024",
+      "triangles": 1600
+    },
+    {
+      "appearance_id": "AOE_LOOK_025",
+      "triangles": 1112
+    },
+    {
+      "appearance_id": "AOE_LOOK_026",
+      "triangles": 1408
+    },
+    {
+      "appearance_id": "AOE_LOOK_027",
+      "triangles": 1420
+    },
+    {
+      "appearance_id": "AOE_LOOK_028",
+      "triangles": 1332
+    },
+    {
+      "appearance_id": "AOE_LOOK_029",
+      "triangles": 1216
+    },
+    {
+      "appearance_id": "AOE_LOOK_030",
+      "triangles": 1644
+    },
+    {
+      "appearance_id": "AOE_LOOK_031",
+      "triangles": 1360
+    },
+    {
+      "appearance_id": "AOE_LOOK_032",
+      "triangles": 1600
+    },
+    {
+      "appearance_id": "AOE_LOOK_033",
+      "triangles": 1112
+    },
+    {
+      "appearance_id": "AOE_LOOK_034",
+      "triangles": 1408
+    },
+    {
+      "appearance_id": "AOE_LOOK_035",
+      "triangles": 1420
+    },
+    {
+      "appearance_id": "AOE_LOOK_036",
+      "triangles": 1288
+    },
+    {
+      "appearance_id": "AOE_LOOK_037",
+      "triangles": 1260
+    },
+    {
+      "appearance_id": "AOE_LOOK_038",
+      "triangles": 1644
+    },
+    {
+      "appearance_id": "AOE_LOOK_039",
+      "triangles": 1360
+    },
+    {
+      "appearance_id": "AOE_LOOK_040",
+      "triangles": 1600
+    }
+  ],
+  "source_meshes_shared": true,
+  "rigging_extension": {
+    "species": 7,
+    "human_common_skeletons": 1,
+    "creature_skeletons": 7,
+    "npc_shared_parts": 37,
+    "new_unique_animal_meshes": 6,
+    "revenant_reused_npc_meshes": 7,
+    "actions_per_skeleton": 18,
+    "keyframe_actions_total": 144,
+    "animated_glb_files": 9,
+    "quadruped_rig_revision": 2,
+    "quadruped_bones_per_rig": 21
+  }
+}

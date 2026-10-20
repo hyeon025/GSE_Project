@@ -1,0 +1,137 @@
+{
+  "status": "PASS",
+  "species_count": 7,
+  "rigs_count": 8,
+  "actions_total": 144,
+  "validation_scope": "normalized max-four skin weights, bone references, baked transform keys, loop seam equality, GLB skin and named animation exports",
+  "errors": [],
+  "rigs": [
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "bone_count": 21,
+      "mesh_count": 37,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "bone_count": 21,
+      "mesh_count": 1,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "bone_count": 21,
+      "mesh_count": 1,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "bone_count": 21,
+      "mesh_count": 1,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "bone_count": 21,
+      "mesh_count": 1,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "bone_count": 21,
+      "mesh_count": 1,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "bone_count": 21,
+      "mesh_count": 1,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "bone_count": 21,
+      "mesh_count": 7,
+      "baked_actions": 18,
+      "glb_animations": 18,
+      "glb_skins": 1
+    }
+  ],
+  "limitations": [
+    "No game build or runtime integration performed",
+    "Rendered and sampled key poses; runtime motion blending, navigation trajectory and physics remain for integration"
+  ],
+  "final_export_checks": [
+    {
+      "file": "MOB_01_Wolf.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "MOB_02_Boar.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "MOB_03_Bear.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "MOB_04_Stag.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "MOB_05_Goat.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "MOB_06_Hare.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "MOB_07_AshenRevenant.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "NPC_Modular_Rigged.glb",
+      "animations": 18,
+      "skins": 1
+    },
+    {
+      "file": "NPC_Resident_Animated.glb",
+      "animations": 18,
+      "skins": 1
+    }
+  ],
+  "robe_secondary_bones": "thigh-following with root-yaw compensation",
+  "geometry_sharing": "humanoid monster reuses seven NPC mesh datablocks",
+  "turn_contact_audit": "PASS",
+  "turn_ankle_error_max_m": 0.006515,
+  "quadruped_rig_revision": 2,
+  "quadruped_revision_validation": "Catalog/quadruped_hind_revision.json"
+}

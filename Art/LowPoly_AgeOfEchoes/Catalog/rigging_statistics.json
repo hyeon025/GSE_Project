@@ -1,0 +1,13 @@
+{
+  "species": 7,
+  "human_common_skeletons": 1,
+  "creature_skeletons": 7,
+  "npc_shared_parts": 37,
+  "new_unique_animal_meshes": 6,
+  "revenant_reused_npc_meshes": 7,
+  "actions_per_skeleton": 18,
+  "keyframe_actions_total": 144,
+  "animated_glb_files": 9,
+  "quadruped_rig_revision": 2,
+  "quadruped_bones_per_rig": 21
+}

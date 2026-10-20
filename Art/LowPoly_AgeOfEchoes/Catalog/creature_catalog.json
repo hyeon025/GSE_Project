@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "species": [
+    {
+      "species_index": 1,
+      "species_key": "Wolf",
+      "label_ko": "잿빛 늑대",
+      "category": "dangerous_animal",
+      "leg_count": 4,
+      "rig_id": "RIG_MOB_01_Wolf",
+      "gait": "gallop",
+      "glb_file": "Exports/Rigged/MOB_01_Wolf.glb",
+      "mesh_ids": [
+        "SKM_MOB_01_Wolf"
+      ],
+      "mesh_triangles": 788,
+      "rig_revision": 2,
+      "hind_chain": "upper / lower / hock / foot"
+    },
+    {
+      "species_index": 2,
+      "species_key": "Boar",
+      "label_ko": "숲 멧돼지",
+      "category": "dangerous_animal",
+      "leg_count": 4,
+      "rig_id": "RIG_MOB_02_Boar",
+      "gait": "gallop",
+      "glb_file": "Exports/Rigged/MOB_02_Boar.glb",
+      "mesh_ids": [
+        "SKM_MOB_02_Boar"
+      ],
+      "mesh_triangles": 924,
+      "rig_revision": 2,
+      "hind_chain": "upper / lower / hock / foot"
+    },
+    {
+      "species_index": 3,
+      "species_key": "Bear",
+      "label_ko": "불곰",
+      "category": "dangerous_animal",
+      "leg_count": 4,
+      "rig_id": "RIG_MOB_03_Bear",
+      "gait": "bound",
+      "glb_file": "Exports/Rigged/MOB_03_Bear.glb",
+      "mesh_ids": [
+        "SKM_MOB_03_Bear"
+      ],
+      "mesh_triangles": 1024,
+      "rig_revision": 2,
+      "hind_chain": "upper / lower / hock / foot"
+    },
+    {
+      "species_index": 4,
+      "species_key": "Stag",
+      "label_ko": "숲 사슴",
+      "category": "herbivore",
+      "leg_count": 4,
+      "rig_id": "RIG_MOB_04_Stag",
+      "gait": "gallop",
+      "glb_file": "Exports/Rigged/MOB_04_Stag.glb",
+      "mesh_ids": [
+        "SKM_MOB_04_Stag"
+      ],
+      "mesh_triangles": 972,
+      "rig_revision": 2,
+      "hind_chain": "upper / lower / hock / foot"
+    },
+    {
+      "species_index": 5,
+      "species_key": "Goat",
+      "label_ko": "산 염소",
+      "category": "herbivore",
+      "leg_count": 4,
+      "rig_id": "RIG_MOB_05_Goat",
+      "gait": "canter",
+      "glb_file": "Exports/Rigged/MOB_05_Goat.glb",
+      "mesh_ids": [
+        "SKM_MOB_05_Goat"
+      ],
+      "mesh_triangles": 924,
+      "rig_revision": 2,
+      "hind_chain": "upper / lower / hock / foot"
+    },
+    {
+      "species_index": 6,
+      "species_key": "Hare",
+      "label_ko": "들 토끼",
+      "category": "herbivore",
+      "leg_count": 4,
+      "rig_id": "RIG_MOB_06_Hare",
+      "gait": "rabbit_bound",
+      "glb_file": "Exports/Rigged/MOB_06_Hare.glb",
+      "mesh_ids": [
+        "SKM_MOB_06_Hare"
+      ],
+      "mesh_triangles": 856,
+      "rig_revision": 2,
+      "hind_chain": "upper / lower / hock / foot"
+    },
+    {
+      "species_index": 7,
+      "species_key": "AshenRevenant",
+      "label_ko": "잿빛 망자",
+      "category": "hostile_monster",
+      "leg_count": 2,
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "gait": "biped",
+      "glb_file": "Exports/Rigged/MOB_07_AshenRevenant.glb",
+      "mesh_ids": [
+        "SKM_MOB_07_AshenRevenant__Head",
+        "SKM_MOB_07_AshenRevenant__Hair",
+        "SKM_MOB_07_AshenRevenant__Torso",
+        "SKM_MOB_07_AshenRevenant__Arms",
+        "SKM_MOB_07_AshenRevenant__Legs",
+        "SKM_MOB_07_AshenRevenant__Feet",
+        "SKM_MOB_07_AshenRevenant__Belt"
+      ],
+      "mesh_triangles": 1112
+    }
+  ]
+}

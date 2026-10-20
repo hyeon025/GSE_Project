@@ -1,0 +1,167 @@
+{
+  "status": "PASS",
+  "notes": "Revision 2: separate hind hock bones; boar uses three short paw steps for 90 degrees and two for 45 degrees. Other quadrupeds use two for 90 degrees.",
+  "errors": [],
+  "clips": [
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 0.001265
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 0.001265
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 1e-06
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "clip": "Turn_L45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "clip": "Turn_R45",
+      "max_planted_ankle_z_error_m": 0.0
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "clip": "Turn_L90",
+      "max_planted_ankle_z_error_m": 0.006515
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "clip": "Turn_R90",
+      "max_planted_ankle_z_error_m": 0.006515
+    }
+  ]
+}

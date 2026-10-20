@@ -39,13 +39,6 @@ namespace Society
         return names[goal];
     }
 
-    inline const wchar_t* VillageName(int village)
-    {
-        static const wchar_t* names[] =
-            {L"\uc7bf\ube5b \ub9c8\uc744", L"\uc885\ud0d1 \ub9c8\uc744", L"\uac15\ubcc0 \ub9c8\uc744"};
-        return names[village];
-    }
-
     inline void Record(Game::World& w, int kind, int actor, int other = 0, int amount = 0)
     {
         auto& s = w.society;
@@ -54,13 +47,61 @@ namespace Society
             s.events.pop_front();
         }
         s.events.push_back({s.elapsed, kind, actor, other, amount});
+        if (kind == Killed && s.nextRumorId < 2147483647)
+        {
+            Rumor rumor;
+            rumor.id = s.nextRumorId++;
+            rumor.time = s.elapsed;
+            rumor.actor = actor;
+            rumor.victim = other;
+            Game::Vec position = other > 0 && other <= (int)w.npcs.size() ? w.npcs[other - 1].p : w.player.p;
+            rumor.x = position.x;
+            rumor.y = position.y;
+            for (int v = 1; v < VillageCount; ++v)
+            {
+                if (Game::Distance(position, Game::VillageCenter(v)) <
+                    Game::Distance(position, Game::VillageCenter(rumor.village)))
+                {
+                    rumor.village = v;
+                }
+            }
+            for (const auto& n : w.npcs)
+            {
+                if (n.life.alive && n.id != actor && n.id != other && Game::Distance(n.p, position) < 180)
+                {
+                    ++rumor.witnesses;
+                }
+            }
+            if (s.rumors.size() == 64)
+            {
+                s.rumors.pop_front();
+            }
+            rumor.reachMask = 1 << rumor.village;
+            s.rumors.push_back(rumor);
+            for (int to = 0; to < VillageCount && s.letters.size() < 1024; ++to)
+            {
+                if (to == rumor.village)
+                {
+                    continue;
+                }
+                Letter letter;
+                letter.from = letter.origin = rumor.village;
+                letter.to = to;
+                letter.rumorId = rumor.id;
+                auto fromCenter = Game::VillageCenter(rumor.village), toCenter = Game::VillageCenter(to);
+                letter.arrival =
+                    s.elapsed + (std::abs(fromCenter.x - toCenter.x) + std::abs(fromCenter.y - toCenter.y)) / 48;
+                letter.news = s.villages[rumor.village].news[rumor.village];
+                s.letters.push_back(letter);
+            }
+        }
         w.dirty = true;
     }
 
     inline int NearestVillage(Game::Vec p)
     {
         int result = 0;
-        for (int i = 1; i < 3; ++i)
+        for (int i = 1; i < VillageCount; ++i)
         {
             if (Game::Distance(p, Game::VillageCenter(i)) < Game::Distance(p, Game::VillageCenter(result)))
             {
@@ -100,35 +141,94 @@ namespace Society
 
     inline void Initialize(Game::World& w)
     {
-        if (!w.society.initialized)
+        bool expanded = w.society.layoutVersion == 0;
+        if (expanded)
         {
-            static const int traits[] = {6, 2, 5, 5, 0, 3, 4, 1};
-            for (int village = 0; village < 3; ++village)
+            static const int traits[VillageCount][8] = {
+                {6, 2, 5, 5, 0, 3, 4, 1},
+                {6, 2, 5, 5, 0, 3, 4, 1},
+                {6, 2, 5, 5, 0, 3, 4, 1},
+                {6, 2, 5, 3, 3, 3, 4, 1},
+                {6, 2, 5, 0, 0, 0, 0, 1},
+                {6, 2, 5, 4, 4, 1, 4, 1},
+                {6, 2, 5, 3, 1, 3, 4, 1}
+            };
+            // Upgrade only once; dead residents remain dead and are not replenished on reload.
+            for (auto& n : w.npcs)
             {
-                for (int i = 0; i < 8; ++i)
+                InitializeNpc(n);
+                if (n.life.alive)
                 {
-                    if (w.npcs.size() >= 200000)
-                    {
-                        break;
-                    }
+                    n.p = Game::VillageCenter(n.life.village);
+                }
+                n.life.houseLot = -1;
+            }
+            for (int village = 0; village < VillageCount; ++village)
+            {
+                for (int i = w.society.seeded[village]; i < ResidentsPerVillage && w.npcs.size() < 200000; ++i)
+                {
                     Game::Npc n;
                     n.id = (int)w.npcs.size() + 1;
                     n.origin = 2;
-                    n.archetype = traits[i];
+                    n.archetype = traits[village][i % 8];
                     n.echo[n.archetype] = 24;
                     n.ability = (Game::Ability)(Game::Hash(n.id, 73, 101) % Game::AbilityCount);
                     n.home = Game::VillageCenter(village);
                     n.p = Game::Vec(n.home.x + (i % 4 - 1.5) * 18, n.home.y + (i / 4 ? 18 : -18));
                     InitializeNpc(n);
                     w.npcs.push_back(n);
+                    w.society.seeded[village] = i + 1;
                 }
+                w.society.settledVillages = village + 1;
             }
             w.society.initialized = true;
+            w.society.layoutVersion = 1;
             w.dirty = true;
+            if (!Game::Walkable(w.player.p))
+            {
+                w.player.p = Game::VillageCenter(NearestVillage(w.player.p));
+            }
+            if (!Game::Walkable(w.player.checkpoint))
+            {
+                w.player.checkpoint = Game::VillageCenter(NearestVillage(w.player.checkpoint));
+            }
+            std::cout << "[World] villages=" << VillageCount << " settled=" << w.society.settledVillages
+                      << " residentsPerVillage=" << ResidentsPerVillage << " npcRecords=" << w.npcs.size() << '\n';
         }
         for (auto& n : w.npcs)
         {
             InitializeNpc(n);
+            if (n.life.houseLot < 0)
+            {
+                std::array<bool, HousingCapacity> occupied = {};
+                for (const auto& other : w.npcs)
+                {
+                    if (other.life.alive && other.life.village == n.life.village && other.life.houseLot >= 0)
+                    {
+                        occupied[other.life.houseLot] = true;
+                    }
+                }
+                for (int lot = 0; lot < HousingCapacity; ++lot)
+                {
+                    if (!occupied[lot])
+                    {
+                        n.life.houseLot = lot;
+                        break;
+                    }
+                }
+                if (n.life.houseLot >= 0)
+                {
+                    n.home = Game::HouseEntrance(n.life.village, n.life.houseLot);
+                    if (expanded || !Game::Walkable(n.p))
+                    {
+                        n.p = n.home;
+                    }
+                }
+            }
+            if (expanded && n.life.alive && !Game::Walkable(n.p))
+            {
+                n.p = n.home;
+            }
         }
     }
 
@@ -198,7 +298,7 @@ namespace Society
             }
             n.archetype = (int)(std::max_element(n.echo.begin(), n.echo.end()) - n.echo.begin());
             n.ability = (Game::Ability)(Game::Hash(n.id, 73, 101) % Game::AbilityCount);
-            n.p = n.home = Game::VillageCenter((old.life.village + 1) % 3);
+            n.p = n.home = Game::VillageCenter((old.life.village + 1) % VillageCount);
             n.life.parentId = old.id;
             InitializeNpc(n);
             auto& treasury = w.society.villages[n.life.village].treasury;
@@ -258,7 +358,132 @@ namespace Society
         double distance = Game::Distance(n.p, goal);
         if (distance < 12)
         {
+            n.life.routeVillage = -1;
             return true;
+        }
+        int destinationVillage = Game::VillageAt(goal);
+        if (!n.life.target && destinationVillage >= 0)
+        {
+            if (n.life.routeTarget != destinationVillage)
+            {
+                n.life.routeVillage = -1;
+                n.life.routeTarget = destinationVillage;
+            }
+            if (n.life.routeVillage >= 0 && Game::Distance(n.p, Game::VillageCenter(n.life.routeVillage)) < 12)
+            {
+                n.life.routeVillage = -1;
+            }
+            int source = NearestVillage(n.p);
+            if (n.life.routeVillage < 0 && source != destinationVillage)
+            {
+                if (Game::Distance(n.p, Game::VillageCenter(source)) > 20)
+                {
+                    n.life.routeVillage = source;
+                }
+                else
+                {
+                    std::array<int, VillageCount> parent;
+                    parent.fill(-1);
+                    std::queue<int> pending;
+                    pending.push(source);
+                    parent[source] = source;
+                    while (!pending.empty() && parent[destinationVillage] < 0)
+                    {
+                        int from = pending.front();
+                        pending.pop();
+                        for (int to = 0; to < VillageCount; ++to)
+                        {
+                            if (parent[to] < 0 && Game::Distance(Game::VillageCenter(from), Game::VillageCenter(to)) <=
+                                                      VillageSpacing * 1.01)
+                            {
+                                parent[to] = from;
+                                pending.push(to);
+                            }
+                        }
+                    }
+                    int hop = destinationVillage;
+                    while (parent[hop] >= 0 && parent[hop] != source && parent[hop] != hop)
+                    {
+                        hop = parent[hop];
+                    }
+                    n.life.routeVillage = hop;
+                }
+            }
+            if (n.life.routeVillage >= 0)
+            {
+                goal = Game::VillageCenter(n.life.routeVillage);
+            }
+            distance = Game::Distance(n.p, goal);
+            if (distance < .001)
+            {
+                return false;
+            }
+        }
+        // Residential travel first joins the street grid, then follows its junctions.
+        // Keep combat pursuit on the existing steering path.
+        n.life.pathBudget -= dt;
+        if (n.life.pathBudget <= 0 || goal.x != n.life.pathX || goal.y != n.life.pathY)
+        {
+            n.life.pathX = goal.x;
+            n.life.pathY = goal.y;
+            n.life.pathClear = ClearSegment(n.p, goal);
+            n.life.pathBudget = .5;
+        }
+        if (!n.life.target && !n.life.pathClear)
+        {
+            if (n.life.streetActive && Game::Distance(n.p, {n.life.streetX, n.life.streetY}) < 10)
+            {
+                n.life.streetActive = false;
+            }
+            if (n.life.streetActive)
+            {
+                goal = Game::Vec(n.life.streetX, n.life.streetY);
+            }
+            else
+            {
+                int village = Game::VillageAt(n.p);
+                if (village >= 0)
+                {
+                    auto center = Game::VillageCenter(village);
+                    Game::Vec junction(
+                        center.x + std::round((n.p.x - center.x) / 112) * 112,
+                        center.y + std::round((n.p.y - center.y) / 112) * 112
+                    );
+                    if (Game::Distance(n.p, junction) > 10 && ClearSegment(n.p, junction))
+                    {
+                        goal = junction;
+                    }
+                    else
+                    {
+                        Game::Vec destination = Game::VillageAt(goal) == village ? goal : center;
+                        Game::Vec next(destination.x, junction.y);
+                        if (Game::Distance(n.p, next) < 10)
+                        {
+                            next = Game::Vec(junction.x, destination.y);
+                        }
+                        if (ClearSegment(n.p, next))
+                        {
+                            goal = next;
+                        }
+                        else
+                        {
+                            goal = Game::Vec(junction.x, destination.y);
+                        }
+                    }
+                }
+                n.life.streetX = goal.x;
+                n.life.streetY = goal.y;
+                n.life.streetActive = true;
+            }
+            distance = Game::Distance(n.p, goal);
+            if (distance < .001)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            n.life.streetActive = false;
         }
         double x = (goal.x - n.p.x) / distance, y = (goal.y - n.p.y) / distance;
         double step = std::min(distance, dt * (n.life.activity == Raiding ? 67 : 48));
@@ -313,9 +538,19 @@ namespace Society
             return;
         }
         l.goal = (l.job == Seeker || (l.insight < 10 && n.echo[3] > n.echo[5])) ? Insight : Wealth;
-        if (l.target == -1 && (!playerPresent || Game::Distance(n.p, w.player.p) > 220))
+        bool unsolicited = l.playerProvoked <= 0;
+        if (l.target == -1 && (!playerPresent || Game::Distance(n.p, w.player.p) > 180 || l.playerChase >= 6 ||
+                               Game::Distance(n.p, n.home) > VillageRadius + 360 ||
+                               (unsolicited && (w.society.playerRaidGrace > 0 || Game::VillageAt(w.player.p) >= 0 ||
+                                                w.society.gold <= 0))))
         {
             l.target = 0;
+            l.playerChase = 0;
+            l.playerRetry = 20;
+            if (unsolicited)
+            {
+                w.society.playerRaidGrace = std::max(w.society.playerRaidGrace, 8.0);
+            }
         }
         if (auto* target = Find(w, l.target))
         {
@@ -344,10 +579,22 @@ namespace Society
                     l.target = target.id;
                 }
             }
-            if (!l.target && playerPresent && l.raidWeight > .6f && Game::VillageAt(w.player.p) < 0 &&
-                w.society.gold > 0 && Game::Distance(n.p, w.player.p) < 135)
+            if (!l.target && playerPresent && l.job != Guardian && l.raidWeight > .6f && l.playerRetry <= 0 &&
+                w.society.playerRaidGrace <= 0 && Game::VillageAt(w.player.p) < 0 && Game::VillageAt(n.p) < 0 &&
+                w.society.gold >= 15 && Game::Distance(n.p, w.player.p) < 85 &&
+                Game::Distance(n.p, n.home) < VillageRadius + 280 && ClearSegment(n.p, w.player.p) &&
+                std::none_of(
+                    w.npcs.begin(),
+                    w.npcs.end(),
+                    [](const Game::Npc& other)
+                    {
+                        return other.life.alive && other.life.target == -1;
+                    }
+                ))
             {
                 l.target = -1;
+                l.playerChase = 0;
+                l.cooldown = std::max(l.cooldown, 1.5);
             }
         }
         if (l.target)
@@ -386,6 +633,43 @@ namespace Society
             return;
         }
         l.cooldown = std::max(0.0, l.cooldown - dt);
+        l.playerRetry = std::max(0.0, l.playerRetry - dt);
+        l.playerProvoked = std::max(0.0, l.playerProvoked - dt);
+        l.playerChase = l.target == -1 ? l.playerChase + dt : 0;
+        if (l.movingTo >= 0 && l.health >= l.maxHealth * .35f && !l.target)
+        {
+            l.activity = Travelling;
+            Game::Vec goal = Game::VillageCenter(l.movingTo), previous = n.p;
+            if (Move(n, goal, dt))
+            {
+                std::array<bool, HousingCapacity> occupied = {};
+                for (const auto& other : w.npcs)
+                {
+                    if (other.life.alive && other.life.village == l.movingTo && other.life.houseLot >= 0)
+                    {
+                        occupied[other.life.houseLot] = true;
+                    }
+                }
+                for (int lot = 0; lot < HousingCapacity; ++lot)
+                {
+                    if (occupied[lot])
+                    {
+                        continue;
+                    }
+                    l.village = l.destination = l.movingTo;
+                    l.houseLot = lot;
+                    n.home = Game::HouseEntrance(l.village, lot);
+                    Record(w, MigrationCompleted, n.id, 0, l.village);
+                    std::cout << "[Migration] npc=" << n.id << " arrivedVillage=" << l.village << " house=" << lot
+                              << '\n';
+                    break;
+                }
+                l.movingTo = -1;
+                l.migrationCooldown = w.society.elapsed + 180;
+            }
+            n.motion.Update(goal.x - n.p.x, goal.y - n.p.y, n.p.x - previous.x, n.p.y - previous.y);
+            return;
+        }
         Decide(w, n, playerPresent);
         Game::Vec previous = n.p;
         Game::Vec goal = n.home;
@@ -401,10 +685,12 @@ namespace Society
             {
                 Attack(w, n, *victim);
             }
-            else if (playerPresent && l.cooldown <= 0)
+            else if (playerPresent && l.cooldown <= 0 && w.society.playerHitRecovery <= 0)
             {
-                l.cooldown = 1.2;
-                w.player.health = std::max(0.f, w.player.health - (6 + n.power * .1f));
+                l.cooldown = 2.5;
+                w.society.playerHitRecovery = 1.5;
+                float damage = l.playerProvoked > 0 ? 6 + n.power * .1f : 3 + n.power * .03f;
+                w.player.health = std::max(0.f, w.player.health - damage);
                 if (l.activity == Raiding)
                 {
                     ++w.society.raids;
@@ -443,7 +729,7 @@ namespace Society
             bool arrived = Move(n, goal, dt);
             if (arrived)
             {
-                l.work += dt;
+                l.work = l.activity == Recovering ? 0 : l.work + dt;
                 if (l.activity == Recovering)
                 {
                     l.health = std::min(l.maxHealth, l.health + (float)dt * 5);
@@ -452,7 +738,7 @@ namespace Society
                         l.goal = Wealth;
                     }
                 }
-                else if (l.work >= 5)
+                else if (l.work >= WorkInterval)
                 {
                     l.work = 0;
                     if (l.activity == Hunting)
@@ -482,7 +768,7 @@ namespace Society
                         {
                             Record(w, GoodsBought, n.id, 0, quantity);
                         }
-                        l.destination = (l.destination + 1) % 3;
+                        l.destination = (l.destination + 1) % VillageCount;
                     }
                     else if (l.activity == Studying)
                     {
@@ -520,6 +806,190 @@ namespace Society
         n.motion.Update(goal.x - n.p.x, goal.y - n.p.y, n.p.x - previous.x, n.p.y - previous.y);
     }
 
+    inline void ExchangeNews(Game::World& w)
+    {
+        auto& s = w.society;
+        for (auto it = s.letters.begin(); it != s.letters.end();)
+        {
+            if (it->arrival > s.elapsed)
+            {
+                ++it;
+                continue;
+            }
+            auto& destination = s.villages[it->to].news[it->origin];
+            if (it->news.time > destination.time)
+            {
+                destination = it->news;
+            }
+            for (auto& rumor : s.rumors)
+            {
+                if (rumor.id == it->rumorId)
+                {
+                    rumor.reachMask |= 1 << it->to;
+                }
+            }
+            Record(w, LetterDelivered, 0, 0, it->to);
+            std::cout << "[Mail] from=" << it->from << " to=" << it->to << " origin=" << it->origin
+                      << " rumor=" << it->rumorId << '\n';
+            it = s.letters.erase(it);
+        }
+        if (s.elapsed >= s.nextNews)
+        {
+            s.nextNews = s.elapsed + 30;
+            for (int v = 0; v < VillageCount; ++v)
+            {
+                News local;
+                local.time = s.elapsed;
+                local.stock = s.villages[v].stock;
+                int raiders = 0;
+                for (const auto& npc : w.npcs)
+                {
+                    if (npc.life.alive && npc.life.village == v)
+                    {
+                        ++local.residents;
+                        raiders += npc.life.raidWeight > .6f;
+                    }
+                }
+                local.danger = local.residents ? (float)raiders / local.residents : 0;
+                s.villages[v].news[v] = local;
+                for (int to = 0; to < VillageCount; ++to)
+                {
+                    double distance = Game::Distance(Game::VillageCenter(v), Game::VillageCenter(to));
+                    if (to == v || distance > VillageSpacing * 1.01)
+                    {
+                        continue;
+                    }
+                    for (int origin = 0; origin < VillageCount && s.letters.size() < 1024; ++origin)
+                    {
+                        const auto& news = s.villages[v].news[origin];
+                        if (news.time < 0 || news.time <= s.villages[to].news[origin].time)
+                        {
+                            continue;
+                        }
+                        Letter letter;
+                        letter.from = v;
+                        letter.to = to;
+                        letter.origin = origin;
+                        letter.arrival = s.elapsed + distance / 48;
+                        letter.news = news;
+                        s.letters.push_back(letter);
+                    }
+                }
+            }
+        }
+        for (auto& npc : w.npcs)
+        {
+            auto& life = npc.life;
+            if (!life.alive)
+            {
+                continue;
+            }
+            life.known[life.village] = s.villages[life.village].news[life.village];
+            for (const auto& visitor : w.npcs)
+            {
+                if (!visitor.life.alive || Game::Distance(npc.p, visitor.p) > 65)
+                {
+                    continue;
+                }
+                for (int origin = 0; origin < VillageCount; ++origin)
+                {
+                    if (visitor.life.known[origin].time > life.known[origin].time)
+                    {
+                        life.known[origin] = visitor.life.known[origin];
+                    }
+                }
+            }
+            int here = Game::VillageAt(npc.p);
+            if (here >= 0 && Game::Distance(npc.p, Game::VillageCenter(here)) < 140)
+            {
+                for (int origin = 0; origin < VillageCount; ++origin)
+                {
+                    auto& bulletin = s.villages[here].news[origin];
+                    if (life.known[origin].time > bulletin.time)
+                    {
+                        bulletin = life.known[origin];
+                    }
+                    else
+                    {
+                        life.known[origin] = bulletin;
+                    }
+                }
+                for (auto& rumor : s.rumors)
+                {
+                    if (rumor.id == life.carriedRumor)
+                    {
+                        rumor.reachMask |= 1 << here;
+                    }
+                    if (rumor.reachMask & (1 << here))
+                    {
+                        life.carriedRumor = std::max(life.carriedRumor, rumor.id);
+                    }
+                }
+            }
+            if (life.movingTo >= 0 || life.target || life.migrationCooldown > s.elapsed || npc.id == w.story.childId)
+            {
+                continue;
+            }
+            life.migrationCooldown = s.elapsed + 60 + npc.id % 30;
+            auto score = [&](int v)
+            {
+                const auto& news = life.known[v];
+                if (news.time < 0 || s.elapsed - news.time > 180)
+                {
+                    return -100.0;
+                }
+                double affinity = life.raidWeight > .6f ? news.danger : -news.danger;
+                double opportunity = (double)news.stock / std::max(1, news.residents) / 20;
+                if (life.job == Seeker && (v == 3 || v == 6))
+                {
+                    affinity += .5;
+                }
+                for (const auto& rumor : s.rumors)
+                {
+                    if (((here >= 0 && (rumor.reachMask & (1 << here))) || rumor.id == life.carriedRumor) &&
+                        rumor.village == v && s.elapsed - rumor.time < 180)
+                    {
+                        affinity -= life.raidWeight > .6f ? 0 : .3;
+                    }
+                }
+                return affinity + std::min(1.0, opportunity);
+            };
+            // Only settlements described by delivered news can be considered.
+            int best = life.village;
+            double threshold = score(best) + .35;
+            if (life.known[best].time < 0)
+            {
+                continue;
+            }
+            for (int v = 0; v < VillageCount; ++v)
+            {
+                double value = score(v);
+                if (value <= threshold)
+                {
+                    continue;
+                }
+                int reserved = 0;
+                for (const auto& other : w.npcs)
+                {
+                    reserved += other.life.alive && (other.life.village == v || other.life.movingTo == v);
+                }
+                if (reserved >= HousingCapacity)
+                {
+                    continue;
+                }
+                best = v;
+                threshold = value;
+            }
+            if (best != life.village)
+            {
+                life.movingTo = life.destination = best;
+                Record(w, MigrationStarted, npc.id, 0, best);
+                std::cout << "[Migration] npc=" << npc.id << " from=" << life.village << " to=" << best
+                          << " newsTime=" << life.known[best].time << '\n';
+            }
+        }
+    }
+
     inline void Update(Game::World& w, double dt, bool playerPresent)
     {
         if (!std::isfinite(dt) || dt <= 0)
@@ -534,14 +1004,23 @@ namespace Society
             s.accumulator = std::max(0.0, s.accumulator - .1);
             s.elapsed += .1;
             ++s.ticks;
+            if (s.ticks % 10 == 0)
+            {
+                ExchangeNews(w);
+            }
             s.playerCooldown = std::max(0.0, s.playerCooldown - .1);
+            if (playerPresent)
+            {
+                s.playerRaidGrace = std::max(0.0, s.playerRaidGrace - .1);
+                s.playerHitRecovery = std::max(0.0, s.playerHitRecovery - .1);
+            }
             for (auto& village : s.villages)
             {
                 village.production += .1;
                 if (village.production >= 20)
                 {
                     village.production -= 20;
-                    village.stock = std::min(1000, village.stock + 3);
+                    village.stock = std::min(1000, village.stock + 20);
                     int index = (int)(&village - s.villages.data());
                     for (auto& n : w.npcs)
                     {
@@ -569,6 +1048,7 @@ namespace Society
         {
             s.logAt = s.elapsed + 10;
             size_t alive = 0;
+            size_t playerPursuers = 0;
             long long gold = s.gold;
             std::array<int, 9> activities = {};
             for (const auto& n : w.npcs)
@@ -577,6 +1057,7 @@ namespace Society
                 if (n.life.alive)
                 {
                     ++alive;
+                    playerPursuers += n.life.target == -1;
                     ++activities[n.life.activity];
                 }
             }
@@ -589,7 +1070,8 @@ namespace Society
                       << " trading=" << activities[Trading] + activities[Travelling]
                       << " fighting=" << activities[Raiding] << " studying=" << activities[Studying]
                       << " trades=" << s.trades << " raidHits=" << s.raids << " deaths=" << s.deaths
-                      << " totalGold=" << gold << " simulationHz=10\n";
+                      << " totalGold=" << gold << " playerPursuers=" << playerPursuers
+                      << " playerRaidGrace=" << s.playerRaidGrace << " simulationHz=10\n";
         }
     }
 
@@ -644,6 +1126,9 @@ namespace Society
         w.society.playerCooldown = .65;
         n->relationship = std::max(-100, n->relationship - 15);
         n->life.target = -1;
+        n->life.playerProvoked = 12;
+        n->life.playerChase = 0;
+        n->life.cooldown = std::max(n->life.cooldown, .8);
         n->life.health = std::max(0.f, n->life.health - 22);
         w.player.echo[0] += 2;
         ++w.player.echo[5];
@@ -653,6 +1138,9 @@ namespace Society
             if (guard.life.alive && guard.life.job == Guardian && Game::Distance(guard.p, w.player.p) < 200)
             {
                 guard.life.target = -1;
+                guard.life.playerProvoked = 12;
+                guard.life.playerChase = 0;
+                guard.life.cooldown = std::max(guard.life.cooldown, .8);
             }
         }
         if (n->life.health <= 0)
@@ -681,7 +1169,10 @@ namespace Society
             L"\uc0ac\ub9dd",
             L"\uc0c8\ub85c\uc6b4 \uacc4\uc2b9\uc790",
             L"\uae68\ub2ec\uc74c",
-            L"\uce58\ub8cc"
+            L"\uce58\ub8cc",
+            L"\ud3b8\uc9c0 \ub3c4\ucc29",
+            L"\uc774\uc8fc \ucd9c\ubc1c",
+            L"\uc774\uc8fc \uc644\ub8cc"
         };
         return (e.actor ? L"#" + std::to_wstring(e.actor) : L"\ub2f9\uc2e0") + std::wstring(L"  ") + names[e.kind] +
                (e.other ? L"  #" + std::to_wstring(e.other) : L"");

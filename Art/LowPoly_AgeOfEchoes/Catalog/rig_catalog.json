@@ -1,0 +1,2732 @@
+{
+  "version": 1,
+  "npc_source_catalog_version": 1,
+  "maximum_weights_per_vertex": 4,
+  "npc_part_mapping": [
+    {
+      "source_asset_id": "SM_NPC_Head_01_Masculine",
+      "rigged_asset_id": "SKM_NPC_Head_01_Masculine",
+      "slot": "Head",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Head_02_Feminine",
+      "rigged_asset_id": "SKM_NPC_Head_02_Feminine",
+      "slot": "Head",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Hair_01_Crop",
+      "rigged_asset_id": "SKM_NPC_Hair_01_Crop",
+      "slot": "Hair",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Hair_02_Bob",
+      "rigged_asset_id": "SKM_NPC_Hair_02_Bob",
+      "slot": "Hair",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Hair_03_Long",
+      "rigged_asset_id": "SKM_NPC_Hair_03_Long",
+      "slot": "Hair",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Hair_04_Braid",
+      "rigged_asset_id": "SKM_NPC_Hair_04_Braid",
+      "slot": "Hair",
+      "part_index": 4,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Hair_05_Swept",
+      "rigged_asset_id": "SKM_NPC_Hair_05_Swept",
+      "slot": "Hair",
+      "part_index": 5,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Torso_01_Tunic",
+      "rigged_asset_id": "SKM_NPC_Torso_01_Tunic",
+      "slot": "Torso",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Torso_02_Armor",
+      "rigged_asset_id": "SKM_NPC_Torso_02_Armor",
+      "slot": "Torso",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Torso_03_Archer",
+      "rigged_asset_id": "SKM_NPC_Torso_03_Archer",
+      "slot": "Torso",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Torso_04_Robe",
+      "rigged_asset_id": "SKM_NPC_Torso_04_Robe",
+      "slot": "Torso",
+      "part_index": 4,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Torso_05_Merchant",
+      "rigged_asset_id": "SKM_NPC_Torso_05_Merchant",
+      "slot": "Torso",
+      "part_index": 5,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Torso_06_Healer",
+      "rigged_asset_id": "SKM_NPC_Torso_06_Healer",
+      "slot": "Torso",
+      "part_index": 6,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Arms_01_Cloth",
+      "rigged_asset_id": "SKM_NPC_Arms_01_Cloth",
+      "slot": "Arms",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Arms_02_Armor",
+      "rigged_asset_id": "SKM_NPC_Arms_02_Armor",
+      "slot": "Arms",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Arms_03_Leather",
+      "rigged_asset_id": "SKM_NPC_Arms_03_Leather",
+      "slot": "Arms",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Arms_04_Robe",
+      "rigged_asset_id": "SKM_NPC_Arms_04_Robe",
+      "slot": "Arms",
+      "part_index": 4,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Legs_01_Trousers",
+      "rigged_asset_id": "SKM_NPC_Legs_01_Trousers",
+      "slot": "Legs",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Legs_02_Patched",
+      "rigged_asset_id": "SKM_NPC_Legs_02_Patched",
+      "slot": "Legs",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Legs_03_Armored",
+      "rigged_asset_id": "SKM_NPC_Legs_03_Armored",
+      "slot": "Legs",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Feet_01_Boots",
+      "rigged_asset_id": "SKM_NPC_Feet_01_Boots",
+      "slot": "Feet",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Feet_02_Wrapped",
+      "rigged_asset_id": "SKM_NPC_Feet_02_Wrapped",
+      "slot": "Feet",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_FacialHair_01_Stubble",
+      "rigged_asset_id": "SKM_NPC_FacialHair_01_Stubble",
+      "slot": "FacialHair",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_FacialHair_02_Beard",
+      "rigged_asset_id": "SKM_NPC_FacialHair_02_Beard",
+      "slot": "FacialHair",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Headgear_01_Hood",
+      "rigged_asset_id": "SKM_NPC_Headgear_01_Hood",
+      "slot": "Headgear",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Headgear_02_Helmet",
+      "rigged_asset_id": "SKM_NPC_Headgear_02_Helmet",
+      "slot": "Headgear",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Headgear_03_Cap",
+      "rigged_asset_id": "SKM_NPC_Headgear_03_Cap",
+      "slot": "Headgear",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Back_01_Cape",
+      "rigged_asset_id": "SKM_NPC_Back_01_Cape",
+      "slot": "Back",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Back_02_Quiver",
+      "rigged_asset_id": "SKM_NPC_Back_02_Quiver",
+      "slot": "Back",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Back_03_Pack",
+      "rigged_asset_id": "SKM_NPC_Back_03_Pack",
+      "slot": "Back",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Belt_01_Plain",
+      "rigged_asset_id": "SKM_NPC_Belt_01_Plain",
+      "slot": "Belt",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Belt_02_Pouches",
+      "rigged_asset_id": "SKM_NPC_Belt_02_Pouches",
+      "slot": "Belt",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Mainhand_01_Sword",
+      "rigged_asset_id": "SKM_NPC_Mainhand_01_Sword",
+      "slot": "Mainhand",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Mainhand_02_Bow",
+      "rigged_asset_id": "SKM_NPC_Mainhand_02_Bow",
+      "slot": "Mainhand",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Mainhand_03_Staff",
+      "rigged_asset_id": "SKM_NPC_Mainhand_03_Staff",
+      "slot": "Mainhand",
+      "part_index": 3,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Offhand_01_Shield",
+      "rigged_asset_id": "SKM_NPC_Offhand_01_Shield",
+      "slot": "Offhand",
+      "part_index": 1,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    },
+    {
+      "source_asset_id": "SM_NPC_Offhand_02_Lantern",
+      "rigged_asset_id": "SKM_NPC_Offhand_02_Lantern",
+      "slot": "Offhand",
+      "part_index": 2,
+      "rig_id": "RIG_NPC_Humanoid_v1"
+    }
+  ],
+  "rigs": [
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0,
+            0,
+            0
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            0.18
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0,
+            0,
+            0.7
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            0.87
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0,
+            0,
+            0.87
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.03
+          ]
+        },
+        {
+          "name": "chest",
+          "parent": "spine",
+          "rest_head_m": [
+            0,
+            0,
+            1.03
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.16
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "chest",
+          "rest_head_m": [
+            0,
+            0,
+            1.16
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.25
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0,
+            0,
+            1.25
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.78
+          ]
+        },
+        {
+          "name": "cape",
+          "parent": "chest",
+          "rest_head_m": [
+            0,
+            0.2,
+            1.12
+          ],
+          "rest_tail_m": [
+            0,
+            0.26,
+            0.43
+          ]
+        },
+        {
+          "name": "upper_arm.R",
+          "parent": "chest",
+          "rest_head_m": [
+            0.25,
+            0,
+            1.105
+          ],
+          "rest_tail_m": [
+            0.38,
+            0,
+            0.93
+          ]
+        },
+        {
+          "name": "forearm.R",
+          "parent": "upper_arm.R",
+          "rest_head_m": [
+            0.38,
+            0,
+            0.93
+          ],
+          "rest_tail_m": [
+            0.47,
+            -0.025,
+            0.77
+          ]
+        },
+        {
+          "name": "hand.R",
+          "parent": "forearm.R",
+          "rest_head_m": [
+            0.47,
+            -0.025,
+            0.77
+          ],
+          "rest_tail_m": [
+            0.48,
+            -0.028,
+            0.69
+          ]
+        },
+        {
+          "name": "thigh.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.12,
+            0,
+            0.7
+          ],
+          "rest_tail_m": [
+            0.12,
+            -0.012,
+            0.43
+          ]
+        },
+        {
+          "name": "shin.R",
+          "parent": "thigh.R",
+          "rest_head_m": [
+            0.12,
+            -0.012,
+            0.43
+          ],
+          "rest_tail_m": [
+            0.12,
+            0,
+            0.18
+          ]
+        },
+        {
+          "name": "foot.R",
+          "parent": "shin.R",
+          "rest_head_m": [
+            0.12,
+            0,
+            0.18
+          ],
+          "rest_tail_m": [
+            0.12,
+            -0.14,
+            0.08
+          ]
+        },
+        {
+          "name": "skirt.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.15,
+            0,
+            0.73
+          ],
+          "rest_tail_m": [
+            0.15,
+            0,
+            0.23
+          ]
+        },
+        {
+          "name": "upper_arm.L",
+          "parent": "chest",
+          "rest_head_m": [
+            -0.25,
+            0,
+            1.105
+          ],
+          "rest_tail_m": [
+            -0.38,
+            0,
+            0.93
+          ]
+        },
+        {
+          "name": "forearm.L",
+          "parent": "upper_arm.L",
+          "rest_head_m": [
+            -0.38,
+            0,
+            0.93
+          ],
+          "rest_tail_m": [
+            -0.47,
+            -0.025,
+            0.77
+          ]
+        },
+        {
+          "name": "hand.L",
+          "parent": "forearm.L",
+          "rest_head_m": [
+            -0.47,
+            -0.025,
+            0.77
+          ],
+          "rest_tail_m": [
+            -0.48,
+            -0.028,
+            0.69
+          ]
+        },
+        {
+          "name": "thigh.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.12,
+            0,
+            0.7
+          ],
+          "rest_tail_m": [
+            -0.12,
+            -0.012,
+            0.43
+          ]
+        },
+        {
+          "name": "shin.L",
+          "parent": "thigh.L",
+          "rest_head_m": [
+            -0.12,
+            -0.012,
+            0.43
+          ],
+          "rest_tail_m": [
+            -0.12,
+            0,
+            0.18
+          ]
+        },
+        {
+          "name": "foot.L",
+          "parent": "shin.L",
+          "rest_head_m": [
+            -0.12,
+            0,
+            0.18
+          ],
+          "rest_tail_m": [
+            -0.12,
+            -0.14,
+            0.08
+          ]
+        },
+        {
+          "name": "skirt.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.15,
+            0,
+            0.73
+          ],
+          "rest_tail_m": [
+            -0.15,
+            0,
+            0.23
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_NPC_Head_01_Masculine",
+        "SKM_NPC_Head_02_Feminine",
+        "SKM_NPC_Hair_01_Crop",
+        "SKM_NPC_Hair_02_Bob",
+        "SKM_NPC_Hair_03_Long",
+        "SKM_NPC_Hair_04_Braid",
+        "SKM_NPC_Hair_05_Swept",
+        "SKM_NPC_Torso_01_Tunic",
+        "SKM_NPC_Torso_02_Armor",
+        "SKM_NPC_Torso_03_Archer",
+        "SKM_NPC_Torso_04_Robe",
+        "SKM_NPC_Torso_05_Merchant",
+        "SKM_NPC_Torso_06_Healer",
+        "SKM_NPC_Arms_01_Cloth",
+        "SKM_NPC_Arms_02_Armor",
+        "SKM_NPC_Arms_03_Leather",
+        "SKM_NPC_Arms_04_Robe",
+        "SKM_NPC_Legs_01_Trousers",
+        "SKM_NPC_Legs_02_Patched",
+        "SKM_NPC_Legs_03_Armored",
+        "SKM_NPC_Feet_01_Boots",
+        "SKM_NPC_Feet_02_Wrapped",
+        "SKM_NPC_FacialHair_01_Stubble",
+        "SKM_NPC_FacialHair_02_Beard",
+        "SKM_NPC_Headgear_01_Hood",
+        "SKM_NPC_Headgear_02_Helmet",
+        "SKM_NPC_Headgear_03_Cap",
+        "SKM_NPC_Back_01_Cape",
+        "SKM_NPC_Back_02_Quiver",
+        "SKM_NPC_Back_03_Pack",
+        "SKM_NPC_Belt_01_Plain",
+        "SKM_NPC_Belt_02_Pouches",
+        "SKM_NPC_Mainhand_01_Sword",
+        "SKM_NPC_Mainhand_02_Bow",
+        "SKM_NPC_Mainhand_03_Staff",
+        "SKM_NPC_Offhand_01_Shield",
+        "SKM_NPC_Offhand_02_Lantern"
+      ]
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.0,
+            0.15000000596046448
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0.0,
+            0.3499999940395355,
+            0.75
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.029999999329447746,
+            0.75
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.029999999329447746,
+            0.75
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.3499999940395355,
+            0.7900000214576721
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "spine",
+          "rest_head_m": [
+            0.0,
+            -0.3499999940395355,
+            0.7900000214576721
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.8299999833106995,
+            0.8999999761581421
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0.0,
+            -0.8299999833106995,
+            0.8999999761581421
+          ],
+          "rest_tail_m": [
+            0.0,
+            -1.0799999237060547,
+            0.8999999761581421
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "rest_head_m": [
+            0.0,
+            -0.9300000071525574,
+            0.7799999713897705
+          ],
+          "rest_tail_m": [
+            0.0,
+            -1.149999976158142,
+            0.7400000095367432
+          ]
+        },
+        {
+          "name": "front_upper.R",
+          "parent": "spine",
+          "rest_head_m": [
+            0.266400009393692,
+            -0.3499999940395355,
+            0.6700000166893005
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            -0.3149999976158142,
+            0.3617999851703644
+          ]
+        },
+        {
+          "name": "front_lower.R",
+          "parent": "front_upper.R",
+          "rest_head_m": [
+            0.266400009393692,
+            -0.3149999976158142,
+            0.3617999851703644
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            -0.3499999940395355,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.R",
+          "parent": "front_lower.R",
+          "rest_head_m": [
+            0.266400009393692,
+            -0.3499999940395355,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            -0.44999998807907104,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_upper.L",
+          "parent": "spine",
+          "rest_head_m": [
+            -0.266400009393692,
+            -0.3499999940395355,
+            0.6700000166893005
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            -0.3149999976158142,
+            0.3617999851703644
+          ]
+        },
+        {
+          "name": "front_lower.L",
+          "parent": "front_upper.L",
+          "rest_head_m": [
+            -0.266400009393692,
+            -0.3149999976158142,
+            0.3617999851703644
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            -0.3499999940395355,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.L",
+          "parent": "front_lower.L",
+          "rest_head_m": [
+            -0.266400009393692,
+            -0.3499999940395355,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            -0.44999998807907104,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "tail",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.5375000238418579,
+            0.7599999904632568
+          ],
+          "rest_tail_m": [
+            0.0,
+            1.1575000286102295,
+            0.6000000238418579
+          ]
+        },
+        {
+          "name": "hind_upper.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.266400009393692,
+            0.3499999940395355,
+            0.6700000166893005
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            0.3181000053882599,
+            0.4960000216960907
+          ]
+        },
+        {
+          "name": "hind_lower.R",
+          "parent": "hind_upper.R",
+          "rest_head_m": [
+            0.266400009393692,
+            0.3181000053882599,
+            0.4960000216960907
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            0.37610000371932983,
+            0.22340001165866852
+          ]
+        },
+        {
+          "name": "hind_hock.R",
+          "parent": "hind_lower.R",
+          "rest_head_m": [
+            0.266400009393692,
+            0.37610000371932983,
+            0.22340001165866852
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            0.3499999940395355,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.R",
+          "parent": "hind_hock.R",
+          "rest_head_m": [
+            0.266400009393692,
+            0.3499999940395355,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.266400009393692,
+            0.25,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_upper.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.266400009393692,
+            0.3499999940395355,
+            0.6700000166893005
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            0.3181000053882599,
+            0.4960000216960907
+          ]
+        },
+        {
+          "name": "hind_lower.L",
+          "parent": "hind_upper.L",
+          "rest_head_m": [
+            -0.266400009393692,
+            0.3181000053882599,
+            0.4960000216960907
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            0.37610000371932983,
+            0.22340001165866852
+          ]
+        },
+        {
+          "name": "hind_hock.L",
+          "parent": "hind_lower.L",
+          "rest_head_m": [
+            -0.266400009393692,
+            0.37610000371932983,
+            0.22340001165866852
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            0.3499999940395355,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.L",
+          "parent": "hind_hock.L",
+          "rest_head_m": [
+            -0.266400009393692,
+            0.3499999940395355,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.266400009393692,
+            0.25,
+            0.04500000178813934
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_01_Wolf"
+      ],
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.0,
+            0.15000000596046448
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0.0,
+            0.32199999690055847,
+            0.6800000071525574
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.029999999329447746,
+            0.6800000071525574
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.029999999329447746,
+            0.6800000071525574
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.32199999690055847,
+            0.7200000286102295
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "spine",
+          "rest_head_m": [
+            0.0,
+            -0.32199999690055847,
+            0.7200000286102295
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.7300000190734863,
+            0.6399999856948853
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0.0,
+            -0.7300000190734863,
+            0.6399999856948853
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.9800000190734863,
+            0.6399999856948853
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "rest_head_m": [
+            0.0,
+            -0.8300000429153442,
+            0.5199999809265137
+          ],
+          "rest_tail_m": [
+            0.0,
+            -1.0499999523162842,
+            0.47999998927116394
+          ]
+        },
+        {
+          "name": "front_upper.R",
+          "parent": "spine",
+          "rest_head_m": [
+            0.3456000089645386,
+            -0.32199999690055847,
+            0.47999998927116394
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            -0.28700000047683716,
+            0.25920000672340393
+          ]
+        },
+        {
+          "name": "front_lower.R",
+          "parent": "front_upper.R",
+          "rest_head_m": [
+            0.3456000089645386,
+            -0.28700000047683716,
+            0.25920000672340393
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            -0.32199999690055847,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.R",
+          "parent": "front_lower.R",
+          "rest_head_m": [
+            0.3456000089645386,
+            -0.32199999690055847,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            -0.421999990940094,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_upper.L",
+          "parent": "spine",
+          "rest_head_m": [
+            -0.3456000089645386,
+            -0.32199999690055847,
+            0.47999998927116394
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            -0.28700000047683716,
+            0.25920000672340393
+          ]
+        },
+        {
+          "name": "front_lower.L",
+          "parent": "front_upper.L",
+          "rest_head_m": [
+            -0.3456000089645386,
+            -0.28700000047683716,
+            0.25920000672340393
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            -0.32199999690055847,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.L",
+          "parent": "front_lower.L",
+          "rest_head_m": [
+            -0.3456000089645386,
+            -0.32199999690055847,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            -0.421999990940094,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "tail",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.4945000112056732,
+            0.6899999976158142
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.6945000290870667,
+            0.5299999713897705
+          ]
+        },
+        {
+          "name": "hind_upper.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.3456000089645386,
+            0.32199999690055847,
+            0.47999998927116394
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            0.30834999680519104,
+            0.3630000054836273
+          ]
+        },
+        {
+          "name": "hind_lower.R",
+          "parent": "hind_upper.R",
+          "rest_head_m": [
+            0.3456000089645386,
+            0.30834999680519104,
+            0.3630000054836273
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            0.3317500054836273,
+            0.17970000207424164
+          ]
+        },
+        {
+          "name": "hind_hock.R",
+          "parent": "hind_lower.R",
+          "rest_head_m": [
+            0.3456000089645386,
+            0.3317500054836273,
+            0.17970000207424164
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            0.32199999690055847,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.R",
+          "parent": "hind_hock.R",
+          "rest_head_m": [
+            0.3456000089645386,
+            0.32199999690055847,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.3456000089645386,
+            0.22200000286102295,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_upper.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.3456000089645386,
+            0.32199999690055847,
+            0.47999998927116394
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            0.30834999680519104,
+            0.3630000054836273
+          ]
+        },
+        {
+          "name": "hind_lower.L",
+          "parent": "hind_upper.L",
+          "rest_head_m": [
+            -0.3456000089645386,
+            0.30834999680519104,
+            0.3630000054836273
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            0.3317500054836273,
+            0.17970000207424164
+          ]
+        },
+        {
+          "name": "hind_hock.L",
+          "parent": "hind_lower.L",
+          "rest_head_m": [
+            -0.3456000089645386,
+            0.3317500054836273,
+            0.17970000207424164
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            0.32199999690055847,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.L",
+          "parent": "hind_hock.L",
+          "rest_head_m": [
+            -0.3456000089645386,
+            0.32199999690055847,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.3456000089645386,
+            0.22200000286102295,
+            0.04500000178813934
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_02_Boar"
+      ],
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.0,
+            0.15000000596046448
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0.0,
+            0.4480000138282776,
+            1.0499999523162842
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.029999999329447746,
+            1.0499999523162842
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.029999999329447746,
+            1.0499999523162842
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.4480000138282776,
+            1.090000033378601
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "spine",
+          "rest_head_m": [
+            0.0,
+            -0.4480000138282776,
+            1.090000033378601
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.9900000095367432,
+            1.0700000524520874
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0.0,
+            -0.9900000095367432,
+            1.0700000524520874
+          ],
+          "rest_tail_m": [
+            0.0,
+            -1.2400000095367432,
+            1.0700000524520874
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "rest_head_m": [
+            0.0,
+            -1.090000033378601,
+            0.9500000476837158
+          ],
+          "rest_tail_m": [
+            0.0,
+            -1.309999942779541,
+            0.9100000858306885
+          ]
+        },
+        {
+          "name": "front_upper.R",
+          "parent": "spine",
+          "rest_head_m": [
+            0.46799999475479126,
+            -0.4480000138282776,
+            0.7699999809265137
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            -0.4129999876022339,
+            0.415800005197525
+          ]
+        },
+        {
+          "name": "front_lower.R",
+          "parent": "front_upper.R",
+          "rest_head_m": [
+            0.46799999475479126,
+            -0.4129999876022339,
+            0.415800005197525
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            -0.4480000138282776,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.R",
+          "parent": "front_lower.R",
+          "rest_head_m": [
+            0.46799999475479126,
+            -0.4480000138282776,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            -0.5480000376701355,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_upper.L",
+          "parent": "spine",
+          "rest_head_m": [
+            -0.46799999475479126,
+            -0.4480000138282776,
+            0.7699999809265137
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            -0.4129999876022339,
+            0.415800005197525
+          ]
+        },
+        {
+          "name": "front_lower.L",
+          "parent": "front_upper.L",
+          "rest_head_m": [
+            -0.46799999475479126,
+            -0.4129999876022339,
+            0.415800005197525
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            -0.4480000138282776,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.L",
+          "parent": "front_lower.L",
+          "rest_head_m": [
+            -0.46799999475479126,
+            -0.4480000138282776,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            -0.5480000376701355,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "tail",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.6880000233650208,
+            1.059999942779541
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.8180000185966492,
+            0.8999999761581421
+          ]
+        },
+        {
+          "name": "hind_upper.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.46799999475479126,
+            0.4480000138282776,
+            0.7699999809265137
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            0.4310000240802765,
+            0.5659999847412109
+          ]
+        },
+        {
+          "name": "hind_lower.R",
+          "parent": "hind_upper.R",
+          "rest_head_m": [
+            0.46799999475479126,
+            0.4310000240802765,
+            0.5659999847412109
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            0.4602400064468384,
+            0.21240000426769257
+          ]
+        },
+        {
+          "name": "hind_hock.R",
+          "parent": "hind_lower.R",
+          "rest_head_m": [
+            0.46799999475479126,
+            0.4602400064468384,
+            0.21240000426769257
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            0.4480000138282776,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.R",
+          "parent": "hind_hock.R",
+          "rest_head_m": [
+            0.46799999475479126,
+            0.4480000138282776,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.46799999475479126,
+            0.34800001978874207,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_upper.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.46799999475479126,
+            0.4480000138282776,
+            0.7699999809265137
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            0.4310000240802765,
+            0.5659999847412109
+          ]
+        },
+        {
+          "name": "hind_lower.L",
+          "parent": "hind_upper.L",
+          "rest_head_m": [
+            -0.46799999475479126,
+            0.4310000240802765,
+            0.5659999847412109
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            0.4602400064468384,
+            0.21240000426769257
+          ]
+        },
+        {
+          "name": "hind_hock.L",
+          "parent": "hind_lower.L",
+          "rest_head_m": [
+            -0.46799999475479126,
+            0.4602400064468384,
+            0.21240000426769257
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            0.4480000138282776,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.L",
+          "parent": "hind_hock.L",
+          "rest_head_m": [
+            -0.46799999475479126,
+            0.4480000138282776,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.46799999475479126,
+            0.34800001978874207,
+            0.04500000178813934
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_03_Bear"
+      ],
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.0,
+            0.15000000596046448
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0.0,
+            0.3303999900817871,
+            1.1200000047683716
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.029999999329447746,
+            1.1200000047683716
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.029999999329447746,
+            1.1200000047683716
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.3303999900817871,
+            1.159999966621399
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "spine",
+          "rest_head_m": [
+            0.0,
+            -0.3303999900817871,
+            1.159999966621399
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.7300000190734863,
+            1.6399999856948853
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0.0,
+            -0.7300000190734863,
+            1.6399999856948853
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.9800000190734863,
+            1.6399999856948853
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "rest_head_m": [
+            0.0,
+            -0.8300000429153442,
+            1.5199999809265137
+          ],
+          "rest_tail_m": [
+            0.0,
+            -1.0499999523162842,
+            1.4800000190734863
+          ]
+        },
+        {
+          "name": "front_upper.R",
+          "parent": "spine",
+          "rest_head_m": [
+            0.25920000672340393,
+            -0.3303999900817871,
+            1.0
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            -0.2953999936580658,
+            0.5400000214576721
+          ]
+        },
+        {
+          "name": "front_lower.R",
+          "parent": "front_upper.R",
+          "rest_head_m": [
+            0.25920000672340393,
+            -0.2953999936580658,
+            0.5400000214576721
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            -0.3303999900817871,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.R",
+          "parent": "front_lower.R",
+          "rest_head_m": [
+            0.25920000672340393,
+            -0.3303999900817871,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            -0.43039998412132263,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_upper.L",
+          "parent": "spine",
+          "rest_head_m": [
+            -0.25920000672340393,
+            -0.3303999900817871,
+            1.0
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            -0.2953999936580658,
+            0.5400000214576721
+          ]
+        },
+        {
+          "name": "front_lower.L",
+          "parent": "front_upper.L",
+          "rest_head_m": [
+            -0.25920000672340393,
+            -0.2953999936580658,
+            0.5400000214576721
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            -0.3303999900817871,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.L",
+          "parent": "front_lower.L",
+          "rest_head_m": [
+            -0.25920000672340393,
+            -0.3303999900817871,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            -0.43039998412132263,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "tail",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.5073999762535095,
+            1.1299999952316284
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.727400004863739,
+            0.9700000286102295
+          ]
+        },
+        {
+          "name": "hind_upper.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.25920000672340393,
+            0.3303999900817871,
+            1.0
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            0.2757999897003174,
+            0.7542999982833862
+          ]
+        },
+        {
+          "name": "hind_lower.R",
+          "parent": "hind_upper.R",
+          "rest_head_m": [
+            0.25920000672340393,
+            0.2757999897003174,
+            0.7542999982833862
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            0.375900000333786,
+            0.399399995803833
+          ]
+        },
+        {
+          "name": "hind_hock.R",
+          "parent": "hind_lower.R",
+          "rest_head_m": [
+            0.25920000672340393,
+            0.375900000333786,
+            0.399399995803833
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            0.3303999900817871,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.R",
+          "parent": "hind_hock.R",
+          "rest_head_m": [
+            0.25920000672340393,
+            0.3303999900817871,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.25920000672340393,
+            0.2303999960422516,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_upper.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.25920000672340393,
+            0.3303999900817871,
+            1.0
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            0.2757999897003174,
+            0.7542999982833862
+          ]
+        },
+        {
+          "name": "hind_lower.L",
+          "parent": "hind_upper.L",
+          "rest_head_m": [
+            -0.25920000672340393,
+            0.2757999897003174,
+            0.7542999982833862
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            0.375900000333786,
+            0.399399995803833
+          ]
+        },
+        {
+          "name": "hind_hock.L",
+          "parent": "hind_lower.L",
+          "rest_head_m": [
+            -0.25920000672340393,
+            0.375900000333786,
+            0.399399995803833
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            0.3303999900817871,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.L",
+          "parent": "hind_hock.L",
+          "rest_head_m": [
+            -0.25920000672340393,
+            0.3303999900817871,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.25920000672340393,
+            0.2303999960422516,
+            0.04500000178813934
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_04_Stag"
+      ],
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.0,
+            0.15000000596046448
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0.0,
+            0.24639999866485596,
+            0.75
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.029999999329447746,
+            0.75
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.029999999329447746,
+            0.75
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.24639999866485596,
+            0.7900000214576721
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "spine",
+          "rest_head_m": [
+            0.0,
+            -0.24639999866485596,
+            0.7900000214576721
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.5600000023841858,
+            1.1200000047683716
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0.0,
+            -0.5600000023841858,
+            1.1200000047683716
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.8100000023841858,
+            1.1200000047683716
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "rest_head_m": [
+            0.0,
+            -0.6600000262260437,
+            1.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.8799999952316284,
+            0.9600000381469727
+          ]
+        },
+        {
+          "name": "front_upper.R",
+          "parent": "spine",
+          "rest_head_m": [
+            0.2231999933719635,
+            -0.24639999866485596,
+            0.6399999856948853
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            -0.21140000224113464,
+            0.3456000089645386
+          ]
+        },
+        {
+          "name": "front_lower.R",
+          "parent": "front_upper.R",
+          "rest_head_m": [
+            0.2231999933719635,
+            -0.21140000224113464,
+            0.3456000089645386
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            -0.24639999866485596,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.R",
+          "parent": "front_lower.R",
+          "rest_head_m": [
+            0.2231999933719635,
+            -0.24639999866485596,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            -0.3463999927043915,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_upper.L",
+          "parent": "spine",
+          "rest_head_m": [
+            -0.2231999933719635,
+            -0.24639999866485596,
+            0.6399999856948853
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            -0.21140000224113464,
+            0.3456000089645386
+          ]
+        },
+        {
+          "name": "front_lower.L",
+          "parent": "front_upper.L",
+          "rest_head_m": [
+            -0.2231999933719635,
+            -0.21140000224113464,
+            0.3456000089645386
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            -0.24639999866485596,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "front_foot.L",
+          "parent": "front_lower.L",
+          "rest_head_m": [
+            -0.2231999933719635,
+            -0.24639999866485596,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            -0.3463999927043915,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "tail",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.3783999979496002,
+            0.7599999904632568
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.5784000158309937,
+            0.6000000238418579
+          ]
+        },
+        {
+          "name": "hind_upper.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.2231999933719635,
+            0.24639999866485596,
+            0.6399999856948853
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            0.21615000069141388,
+            0.49149999022483826
+          ]
+        },
+        {
+          "name": "hind_lower.R",
+          "parent": "hind_upper.R",
+          "rest_head_m": [
+            0.2231999933719635,
+            0.21615000069141388,
+            0.49149999022483826
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            0.27114999294281006,
+            0.26600000262260437
+          ]
+        },
+        {
+          "name": "hind_hock.R",
+          "parent": "hind_lower.R",
+          "rest_head_m": [
+            0.2231999933719635,
+            0.27114999294281006,
+            0.26600000262260437
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            0.24639999866485596,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.R",
+          "parent": "hind_hock.R",
+          "rest_head_m": [
+            0.2231999933719635,
+            0.24639999866485596,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            0.2231999933719635,
+            0.14640000462532043,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_upper.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.2231999933719635,
+            0.24639999866485596,
+            0.6399999856948853
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            0.21615000069141388,
+            0.49149999022483826
+          ]
+        },
+        {
+          "name": "hind_lower.L",
+          "parent": "hind_upper.L",
+          "rest_head_m": [
+            -0.2231999933719635,
+            0.21615000069141388,
+            0.49149999022483826
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            0.27114999294281006,
+            0.26600000262260437
+          ]
+        },
+        {
+          "name": "hind_hock.L",
+          "parent": "hind_lower.L",
+          "rest_head_m": [
+            -0.2231999933719635,
+            0.27114999294281006,
+            0.26600000262260437
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            0.24639999866485596,
+            0.09000000357627869
+          ]
+        },
+        {
+          "name": "hind_foot.L",
+          "parent": "hind_hock.L",
+          "rest_head_m": [
+            -0.2231999933719635,
+            0.24639999866485596,
+            0.09000000357627869
+          ],
+          "rest_tail_m": [
+            -0.2231999933719635,
+            0.14640000462532043,
+            0.04500000178813934
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_05_Goat"
+      ],
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.0,
+            0.15000000596046448
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0.0,
+            0.15680000185966492,
+            0.3100000023841858
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.029999999329447746,
+            0.3100000023841858
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.029999999329447746,
+            0.3100000023841858
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.15680000185966492,
+            0.3499999940395355
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "spine",
+          "rest_head_m": [
+            0.0,
+            -0.15680000185966492,
+            0.3499999940395355
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.3400000035762787,
+            0.47999998927116394
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0.0,
+            -0.3400000035762787,
+            0.47999998927116394
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.5900000333786011,
+            0.47999998927116394
+          ]
+        },
+        {
+          "name": "jaw",
+          "parent": "head",
+          "rest_head_m": [
+            0.0,
+            -0.4399999976158142,
+            0.35999998450279236
+          ],
+          "rest_tail_m": [
+            0.0,
+            -0.6599999666213989,
+            0.3199999928474426
+          ]
+        },
+        {
+          "name": "front_upper.R",
+          "parent": "spine",
+          "rest_head_m": [
+            0.15839999914169312,
+            -0.15680000185966492,
+            0.23999999463558197
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            -0.13680000603199005,
+            0.11999999731779099
+          ]
+        },
+        {
+          "name": "front_lower.R",
+          "parent": "front_upper.R",
+          "rest_head_m": [
+            0.15839999914169312,
+            -0.13680000603199005,
+            0.11999999731779099
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            -0.15680000185966492,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_foot.R",
+          "parent": "front_lower.R",
+          "rest_head_m": [
+            0.15839999914169312,
+            -0.15680000185966492,
+            0.04500000178813934
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            -0.25679999589920044,
+            0.0
+          ]
+        },
+        {
+          "name": "front_upper.L",
+          "parent": "spine",
+          "rest_head_m": [
+            -0.15839999914169312,
+            -0.15680000185966492,
+            0.23999999463558197
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            -0.13680000603199005,
+            0.11999999731779099
+          ]
+        },
+        {
+          "name": "front_lower.L",
+          "parent": "front_upper.L",
+          "rest_head_m": [
+            -0.15839999914169312,
+            -0.13680000603199005,
+            0.11999999731779099
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            -0.15680000185966492,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "front_foot.L",
+          "parent": "front_lower.L",
+          "rest_head_m": [
+            -0.15839999914169312,
+            -0.15680000185966492,
+            0.04500000178813934
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            -0.25679999589920044,
+            0.0
+          ]
+        },
+        {
+          "name": "tail",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.0,
+            0.24079999327659607,
+            0.3199999928474426
+          ],
+          "rest_tail_m": [
+            0.0,
+            0.3407999873161316,
+            0.1599999964237213
+          ]
+        },
+        {
+          "name": "hind_upper.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.15839999914169312,
+            0.15680000185966492,
+            0.27000001072883606
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            0.13429999351501465,
+            0.19575001299381256
+          ]
+        },
+        {
+          "name": "hind_lower.R",
+          "parent": "hind_upper.R",
+          "rest_head_m": [
+            0.15839999914169312,
+            0.13429999351501465,
+            0.19575001299381256
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            0.16805000603199005,
+            0.09450000524520874
+          ]
+        },
+        {
+          "name": "hind_hock.R",
+          "parent": "hind_lower.R",
+          "rest_head_m": [
+            0.15839999914169312,
+            0.16805000603199005,
+            0.09450000524520874
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            0.15680000185966492,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_foot.R",
+          "parent": "hind_hock.R",
+          "rest_head_m": [
+            0.15839999914169312,
+            0.15680000185966492,
+            0.04500000178813934
+          ],
+          "rest_tail_m": [
+            0.15839999914169312,
+            0.01680000126361847,
+            0.0
+          ]
+        },
+        {
+          "name": "hind_upper.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.15839999914169312,
+            0.15680000185966492,
+            0.27000001072883606
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            0.13429999351501465,
+            0.19575001299381256
+          ]
+        },
+        {
+          "name": "hind_lower.L",
+          "parent": "hind_upper.L",
+          "rest_head_m": [
+            -0.15839999914169312,
+            0.13429999351501465,
+            0.19575001299381256
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            0.16805000603199005,
+            0.09450000524520874
+          ]
+        },
+        {
+          "name": "hind_hock.L",
+          "parent": "hind_lower.L",
+          "rest_head_m": [
+            -0.15839999914169312,
+            0.16805000603199005,
+            0.09450000524520874
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            0.15680000185966492,
+            0.04500000178813934
+          ]
+        },
+        {
+          "name": "hind_foot.L",
+          "parent": "hind_hock.L",
+          "rest_head_m": [
+            -0.15839999914169312,
+            0.15680000185966492,
+            0.04500000178813934
+          ],
+          "rest_tail_m": [
+            -0.15839999914169312,
+            0.01680000126361847,
+            0.0
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_06_Hare"
+      ],
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "bones": [
+        {
+          "name": "root",
+          "parent": null,
+          "rest_head_m": [
+            0,
+            0,
+            0
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            0.18
+          ]
+        },
+        {
+          "name": "pelvis",
+          "parent": "root",
+          "rest_head_m": [
+            0,
+            0,
+            0.7
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            0.87
+          ]
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0,
+            0,
+            0.87
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.03
+          ]
+        },
+        {
+          "name": "chest",
+          "parent": "spine",
+          "rest_head_m": [
+            0,
+            0,
+            1.03
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.16
+          ]
+        },
+        {
+          "name": "neck",
+          "parent": "chest",
+          "rest_head_m": [
+            0,
+            0,
+            1.16
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.25
+          ]
+        },
+        {
+          "name": "head",
+          "parent": "neck",
+          "rest_head_m": [
+            0,
+            0,
+            1.25
+          ],
+          "rest_tail_m": [
+            0,
+            0,
+            1.78
+          ]
+        },
+        {
+          "name": "cape",
+          "parent": "chest",
+          "rest_head_m": [
+            0,
+            0.2,
+            1.12
+          ],
+          "rest_tail_m": [
+            0,
+            0.26,
+            0.43
+          ]
+        },
+        {
+          "name": "upper_arm.R",
+          "parent": "chest",
+          "rest_head_m": [
+            0.25,
+            0,
+            1.105
+          ],
+          "rest_tail_m": [
+            0.38,
+            0,
+            0.93
+          ]
+        },
+        {
+          "name": "forearm.R",
+          "parent": "upper_arm.R",
+          "rest_head_m": [
+            0.38,
+            0,
+            0.93
+          ],
+          "rest_tail_m": [
+            0.47,
+            -0.025,
+            0.77
+          ]
+        },
+        {
+          "name": "hand.R",
+          "parent": "forearm.R",
+          "rest_head_m": [
+            0.47,
+            -0.025,
+            0.77
+          ],
+          "rest_tail_m": [
+            0.48,
+            -0.028,
+            0.69
+          ]
+        },
+        {
+          "name": "thigh.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.12,
+            0,
+            0.7
+          ],
+          "rest_tail_m": [
+            0.12,
+            -0.012,
+            0.43
+          ]
+        },
+        {
+          "name": "shin.R",
+          "parent": "thigh.R",
+          "rest_head_m": [
+            0.12,
+            -0.012,
+            0.43
+          ],
+          "rest_tail_m": [
+            0.12,
+            0,
+            0.18
+          ]
+        },
+        {
+          "name": "foot.R",
+          "parent": "shin.R",
+          "rest_head_m": [
+            0.12,
+            0,
+            0.18
+          ],
+          "rest_tail_m": [
+            0.12,
+            -0.14,
+            0.08
+          ]
+        },
+        {
+          "name": "skirt.R",
+          "parent": "pelvis",
+          "rest_head_m": [
+            0.15,
+            0,
+            0.73
+          ],
+          "rest_tail_m": [
+            0.15,
+            0,
+            0.23
+          ]
+        },
+        {
+          "name": "upper_arm.L",
+          "parent": "chest",
+          "rest_head_m": [
+            -0.25,
+            0,
+            1.105
+          ],
+          "rest_tail_m": [
+            -0.38,
+            0,
+            0.93
+          ]
+        },
+        {
+          "name": "forearm.L",
+          "parent": "upper_arm.L",
+          "rest_head_m": [
+            -0.38,
+            0,
+            0.93
+          ],
+          "rest_tail_m": [
+            -0.47,
+            -0.025,
+            0.77
+          ]
+        },
+        {
+          "name": "hand.L",
+          "parent": "forearm.L",
+          "rest_head_m": [
+            -0.47,
+            -0.025,
+            0.77
+          ],
+          "rest_tail_m": [
+            -0.48,
+            -0.028,
+            0.69
+          ]
+        },
+        {
+          "name": "thigh.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.12,
+            0,
+            0.7
+          ],
+          "rest_tail_m": [
+            -0.12,
+            -0.012,
+            0.43
+          ]
+        },
+        {
+          "name": "shin.L",
+          "parent": "thigh.L",
+          "rest_head_m": [
+            -0.12,
+            -0.012,
+            0.43
+          ],
+          "rest_tail_m": [
+            -0.12,
+            0,
+            0.18
+          ]
+        },
+        {
+          "name": "foot.L",
+          "parent": "shin.L",
+          "rest_head_m": [
+            -0.12,
+            0,
+            0.18
+          ],
+          "rest_tail_m": [
+            -0.12,
+            -0.14,
+            0.08
+          ]
+        },
+        {
+          "name": "skirt.L",
+          "parent": "pelvis",
+          "rest_head_m": [
+            -0.15,
+            0,
+            0.73
+          ],
+          "rest_tail_m": [
+            -0.15,
+            0,
+            0.23
+          ]
+        }
+      ],
+      "skin_meshes": [
+        "SKM_MOB_07_AshenRevenant__Head",
+        "SKM_MOB_07_AshenRevenant__Hair",
+        "SKM_MOB_07_AshenRevenant__Torso",
+        "SKM_MOB_07_AshenRevenant__Arms",
+        "SKM_MOB_07_AshenRevenant__Legs",
+        "SKM_MOB_07_AshenRevenant__Feet",
+        "SKM_MOB_07_AshenRevenant__Belt"
+      ]
+    }
+  ]
+}

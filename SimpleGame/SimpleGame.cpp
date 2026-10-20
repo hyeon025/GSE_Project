@@ -16,12 +16,14 @@ Distributed under the What The Hell License.
 #include "GameStory.h"
 #include "GameScene.h"
 #include "LevelOneView.h"
+#include "WorldMonitor.h"
 
 using namespace Game;
 World g_World;
 std::unique_ptr<Renderer> g_Renderer;
 std::unique_ptr<GameScene> g_Scene;
 std::unique_ptr<LevelOneView> g_LevelView;
+std::unique_ptr<WorldMonitor> g_Monitor;
 std::vector<Site> g_Sites;
 bool g_Keys[256] = {};
 int g_LastTick = 0, g_Width = 1440, g_Height = 900;
@@ -305,11 +307,11 @@ std::wstring TargetName()
     {
         if (g_World.npcs[g_TargetIndex].id == g_World.story.childId)
         {
-            return L"\uae30\uc5b5\uc758 \ud30c\ud3b8\uc744 \uc9c0\ub2cc \uc544\uc774";
+            return g_World.npcs[g_TargetIndex].Name() +
+                   L" / \uae30\uc5b5\uc758 \ud30c\ud3b8\uc744 \uc9c0\ub2cc \uc544\uc774";
         }
         const auto& n = g_World.npcs[g_TargetIndex];
-        return std::wstring(Society::JobName(n.life.job)) + L" #" + std::to_wstring(n.id) +
-               (n.origin == 0 ? L"  \uacc4\uc2b9\uc790" : L"");
+        return n.Name() + L" / " + Society::JobName(n.life.job) + (n.origin == 0 ? L"  \uacc4\uc2b9\uc790" : L"");
     }
     return L"";
 }
@@ -879,9 +881,10 @@ void AbilityUse(bool secondary)
         if (best < 1e19)
         {
             auto q = g_Scene->Project(nearest.p);
-            std::wstring direction = std::abs(q.x - g_Width * .5) > std::abs(q.y - g_Height * .55)
-                                         ? (q.x > g_Width * .5 ? L"\ub3d9\ucabd" : L"\uc11c\ucabd")
-                                         : (q.y > g_Height * .55 ? L"\ub0a8\ucabd" : L"\ubd81\ucabd");
+            std::wstring direction =
+                std::abs(q.x - g_Width * .5) > std::abs(q.y - g_Height * IsometricView::AnchorY)
+                    ? (q.x > g_Width * .5 ? L"\ub3d9\ucabd" : L"\uc11c\ucabd")
+                    : (q.y > g_Height * IsometricView::AnchorY ? L"\ub0a8\ucabd" : L"\ubd81\ucabd");
             Notify(
                 direction +
                 L"\uc5d0\uc11c \uc544\uc9c1 \uc0ac\ub77c\uc9c0\uc9c0 \uc54a\uc740 \ud754\uc801\uc774 \ub290\uaef4\uc9d1\ub2c8\ub2e4."
@@ -1041,14 +1044,16 @@ void Map()
         for (int ix = 0; ix < 48; ++ix)
         {
             double sx = (ix - 24) * 12.0, sy = (iy - 24) * 12.0;
-            Vec p(g_World.player.p.x + sx * .5 - sy, g_World.player.p.y - sx * .5 - sy);
+            auto ground = IsometricView::GroundFromScreen({sx, sy});
+            Vec p(g_World.player.p.x + ground.x, g_World.player.p.y + ground.y);
             Box(x + ix * 4, y + iy * 4, 4, 4, Road(p) < 33 ? Color(.39f, .40f, .33f) : Color(.16f, .21f, .18f));
         }
     }
     auto mark = [&](Vec p, Color c, float radius)
     {
         double dx = p.x - g_World.player.p.x, dy = p.y - g_World.player.p.y;
-        float mx = (float)((dx - dy) / 3), my = (float)(-(dx + dy) / 6);
+        auto projected = IsometricView::Project({dx, dy, 0});
+        float mx = (float)(projected.x / 3), my = (float)(projected.y / 3);
         if (std::abs(mx) < 90 && std::abs(my) < 90)
         {
             g_Renderer->Ellipse(
@@ -1072,12 +1077,16 @@ void Map()
             mark(n.p, n.life.target ? Color(.82f, .36f, .28f) : Color(.58f, .74f, .72f), 2.5f);
         }
     }
-    for (int village = 0; village < 3; ++village)
+    for (int village = 0; village < Society::VillageCount; ++village)
     {
         mark(VillageCenter(village), Color(.88f, .81f, .52f), 5);
     }
     mark(g_World.player.p, g_Ink, 3.5f);
-    Text(x + 8, y + 7, L"N", g_Ink, 13);
+    auto north = IsometricView::Project({0, 1, 0});
+    double northLength = std::hypot(north.x, north.y);
+    float nx = (float)(north.x / northLength), ny = (float)(north.y / northLength);
+    Line(x + 26, y + 28, x + 26 + nx * 12, y + 28 + ny * 12, 1.5f, g_Ink);
+    Text(x + 22 + nx * 20, y + 20 + ny * 20, L"N", g_Ink, 13);
     Text(
         x,
         y + size + 7,
@@ -1464,6 +1473,11 @@ void Display()
     glutSwapBuffers();
 }
 
+IsometricView::Point MovementInput()
+{
+    return IsometricView::GroundFromScreen({(double)g_Keys['d'] - g_Keys['a'], (double)g_Keys['s'] - g_Keys['w']});
+}
+
 void Update(float dt)
 {
     if (InCombat())
@@ -1478,29 +1492,11 @@ void Update(float dt)
         int kills = level.kills;
         int souls = level.souls;
         auto previous = level.p;
-        LevelOne::Point movement;
-        if (g_Keys['w'])
-        {
-            movement.x += 1;
-            movement.y += 1;
-        }
-        if (g_Keys['s'])
-        {
-            movement.x -= 1;
-            movement.y -= 1;
-        }
-        if (g_Keys['a'])
-        {
-            movement.x -= 1;
-            movement.y += 1;
-        }
-        if (g_Keys['d'])
-        {
-            movement.x += 1;
-            movement.y -= 1;
-        }
+        auto input = MovementInput();
+        LevelOne::Point movement(input.x, input.y);
         g_LevelView->Update(dt, movement, g_Keys[' ']);
         g_Scene->playerMotion.Update(movement.x, movement.y, level.p.x - previous.x, level.p.y - previous.y);
+        g_Scene->playerMotion.sprinting = g_Keys[' '] && g_Scene->playerMotion.moving && level.stamina > 2;
         g_World.player.echo[0] += (level.kills - kills) * 3;
         g_World.player.echo[3] += level.souls - souls;
         if (phase == LevelOne::Fighting)
@@ -1557,28 +1553,8 @@ void Update(float dt)
         g_Scene->playerMotion.Stop();
         return;
     }
-    float x = 0, y = 0;
-    if (g_Keys['w'])
-    {
-        x += 1;
-        y += 1;
-    }
-    if (g_Keys['s'])
-    {
-        x -= 1;
-        y -= 1;
-    }
-    if (g_Keys['a'])
-    {
-        x -= 1;
-        y += 1;
-    }
-    if (g_Keys['d'])
-    {
-        x += 1;
-        y -= 1;
-    }
-    g_Scene->Update(dt, Vec(x, y), g_Keys[' ']);
+    auto movement = MovementInput();
+    g_Scene->Update(dt, Vec(movement.x, movement.y), g_Keys[' ']);
     RefreshTargets();
 }
 
@@ -1589,6 +1565,11 @@ void Idle()
     g_LastTick = now;
     g_ToastTime = std::max(0.f, g_ToastTime - dt);
     Update(dt);
+    if (g_Monitor)
+    {
+        bool paused = !g_Focused || (InCombat() && (g_LevelView->paused || CurrentLevel().judgementPending));
+        g_Monitor->Publish(g_World, paused);
+    }
     g_Autosave += dt;
     if (g_Autosave >= 15)
     {
@@ -1705,6 +1686,12 @@ void KeyUp(unsigned char key, int, int)
 
 void SpecialKey(int key, int, int)
 {
+    if (key == GLUT_KEY_F8)
+    {
+        bool loaded = Art::Reload();
+        std::cout << "[Art] reload=" << (loaded ? "ok" : "failed; previous catalog retained") << '\n';
+        return;
+    }
     if (key == GLUT_KEY_F1 && !InCombat())
     {
         Act(EnterLevel);
@@ -1789,6 +1776,11 @@ void Visibility(int state)
 
 void OnClose()
 {
+    if (g_Monitor)
+    {
+        g_Monitor->Publish(g_World, true, true);
+        g_Monitor.reset();
+    }
     if (!g_SaveBlocked)
     {
         Persist();
@@ -1827,6 +1819,7 @@ int main(int argc, char** argv)
     g_Scene->height = g_Height;
     bool loaded = Load(g_World, g_SaveBlocked);
     Society::Initialize(g_World);
+    g_Monitor.reset(new WorldMonitor());
     if (!Walkable(g_World.player.p))
     {
         g_World.player.p = VillageCenter(Society::NearestVillage(g_World.player.p));

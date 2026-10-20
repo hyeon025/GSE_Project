@@ -82,11 +82,16 @@ namespace Game
         return h * 1274126177u;
     }
 
+    inline double SettlementRoad(Vec p);
+
     inline float Road(Vec p)
     {
         return (float)std::min(
-            std::abs(p.x - p.y) * 0.7071,
-            std::min(std::abs(p.x + p.y + 128) * 0.7071, std::abs(p.y - std::sin(p.x / 145) * 100 + 320) * 0.78)
+            SettlementRoad(p),
+            std::min(
+                std::abs(p.x - p.y) * 0.7071,
+                std::min(std::abs(p.x + p.y + 128) * 0.7071, std::abs(p.y - std::sin(p.x / 145) * 100 + 320) * 0.78)
+            )
         );
     }
 
@@ -109,6 +114,9 @@ namespace Game
 
     struct Npc
     {
+        unsigned artCatalogVersion = 0;
+        std::vector<std::string> artParts;
+        std::array<int, 3> artPalettes = {{0, 0, 0}};
         Society::Life life;
         CharacterMotion motion;
         Vec p, home;
@@ -117,6 +125,11 @@ namespace Game
         std::array<int, 7> echo = {};
         int originDeathId = 0, origin = 0, relationship = 0, power = 20;
         bool met = false, saved = false, changed = false, freeWill = false;
+
+        std::wstring Name() const
+        {
+            return Society::PersonalName(id);
+        }
     };
 
     struct Player
@@ -248,20 +261,20 @@ namespace Game
 
     inline Vec VillageCenter(int index)
     {
-        static const Vec centers[] = {Vec(0, 0), Vec(480, 480), Vec(-480, -480)};
-        return centers[index];
+        static const int grid[Society::VillageCount][2] = {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}};
+        return Vec(grid[index][0] * Society::VillageSpacing, grid[index][1] * Society::VillageSpacing);
     }
 
     inline Vec HuntingGround(int index)
     {
         Vec p = VillageCenter(index);
-        return Vec(p.x + 190, p.y - 190);
+        return Vec(p.x + 570, p.y - 100);
     }
 
     inline Vec MeditationGround(int index)
     {
         Vec p = VillageCenter(index);
-        return Vec(p.x - 135, p.y + 135);
+        return Vec(p.x - 570, p.y + 100);
     }
 
     inline Vec VillageBuilding(int village, int building)
@@ -278,25 +291,73 @@ namespace Game
         return Distance(p, Vec(a.x + x * t, a.y + y * t));
     }
 
+    inline Vec HousePosition(int village, int lot)
+    {
+        // Sixty private plots; the four central plots are reserved for the market.
+        int cell = lot;
+        if (cell >= 27)
+        {
+            cell += 2;
+        }
+        if (cell >= 35)
+        {
+            cell += 2;
+        }
+        Vec c = VillageCenter(village);
+        return Vec(c.x + (cell % 8 - 3.5) * 112, c.y + (cell / 8 - 3.5) * 112);
+    }
+
+    inline Vec HouseEntrance(int village, int lot)
+    {
+        Vec p = HousePosition(village, lot);
+        return Vec(p.x, p.y - 38);
+    }
+
+    inline double SettlementRoad(Vec p)
+    {
+        double distance = 1e10;
+        for (int v = 0; v < Society::VillageCount; ++v)
+        {
+            Vec c = VillageCenter(v);
+            if (Distance(p, c) < Society::VillageRadius)
+            {
+                distance = std::min(distance, std::min(std::abs(p.x - c.x), std::abs(p.y - c.y)));
+                distance = std::min(
+                    distance,
+                    std::min(std::abs(std::remainder(p.x - c.x, 112.0)), std::abs(std::remainder(p.y - c.y, 112.0)))
+                );
+            }
+            for (int other = v + 1; other < Society::VillageCount; ++other)
+            {
+                if (Distance(c, VillageCenter(other)) <= Society::VillageSpacing * 1.01)
+                {
+                    distance = std::min(distance, SegmentDistance(p, c, VillageCenter(other)));
+                }
+            }
+        }
+        return distance;
+    }
+
     inline bool SettlementClearing(Vec p)
     {
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < Society::VillageCount; ++i)
         {
             Vec c = VillageCenter(i);
-            if (Distance(p, c) < 155 || Distance(p, HuntingGround(i)) < 60 || Distance(p, MeditationGround(i)) < 45 ||
-                SegmentDistance(p, c, HuntingGround(i)) < 36 || SegmentDistance(p, c, MeditationGround(i)) < 36)
+            if (Distance(p, c) < Society::VillageRadius || Distance(p, HuntingGround(i)) < 60 ||
+                Distance(p, MeditationGround(i)) < 45 || SegmentDistance(p, c, HuntingGround(i)) < 36 ||
+                SegmentDistance(p, c, MeditationGround(i)) < 36)
             {
                 return true;
             }
         }
-        return false;
+        return SettlementRoad(p) < 40;
     }
 
     inline int VillageAt(Vec p)
     {
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < Society::VillageCount; ++i)
         {
-            if (Distance(p, VillageCenter(i)) < 145)
+            if (Distance(p, VillageCenter(i)) < Society::VillageRadius)
             {
                 return i;
             }
@@ -328,8 +389,23 @@ namespace Game
 
     inline bool Walkable(Vec p)
     {
-        for (int v = 0; v < 3; ++v)
+        for (int v = 0; v < Society::VillageCount; ++v)
         {
+            Vec relative(p.x - VillageCenter(v).x, p.y - VillageCenter(v).y);
+            if (std::abs(relative.x) < 460 && std::abs(relative.y) < 460)
+            {
+                int cellX = (int)std::round(relative.x / 112 + 3.5);
+                int cellY = (int)std::round(relative.y / 112 + 3.5);
+                if (cellX >= 0 && cellX < 8 && cellY >= 0 && cellY < 8 &&
+                    !((cellX == 3 || cellX == 4) && (cellY == 3 || cellY == 4)))
+                {
+                    Vec house(VillageCenter(v).x + (cellX - 3.5) * 112, VillageCenter(v).y + (cellY - 3.5) * 112);
+                    if (std::abs(p.x - house.x) < 25 && std::abs(p.y - house.y) < 23)
+                    {
+                        return false;
+                    }
+                }
+            }
             for (int b = 0; b < 3; ++b)
             {
                 Vec c = VillageBuilding(v, b);
@@ -485,6 +561,17 @@ namespace Game
         }
         w.player.p = w.player.checkpoint;
         w.player.health = w.player.stamina = 100;
+        w.society.playerRaidGrace = 30;
+        w.society.playerHitRecovery = 2;
+        for (auto& npc : w.npcs)
+        {
+            if (npc.life.target == -1)
+            {
+                npc.life.target = 0;
+                npc.life.playerChase = npc.life.playerProvoked = 0;
+                npc.life.playerRetry = 20;
+            }
+        }
         if (w.story.ending == Story::Destroy)
         {
             w.player.health = 50;
@@ -523,7 +610,7 @@ namespace Game
             return false;
         }
         const Player& p = w.player;
-        f << std::setprecision(17) << "GSE_WORLD 4\n" << w.time << ' ' << w.deaths << '\n';
+        f << std::setprecision(17) << "GSE_WORLD 6\n" << w.time << ' ' << w.deaths << '\n';
         f << p.p.x << ' ' << p.p.y << ' ' << p.checkpoint.x << ' ' << p.checkpoint.y << ' ' << p.health << ' '
           << p.stamina << ' ' << p.bread << ' ' << p.herbs << ' ' << p.wood << ' ' << p.fragments << ' '
           << (int)p.ability << ' ' << p.exploration << '\n';
@@ -555,7 +642,17 @@ namespace Game
             f << n.originDeathId << ' ' << n.origin << ' ' << n.relationship << ' ' << n.power << ' ' << n.met << ' '
               << n.saved << ' ' << n.changed << ' ' << n.freeWill;
             f << '\n';
-            Society::WriteLife(f, n.life);
+            Society::WriteLife(f, n.life, true);
+            f << n.artCatalogVersion << ' ' << n.artParts.size();
+            for (const auto& part : n.artParts)
+            {
+                f << ' ' << part;
+            }
+            for (int palette : n.artPalettes)
+            {
+                f << ' ' << palette;
+            }
+            f << '\n';
         }
         f << w.events.size() << '\n';
         for (int e : w.events)
@@ -604,7 +701,7 @@ namespace Game
         Player& p = result.player;
         std::string magic;
         int version = 0, ability = 0;
-        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 4)
+        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 6)
         {
             return false;
         }
@@ -705,9 +802,35 @@ namespace Game
             {
                 return false;
             }
-            if (version >= 4 && !Society::ReadLife(f, n.life, (int)count))
+            if (version >= 4 && !Society::ReadLife(f, n.life, (int)count, version >= 5))
             {
                 return false;
+            }
+            if (version >= 6)
+            {
+                size_t parts = 0;
+                if (!(f >> n.artCatalogVersion >> parts) || parts > 16)
+                {
+                    return false;
+                }
+                for (size_t k = 0; k < parts; ++k)
+                {
+                    std::string part;
+                    if (!(f >> part) || part.empty() || part.size() > 128 ||
+                        part.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") !=
+                            std::string::npos)
+                    {
+                        return false;
+                    }
+                    n.artParts.push_back(part);
+                }
+                for (int& palette : n.artPalettes)
+                {
+                    if (!(f >> palette) || palette < 0 || palette > 1024)
+                    {
+                        return false;
+                    }
+                }
             }
             result.npcs.push_back(n);
         }

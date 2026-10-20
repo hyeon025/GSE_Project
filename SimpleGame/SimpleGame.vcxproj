@@ -158,6 +158,8 @@
     <ClInclude Include="GameWorld.h" />
     <ClInclude Include="SocietyState.h" />
     <ClInclude Include="WorldSimulation.h" />
+    <ClInclude Include="MonitorSnapshot.h" />
+    <ClInclude Include="WorldMonitor.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="SceneGraph.h" />
     <ClInclude Include="WorldActors.h" />
@@ -170,6 +172,11 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="CharacterMotion.h" />
     <ClInclude Include="CharacterMesh.h" />
+    <ClInclude Include="ArtAsset.h" />
+    <ClInclude Include="ArtPresentation.h" />
+    <ClInclude Include="Dependencies\cgltf.h" />
+    <ClInclude Include="Dependencies\json.hpp" />
+    <ClInclude Include="IsometricView.h" />
     <ClInclude Include="RenderMetrics.h" />
     <ClInclude Include="RenderMeshCache.h" />
     <ClInclude Include="stdafx.h" />
@@ -177,7 +184,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="WorldMonitor.cpp" />
     <ClCompile Include="CharacterMesh.cpp" />
+    <ClCompile Include="ArtAsset.cpp" />
+    <ClCompile Include="ArtPresentation.cpp" />
     <ClCompile Include="RendererBatch.cpp" />
     <ClCompile Include="RendererStorage.cpp" />
     <ClCompile Include="RendererText.cpp" />

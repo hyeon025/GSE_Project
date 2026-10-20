@@ -1,0 +1,48 @@
+# Art 에셋 로더
+
+## 입력 규격
+
+`Art/LowPoly_AgeOfEchoes/README_KO.md`와 `Catalog/assembly_contract.json`을 기준으로 구현했다. 제작용 `.blend`는 Blender에서 편집하고 게임은 embedded GLB를 읽는다. 현재 추가된 리깅 자료의 `rig_catalog.json`, `creature_catalog.json`도 인식한다.
+
+- `mesh_catalog.json`: 영속 `asset_id`, 슬롯별 고정 번호, 상대 GLB 경로. 라이브러리와 개별 파일을 중복 등록하지 않는다.
+- `npc_appearance_recipes.json`: 필수 슬롯, 머리카락/모자 및 몸통/팔 조합 검증 후 초기 외형을 한 번 선택한다. 예제 `appearance_id`를 NPC ID로 취급하지 않는다.
+- `rig_catalog.json`: 기존 `source_asset_id`를 `NPC_Modular_Rigged.glb` 안의 `rigged_asset_id`로 연결한다. 카탈로그가 없으면 정적 파트를 사용한다.
+- `creature_catalog.json`: 종별 GLB를 `MOB_<species_key>` ID로 등록한다. 이후 몹도 카탈로그에 추가하면 로더 코드 변경 없이 등록된다.
+- 애니메이션 이름과 실제 시간 범위는 GLB에서 읽는다. Idle/Walk/Run 외에도 현재 18개 클립을 명시적으로 선택해 샘플링할 수 있다. 실제 게임의 전이 규칙은 별도다.
+
+GLB의 +Y 위/+Z 앞을 게임의 +Z 위/-Y 앞으로 변환한다. 공통 조립 원점을 유지하며 파트별 중심 정렬은 하지 않는다. NPC 기본 단위는 1m=30 월드 단위다. 환경은 기존 충돌 크기에 맞춘 표시 배율을 별도로 사용한다. 자동 충돌 메시나 실내 생성은 포함하지 않는다.
+
+## 구조
+
+`ArtAsset.h/.cpp`는 cgltf v1.15로 GLB를 파싱하고 nlohmann/json v3.12.0으로 카탈로그를 읽는다. 의존성은 `SimpleGame/Dependencies`에 고정 버전으로 포함한다.
+
+`Model`은 원본 버퍼·본 계층·역바인드 행렬·정점별 최대 네 가중치·TRS 애니메이션을 공유 보관한다. STEP/LINEAR/CUBICSPLINE, quaternion SLERP, 반복/1회 재생을 지원한다. 포즈 평가 시 공유 본을 변경하지 않는다. `Model::Socket`은 이름으로 본/노드의 GLB 월드 행렬을 반환하므로 손 장비 부착에 사용할 수 있다.
+
+```cpp
+auto* asset = Art::Assets().Find("MOB_Wolf");
+auto model = Art::Assets().Load(*asset);
+auto triangles = model->Sample("", "Jump", elapsedSeconds, false);
+auto hand = model->Socket("hand.R", "Attack", elapsedSeconds, false);
+```
+
+소켓 이름은 해당 리그의 실제 본 이름을 사용해야 한다. 위 예제의 `hand.R`는 이름 선택 예시다. 소켓 행렬은 미터 단위 GLB 축이며 게임 축·인스턴스 배율·회전 변환이 추가로 필요하다.
+
+`ArtPresentation`은 CPU 스키닝 결과를 아이소매트릭 면으로 투영하고, 모든 모듈 파트의 면을 한 캐릭터 안에서 함께 정렬한다. 재질의 선형 기본색·발광 값을 현재 렌더러의 표시 색 공간으로 변환한다. 완전한 PBR 셰이더가 아닌 면 조명 방식이다.
+
+정적 투영 메시에는 소스 내용 해시·에셋 ID·시점 버전·배율·회전을 포함한 키를 사용하며 기존 디스크 메시 캐시와 인스턴싱 경로를 공유한다. 애니메이션은 기본 15Hz, 클립당 최대 120개 포즈를 공유하고 96MiB/1,024개 CPU 캐시를 사용한다. 포즈는 디스크에 저장하지 않는다. 캐시 압박 시 다시 평가할 수 있으며 `[ArtPose] builds/cached/bytes/evictions`와 기존 렌더 프로파일로 비용을 확인한다. GPU 스키닝이나 모든 캐릭터를 매 프레임 새로 만드는 방식은 아니다.
+
+## 게임 연결과 업데이트
+
+플레이어·NPC에는 Idle/Walk/Run, 전투 적에는 종별 모델과 Walk/Attack을 연결했다. 집·나무·바위·폐허 벽도 카탈로그 모델을 사용한다. 로딩 실패 시 `[Art]` 로그를 남기고 기존 절차적 모델로 표시한다.
+
+작업 폴더는 현재 디렉터리와 실행 파일의 상위 경로에서 찾는다. 별도 설치에서는 `GSE_ART_ROOT`를 `Catalog`와 `Exports`가 있는 폴더로 지정한다. 배포에는 해당 Art 폴더도 함께 제공해야 한다. 빌드 때 `.blend` 전체를 복사하지 않는다.
+
+새 GLB와 카탈로그를 저장한 뒤 게임에서 **F8**을 누르면 다시 읽는다. 실패한 재로딩은 이전 정상 카탈로그를 유지한다. 개발 중 파일을 저장하는 순간 자동으로 읽지 않는다.
+
+NPC의 선택된 파트 ID 목록·카탈로그 버전·팔레트 번호는 `GSE_WORLD 6`에 저장한다. 기존 월드 1~5는 읽을 수 있고, 외형 미지정 NPC는 첫 표시 동기화에서 영속 ID를 기준으로 배정한다. 이후 카탈로그 추가·직업 변경·이주가 기존 외형을 다시 뽑지 않는다. 현재 팔레트 번호는 기본값 0이며 대체 피부/머리/천 팔레트 적용 UI는 포함하지 않는다.
+
+## 지원 범위와 검증
+
+현재 제작 규격인 triangle GLB·색상 재질·최대 4개 가중치를 지원한다. 이미지 텍스처, morph target, Draco/meshopt 압축, 외부 버퍼 및 필수 확장은 명시적으로 거절한다. 리깅/애니메이션 자료를 수정할 때 이 규격으로 내보낸다. 애니메이션 블렌딩·루트 이동의 게임 이동 반영·점프 물리·LOD는 별도 구현 대상이다. 임포터는 GLB 안의 세로 이동과 회전 자체는 평가한다.
+
+`tests/ArtAssetTests.cpp`는 현재 카탈로그 전체, 실제 리그의 클립별 평가, 반복/단발 샘플링, 포즈 간 상태 독립성, 공유 로딩을 검사하는 독립 회귀 테스트다. `SimpleGame/ArtAsset.cpp`와 함께 링크하고 프로젝트 루트에서 실행한다. 사용자 선호에 따라 게임 빌드와 이 테스트의 실행은 수행하지 않았다. 제공된 GLB 9개에 스킨이 있고 각 18개 애니메이션이 있는 것은 파일 메타데이터로 확인했다.

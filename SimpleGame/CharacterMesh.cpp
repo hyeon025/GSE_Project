@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iterator>
 #include "CharacterMesh.h"
+#include "IsometricView.h"
 
 namespace CharacterMesh
 {
@@ -153,7 +154,7 @@ namespace CharacterMesh
             void Add(SurfaceVertex a, SurfaceVertex b, SurfaceVertex d, Tint color, float shine)
             {
                 SurfaceVertex vertices[] = {a, b, d};
-                Vec view = Normalize({0, -1, .5f});
+                Vec view = Normalize({0, -IsometricView::HeightScale, IsometricView::GroundDepth});
                 Vec normal = Rotate(a.n + b.n + d.n);
                 if (Dot(normal, view) <= 0)
                 {
@@ -172,7 +173,7 @@ namespace CharacterMesh
                     float intensity = (.40f + .67f * diffuse + rim) * occlusion;
                     triangle.vertices[i] = {
                         p.x,
-                        -p.y * .5f - p.z,
+                        -p.y * IsometricView::GroundDepth - p.z * IsometricView::HeightScale,
                         color[0] * intensity + specular,
                         color[1] * intensity + specular,
                         color[2] * intensity + specular,
@@ -180,7 +181,7 @@ namespace CharacterMesh
                         0,
                         0
                     };
-                    triangle.depth += (p.y - p.z * .5f) / 3;
+                    triangle.depth += (p.y * IsometricView::HeightScale - p.z * IsometricView::GroundDepth) / 3;
                 }
                 triangles.push_back(triangle);
             }
@@ -190,8 +191,9 @@ namespace CharacterMesh
     std::uint64_t Key(const Appearance& a)
     {
         // Appearance revision is independent of the generic on-disk mesh format.
-        return (std::uint64_t(1) << 32) | (std::uint64_t(a.facing) << 16) | (std::uint64_t(a.pose) << 8) |
-               (std::uint64_t(a.ability) << 3) | (a.player ? 4 : 0) | (a.crossbow ? 2 : 0) | (a.armed ? 1 : 0);
+        return (std::uint64_t(IsometricView::MeshRevision) << 32) | (std::uint64_t(a.facing) << 16) |
+               (std::uint64_t(a.pose) << 8) | (std::uint64_t(a.ability) << 3) | (a.player ? 4 : 0) |
+               (a.crossbow ? 2 : 0) | (a.armed ? 1 : 0);
     }
 
     std::vector<RenderMeshCache::Vertex> Build(const Appearance& appearance)

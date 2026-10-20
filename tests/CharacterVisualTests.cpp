@@ -27,6 +27,17 @@ void CheckDirections()
     }
     motion.Stop();
     assert(motion.Pose() == CharacterMotion::IdlePose && motion.facing == CharacterFacing::Back);
+    const IsometricView::Point inputs[] = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+    const CharacterFacing expected[] =
+        {CharacterFacing::Front, CharacterFacing::Back, CharacterFacing::Left, CharacterFacing::Right};
+    for (int i = 0; i < 4; ++i)
+    {
+        auto movement = IsometricView::GroundFromScreen(inputs[i]);
+        motion.Update(movement.x, movement.y, movement.x, movement.y);
+        assert(motion.facing == expected[i]);
+        motion.Update(movement.x, movement.y, 0, 0);
+        assert(motion.facing == expected[i] && !motion.moving);
+    }
 }
 
 void CheckCachedPoses()

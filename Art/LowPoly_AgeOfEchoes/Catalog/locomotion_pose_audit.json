@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "scope": "baked skeleton stance ankle heights and loop matrices; in-place motion so actor velocity must match catalog speed",
+  "errors": [],
+  "rigs": [
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "max_stance_ankle_height_error_m": 0.000451,
+      "loop_seam_max_matrix_error": 0
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "max_stance_ankle_height_error_m": 1e-06,
+      "loop_seam_max_matrix_error": 0,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "max_stance_ankle_height_error_m": 0.0,
+      "loop_seam_max_matrix_error": 0,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "max_stance_ankle_height_error_m": 1e-06,
+      "loop_seam_max_matrix_error": 0,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "max_stance_ankle_height_error_m": 1e-06,
+      "loop_seam_max_matrix_error": 0,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "max_stance_ankle_height_error_m": 0.0,
+      "loop_seam_max_matrix_error": 0,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "max_stance_ankle_height_error_m": 0.003168,
+      "loop_seam_max_matrix_error": 0,
+      "rig_revision": 2
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "max_stance_ankle_height_error_m": 0.000451,
+      "loop_seam_max_matrix_error": 0
+    }
+  ]
+}

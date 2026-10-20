@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>잔향의 시대 · 월드 모니터</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/dashboard.js" defer></script>
+</head>
+<body>
+  <header>
+    <div><h1>잔향의 시대 <span>월드 모니터</span></h1><p id="clock">스냅샷 대기</p></div>
+    <div class="header-actions">
+      <span id="connection" class="status" role="status">연결 중</span>
+      <label>갱신 <select id="interval"><option value="1000">1초</option><option value="2000">2초</option><option value="5000">5초</option></select></label>
+      <button id="refresh" class="icon" title="지금 갱신" aria-label="지금 갱신">↻</button>
+      <button id="download" class="icon" title="JSON 다운로드" aria-label="JSON 다운로드" disabled>↓</button>
+    </div>
+  </header>
+  <main>
+    <p id="notice" class="notice" role="status">게임 데이터 대기 중</p>
+    <section class="diagnostics" aria-label="연결 진단">
+      <div><span>JSON 수신 시각</span><strong id="received-at">—</strong></div>
+      <div><span>원본 데이터 경과</span><strong id="source-age">—</strong></div>
+      <div><span>실제 시뮬레이션 속도</span><strong id="simulation-rate">—</strong></div>
+      <div><span>메시지 크기 / 응답 시간</span><strong id="transfer">—</strong></div>
+      <div class="source-path"><span>데이터 파일</span><code id="source-path">—</code></div>
+      <div class="source-path" id="source-error" hidden></div>
+    </section>
+    <section class="metrics" aria-label="전체 상태">
+      <div><span>생존 NPC</span><strong id="alive">—</strong><small id="population">전체 — / 사망 —</small></div>
+      <div><span>현재 전투 몹</span><strong id="mobs">—</strong><small id="combat">진입한 전투 없음</small></div>
+      <div><span>플레이어 체력</span><strong id="player-health">—</strong><small id="player-gold">은화 —</small></div>
+      <div><span>누적 거래</span><strong id="trades">—</strong><small id="raids">약탈 명중 — / NPC 사망 —</small></div>
+    </section>
+    <section class="operations" aria-label="위험 및 경제 상태">
+      <div>
+        <div class="section-title"><h2>위험 알림</h2><span id="alert-count">—</span></div>
+        <ul id="alerts" class="alerts"><li>데이터 대기 중</li></ul>
+      </div>
+      <div>
+        <div class="section-title"><h2>월드 지표</h2><span id="metric-state">—</span></div>
+        <dl id="world-metrics"></dl>
+      </div>
+    </section>
+    <div class="world-grid">
+      <section>
+        <div class="section-title"><h2>마을 현황</h2><span>소속 생존 주민 기준</span></div>
+        <div class="table-scroll"><table class="villages">
+          <thead><tr><th>마을</th><th>성향 / 분위기</th><th>주민 / 현지</th><th>체력</th><th>부상 / 위급</th><th>금고</th><th>재고</th><th>주민 자산</th></tr></thead>
+          <tbody id="villages"><tr><td colspan="8" class="empty">마을 데이터 없음</td></tr></tbody>
+        </table></div>
+        <div id="village-details" class="village-details"></div>
+      </section>
+      <section class="map-section">
+        <div class="section-title"><h2>생활권</h2><span>생존 주민 위치</span></div>
+        <canvas id="map" width="600" height="290" aria-label="마을과 NPC 위치 지도"></canvas>
+        <div class="legend"><span class="legend-village">■ 마을</span><span class="legend-npc">● 주민</span><span class="legend-fight">● 교전</span><span class="legend-player">◆ 플레이어</span><span id="off-map"></span></div>
+      </section>
+    </div>
+    <section class="npc-section">
+      <div class="section-title"><h2>NPC 상태</h2><span id="result-count">0명</span></div>
+      <div class="filters">
+        <label class="search">검색<input id="search" type="search" placeholder="이름, ID, 마을, 직업, 활동" autocomplete="off"></label>
+        <label>소속 마을<select id="village-filter"><option value="all">모든 마을</option></select></label>
+        <label>직업<select id="job-filter"><option value="all">모든 직업</option></select></label>
+        <label>생존<select id="life-filter"><option value="alive">생존</option><option value="all">전체</option><option value="dead">사망</option></select></label>
+        <label>정렬<select id="sort"><option value="id">ID 순</option><option value="health">체력 낮은 순</option><option value="gold">은화 많은 순</option><option value="insight">깨달음 높은 순</option></select></label>
+      </div>
+      <div class="npc-layout">
+        <div class="npc-list">
+          <div class="table-scroll"><table>
+            <thead><tr><th>NPC</th><th>직업 / 거점</th><th>행동 / 목표</th><th>체력</th><th>은화</th><th>물품</th><th>깨달음</th><th>대상</th></tr></thead>
+            <tbody id="npcs"><tr><td colspan="8" class="empty">NPC 데이터 없음</td></tr></tbody>
+          </table></div>
+          <div class="pagination"><span id="page-label">0 / 0</span><button id="previous" class="icon" title="이전 페이지" aria-label="이전 페이지">←</button><button id="next" class="icon" title="다음 페이지" aria-label="다음 페이지">→</button></div>
+        </div>
+        <aside id="detail" aria-label="NPC 상세"><h3>선택한 NPC</h3><p class="muted">선택 없음</p></aside>
+      </div>
+    </section>
+    <section class="events-section"><div class="section-title"><h2>살인 소문</h2><span id="rumor-count">0건</span></div>
+      <div class="filters"><label>전파 마을<select id="rumor-village"><option value="all">모든 마을</option></select></label><label><input id="rumor-active" type="checkbox" checked>현재 퍼지는 소문만</label></div>
+      <div class="table-scroll event-scroll"><table><thead><tr><th>사건</th><th>경과</th><th>가해자 / 피해자</th><th>인근 마을 / 좌표</th><th>목격</th><th>전파 마을</th></tr></thead><tbody id="rumors"><tr><td colspan="6" class="empty">소문 없음</td></tr></tbody></table></div>
+    </section>
+    <section class="events-section"><div class="section-title"><h2>최근 사건</h2><label>분류 <select id="event-kind"><option value="all">전체 사건</option><option value="violent">공격·사망</option><option value="economy">거래·사냥</option><option value="life">계승·치료·깨달음</option></select></label></div>
+      <div class="table-scroll event-scroll"><table><thead><tr><th>월드 시각</th><th>사건</th><th>주체</th><th>상대</th><th>수량 / 값</th></tr></thead><tbody id="events"><tr><td colspan="5" class="empty">사건 없음</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <footer><span id="session">세션 —</span><span>읽기 전용 · 로컬 연결</span></footer>
+</body>
+</html>

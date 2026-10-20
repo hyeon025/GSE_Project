@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "notes_ko": "망자는 NPC 메시를 공유하고 오브젝트 재질과 포즈만 바꾼다. 개별 GLB를 함께 로드할 때 이 표를 이용해 공용 메시를 재사용할 수 있다.",
+  "aliases": [
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Arms",
+      "source_mesh": "SKM_NPC_Arms_01_Cloth"
+    },
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Belt",
+      "source_mesh": "SKM_NPC_Belt_01_Plain"
+    },
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Feet",
+      "source_mesh": "SKM_NPC_Feet_02_Wrapped"
+    },
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Hair",
+      "source_mesh": "SKM_NPC_Hair_01_Crop"
+    },
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Head",
+      "source_mesh": "SKM_NPC_Head_01_Masculine"
+    },
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Legs",
+      "source_mesh": "SKM_NPC_Legs_02_Patched"
+    },
+    {
+      "mob_node": "SKM_MOB_07_AshenRevenant__Torso",
+      "source_mesh": "SKM_NPC_Torso_01_Tunic"
+    }
+  ]
+}

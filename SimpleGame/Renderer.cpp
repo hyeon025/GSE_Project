@@ -12,6 +12,8 @@
 #include <iomanip>
 #include <sstream>
 #include "Renderer.h"
+#include "IsometricView.h"
+#include "GameWorld.h"
 
 Renderer::Renderer(int width, int height)
     : m_Width(width),
@@ -363,8 +365,27 @@ void Renderer::Terrain(float cameraX, float cameraY, float zoom, bool farming, f
     glUniform1i(glGetUniformLocation(m_Terrain, "u_LinearOutput"), m_RenderingHdr ? 1 : 0);
     glUniform2f(glGetUniformLocation(m_Terrain, "u_Camera"), cameraX, cameraY);
     glUniform1f(glGetUniformLocation(m_Terrain, "u_Zoom"), zoom);
+    glUniform2f(glGetUniformLocation(m_Terrain, "u_View"), IsometricView::GroundDepth, IsometricView::AnchorY);
+    const auto right = IsometricView::GroundFromScreen({1, 0});
+    const auto down = IsometricView::GroundFromScreen({0, 1});
+    glUniform4f(
+        glGetUniformLocation(m_Terrain, "u_GroundFromScreen"),
+        (float)right.x,
+        (float)right.y,
+        (float)down.x,
+        (float)down.y
+    );
     glUniform1i(glGetUniformLocation(m_Terrain, "u_Farming"), farming ? 1 : 0);
     glUniform1f(glGetUniformLocation(m_Terrain, "u_Seed"), seed);
+    float centers[Society::VillageCount * 2];
+    for (int v = 0; v < Society::VillageCount; ++v)
+    {
+        auto center = Game::VillageCenter(v);
+        centers[v * 2] = (float)center.x;
+        centers[v * 2 + 1] = (float)center.y;
+    }
+    glUniform2fv(glGetUniformLocation(m_Terrain, "u_Villages[0]"), Society::VillageCount, centers);
+    glUniform1f(glGetUniformLocation(m_Terrain, "u_VillageRadius"), (float)Society::VillageRadius);
     glBindVertexArray(m_Array);
     DrawArrays(GL_TRIANGLES, 0, 3);
 }

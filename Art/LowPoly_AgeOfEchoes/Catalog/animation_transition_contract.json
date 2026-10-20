@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "implementation_status": "DATA_ONLY_RUNTIME_INTEGRATION_DEFERRED",
+  "sample_fps": 30,
+  "bone_rotation_interpolation": "quaternion_slerp",
+  "keyframe_interpolation": "LINEAR",
+  "recommended_crossfade_seconds": {
+    "Idle_Walk": 0.12,
+    "Walk_Run": 0.1,
+    "Turn_enter_exit": 0.1,
+    "Jump_phases": 0.06
+  },
+  "locomotion": {
+    "xy_mode": "in_place",
+    "match_actor_speed_to": "animation_catalog.json / nominal_speed_mps",
+    "allow_playback_rate_scaling": true,
+    "slope_foot_ik": "not implemented"
+  },
+  "turning": {
+    "clips": [
+      "Turn_L45",
+      "Turn_R45",
+      "Turn_L90",
+      "Turn_R90",
+      "WalkTurn_L45",
+      "WalkTurn_R45",
+      "RunTurn_L45",
+      "RunTurn_R45"
+    ],
+    "animated_channel": "root bone yaw",
+    "left_degrees": 45,
+    "large_left_degrees": 90,
+    "right_sign": -1,
+    "accumulate_actor_heading": true,
+    "notes_ko": "루트 yaw를 추출하거나 클립 완료 시 누적 회전을 액터에 전달한 뒤 루트 회전을 정리. 액터와 루트에 회전을 중복 적용하지 않음."
+  },
+  "jump": {
+    "full_clip": "Jump",
+    "full_clip_has_vertical_root_motion": true,
+    "physics_mode_sequence": [
+      "JumpStart",
+      "JumpLoop",
+      "JumpLand"
+    ],
+    "physics_phase_clips_have_vertical_root_motion": false,
+    "notes_ko": "완결형 Jump의 수직 루트 이동과 물리 점프 높이를 중복 적용하지 않음. 분리형은 실제 접지·이륙 이벤트로 전환."
+  },
+  "npc_mesh_selection": {
+    "catalog": "rig_catalog.json",
+    "source_indices_unchanged": true,
+    "one_skeleton_per_actor": true,
+    "none_index": 0,
+    "preserve_common_assembly_origin": true
+  },
+  "preview_gifs": {
+    "phase_normalized": true,
+    "exported_clip_timing_unchanged": true,
+    "files": [
+      "Previews/Rigged/Walk.gif",
+      "Previews/Rigged/Run.gif",
+      "Previews/Rigged/Jump.gif",
+      "Previews/Rigged/Turn_L90.gif"
+    ]
+  }
+}

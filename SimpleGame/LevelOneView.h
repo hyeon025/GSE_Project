@@ -48,36 +48,38 @@ public:
     {
         auto p = Project({});
         unsigned variant = Game::Hash(x, y, level.seed) % 17;
-        float h = (20 + variant) * scene.zoom;
+        float h = (20 + variant) * IsometricView::HeightScale * scene.zoom;
+        auto bounds = IsometricView::GroundHalfExtents({LevelOne::CellSize * .5, LevelOne::CellSize * .5});
+        float depth = (float)bounds.y;
+        float opacity = scene.SceneryOpacity(p, (float)bounds.x, h / scene.zoom + depth + 16, depth);
         scene.r.CachedMesh(
             Renderer::MeshKind::LevelBlock,
-            variant,
+            (std::uint64_t(IsometricView::MeshRevision) << 32) | variant,
             (float)p.x,
             (float)p.y,
             scene.zoom,
-            1,
+            opacity,
             [this, variant]
             {
                 float height = 20 + variant;
                 float half = LevelOne::CellSize * .5f;
-                float width = (float)LevelOne::CellSize;
                 Color top(.37f, .40f, .35f), front(.22f, .27f, .25f), side(.29f, .32f, .28f);
-                scene.r.Triangle(0, half - height, width, -height, 0, -half - height, top, top, top);
-                scene.r.Triangle(0, half - height, 0, -half - height, -width, -height, top, top, top);
-                scene.r.Triangle(0, half - height, -width, -height, 0, half, front, side, front);
-                scene.r.Triangle(0, half, -width, -height, -width, 0, front, side, side);
-                scene.r.Triangle(0, half - height, 0, half, width, -height, side, front, front);
-                scene.r.Triangle(0, half, width, 0, width, -height, front, front, side);
+                GameScene mesh(scene.r, scene.world);
+                mesh.zoom = 1;
+                mesh.Prism(half, half, height, side, front, top);
             }
         );
-        scene.Rock((float)p.x, (float)p.y - h, .7f, Game::Hash(x, y, 77));
+        scene.Rock((float)p.x, (float)p.y - h, .7f, Game::Hash(x, y, 77), opacity);
+        double half = LevelOne::CellSize * .5;
+        auto edgeStart = IsometricView::Project({-half, -half, (double)(20 + variant)});
+        auto edgeEnd = IsometricView::Project({half, -half, (double)(20 + variant)});
         scene.r.Line(
-            (float)p.x,
-            (float)p.y + LevelOne::CellSize * .5f * scene.zoom - h,
-            (float)p.x + LevelOne::CellSize * scene.zoom,
-            (float)p.y - h,
+            (float)p.x + (float)edgeStart.x * scene.zoom,
+            (float)p.y + (float)edgeStart.y * scene.zoom,
+            (float)p.x + (float)edgeEnd.x * scene.zoom,
+            (float)p.y + (float)edgeEnd.y * scene.zoom,
             1,
-            Color(.50f, .52f, .45f)
+            Color(.50f, .52f, .45f, opacity)
         );
     }
 
@@ -89,7 +91,23 @@ public:
             Ring(enemy.p, 24, Color(.78f, .42f, .33f, .7f), 2);
             return;
         }
-        if (enemy.kind == LevelOne::Boss)
+        Art::DrawRequest imported;
+        imported.assets = {
+            enemy.kind == LevelOne::Boss     ? "MOB_Bear"
+            : enemy.kind == LevelOne::Runner ? "MOB_Wolf"
+            : enemy.kind == LevelOne::Archer ? "MOB_AshenRevenant"
+                                             : "MOB_Boar"
+        };
+        imported.x = (float)p.x;
+        imported.y = (float)p.y;
+        imported.scale = scene.zoom * (enemy.kind == LevelOne::Boss ? 1.5f : 1.f);
+        imported.clip = enemy.windup > 0 ? "Attack" : "Walk";
+        imported.seconds = scene.world.time;
+        CharacterMotion heading;
+        heading.Update(level.p.x - enemy.p.x, level.p.y - enemy.p.y, 0, 0);
+        imported.yaw = Art::FacingYaw(heading.facing);
+        bool loaded = Art::Draw(scene.r, imported);
+        if (!loaded && enemy.kind == LevelOne::Boss)
         {
             float x = (float)p.x;
             float y = (float)p.y;
@@ -133,7 +151,7 @@ public:
             scene.Stroke(x, y, -21, -43, -21, -17, 10, Color(.32f, .37f, .36f));
             scene.zoom = z;
         }
-        else
+        else if (!loaded)
         {
             scene.Person(
                 Game::Vec(enemy.p.x, enemy.p.y),
@@ -333,31 +351,24 @@ public:
                             Block(tile.first, tile.second);
                         }
                     );
-                    block.depthOffset = 24 * scene.zoom;
+                    block.depthOffset =
+                        IsometricView::GroundHalfExtents({LevelOne::CellSize * .5, LevelOne::CellSize * .5}).y *
+                        scene.zoom;
                 }
-                else if ((std::abs(x - LevelOne::Center) > 2 && std::abs(y - LevelOne::Center) > 2) && (x + y) % 3 == 0)
+                else if ((std::abs(x - LevelOne::Center) > 2 && std::abs(y - LevelOne::Center) > 2) &&
+                         Game::Hash(x, y, level.seed) % 100 < 55)
                 {
+                    unsigned seed = Game::Hash(x, y, level.seed);
+                    center.x += (int)(seed / 100 % 21) - 10;
+                    center.y += (int)(seed / 2100 % 21) - 10;
                     Place(
                         {GrassNode, x, y},
                         scenery,
                         center,
-                        0,
-                        [this](int)
+                        seed,
+                        [this](unsigned seed)
                         {
-                            auto p = Project({});
-                            for (int i = -2; i <= 2; ++i)
-                            {
-                                scene.Stroke(
-                                    (float)p.x,
-                                    (float)p.y,
-                                    (float)i * 9,
-                                    0,
-                                    (float)i * 9 - 4,
-                                    -7,
-                                    .8f,
-                                    Color(.42f, .43f, .28f, .6f)
-                                );
-                            }
+                            scene.Grass(seed);
                         },
                         ActorLayer::Ground
                     );
@@ -888,25 +899,48 @@ private:
     void MiniMap(float x, float y)
     {
         Rect(x - 7, y - 7, 169, 169, Color(.06f, .10f, .08f, .94f));
+        auto mapPoint = [&](double gx, double gy)
+        {
+            auto p = IsometricView::Project({gx, gy, 0});
+            return IsometricView::Point{x + 77.5 + p.x * 2.4, y + 77.5 + p.y * 2.4};
+        };
         for (int cy = 0; cy < LevelOne::MapSize; ++cy)
         {
             for (int cx = 0; cx < LevelOne::MapSize; ++cx)
             {
-                float px = (x + 77.5f + (cx - cy) * 2.4f) * scale;
-                float py = (y + 77.5f - (cx + cy - 2 * LevelOne::Center) * 1.2f) * scale;
-                float rx = 2.4f * scale;
-                float ry = 1.2f * scale;
+                double gx = cx - LevelOne::Center, gy = cy - LevelOne::Center;
+                auto a = mapPoint(gx - .5, gy - .5), b = mapPoint(gx + .5, gy - .5);
+                auto c = mapPoint(gx + .5, gy + .5), d = mapPoint(gx - .5, gy + .5);
                 Color color =
                     level.blocked[cy * LevelOne::MapSize + cx] ? Color(.30f, .32f, .27f) : Color(.15f, .23f, .17f);
-                scene.r.Triangle(px, py - ry, px + rx, py, px, py + ry, color, color, color);
-                scene.r.Triangle(px, py - ry, px, py + ry, px - rx, py, color, color, color);
+                scene.r.Triangle(
+                    (float)a.x * scale,
+                    (float)a.y * scale,
+                    (float)b.x * scale,
+                    (float)b.y * scale,
+                    (float)c.x * scale,
+                    (float)c.y * scale,
+                    color,
+                    color,
+                    color
+                );
+                scene.r.Triangle(
+                    (float)a.x * scale,
+                    (float)a.y * scale,
+                    (float)c.x * scale,
+                    (float)c.y * scale,
+                    (float)d.x * scale,
+                    (float)d.y * scale,
+                    color,
+                    color,
+                    color
+                );
             }
         }
         auto marker = [&](LevelOne::Point p, Color c, float size)
         {
-            float px = (float)((p.x - p.y) / LevelOne::CellSize) * 2.4f;
-            float py = (float)(-(p.x + p.y) / LevelOne::CellSize) * 1.2f;
-            Rect(x + 77.5f + px - size * .5f, y + 77.5f + py - size * .5f, size, size, c);
+            auto point = mapPoint(p.x / LevelOne::CellSize, p.y / LevelOne::CellSize);
+            Rect((float)point.x - size * .5f, (float)point.y - size * .5f, size, size, c);
         };
         for (const auto& e : level.enemies)
         {

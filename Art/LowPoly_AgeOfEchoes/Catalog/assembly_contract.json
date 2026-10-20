@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "height_m": 1.8,
+  "head_height_m": 0.6,
+  "head_body_ratio": 3,
+  "rest_pose": "relaxed A pose",
+  "origin": "ground between feet; all NPC mesh origins identical",
+  "required_slots": [
+    "Head",
+    "Torso",
+    "Arms",
+    "Legs",
+    "Feet",
+    "Belt"
+  ],
+  "optional_slots": [
+    "Hair",
+    "FacialHair",
+    "Headgear",
+    "Back",
+    "Mainhand",
+    "Offhand"
+  ],
+  "none_index": 0,
+  "index_policy": "append-only within each slot; never use file order or Blender object order",
+  "constraints": [
+    {
+      "if": "Headgear > 0",
+      "require": "Hair == 0",
+      "reason": "모자/투구/후드에는 머리카락 숨김"
+    },
+    {
+      "if": "Torso == 2",
+      "require": "Arms == 2",
+      "reason": "판금 어깨와 팔의 연결"
+    },
+    {
+      "if": "Torso == 4",
+      "require": "Arms == 4",
+      "reason": "로브 소매 연결"
+    },
+    {
+      "if": "Mainhand == 2",
+      "recommend": "Back == 2",
+      "reason": "궁수 화살통"
+    }
+  ],
+  "sockets_m": {
+    "head": [
+      0,
+      0,
+      1.2
+    ],
+    "neck": [
+      0,
+      0,
+      1.2
+    ],
+    "waist": [
+      0,
+      0,
+      0.78
+    ],
+    "ankles": [
+      0,
+      0,
+      0.18
+    ],
+    "hand_R": [
+      0.48,
+      -0.028,
+      0.725
+    ],
+    "hand_L": [
+      -0.48,
+      -0.028,
+      0.725
+    ],
+    "back": [
+      0,
+      0.2,
+      1.0
+    ]
+  },
+  "runtime_implementation": "deferred; no changes to game code or save format",
+  "rigging": "provided in AgeOfEchoes_Characters_Rigged.blend and Exports/Rigged; original static source preserved",
+  "environment": "exterior-only buildings; windows and doors are modeled closed; no interiors or collision meshes",
+  "rigged_variant": {
+    "rig_id": "RIG_NPC_Humanoid_v1",
+    "source_file": "AgeOfEchoes_Characters_Rigged.blend",
+    "library_glb": "Exports/Rigged/NPC_Modular_Rigged.glb",
+    "rig_catalog": "Catalog/rig_catalog.json",
+    "animation_catalog": "Catalog/animation_catalog.json",
+    "transition_contract": "Catalog/animation_transition_contract.json",
+    "part_indices_unchanged": true,
+    "skin_influences_max": 4
+  }
+}
