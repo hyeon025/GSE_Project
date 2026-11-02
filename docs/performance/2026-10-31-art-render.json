@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-31",
+  "scene": {
+    "actors": 48,
+    "resolution": [
+      1440,
+      900
+    ],
+    "clips": [
+      "Idle",
+      "Walk",
+      "Run"
+    ],
+    "headings": 4,
+    "frames": 240,
+    "warmup_frames": 120,
+    "build": "MSVC x64 /O2 /MD",
+    "post_processing": "unchanged defaults, HDR enabled",
+    "timing": "wall time including glFinish; render harness only, excludes game simulation, save/load and VSync"
+  },
+  "runs": {
+    "baseline": {
+      "cold": {
+        "mean_ms": 43.8932,
+        "p95_ms": 83.7935
+      },
+      "warm": {
+        "mean_ms": 44.9606,
+        "p95_ms": 84.1703
+      },
+      "profile_metadata": [
+        "# schema=2,mesh_revision=2,max_instances=2048,padding_ratio=8",
+        "# gpu=NVIDIA GeForce RTX 4060 Ti/PCIe/SSE2,gl=3.3.0 NVIDIA 610.88",
+        "# build=Oct 31 2026 22:10:03,shader_fnv64=5475228552932707015,segment=0"
+      ],
+      "warm_per_frame": {
+        "cpu_render_ms": 44.60661666666667,
+        "mesh_builds": 45.75,
+        "mesh_evictions": 45.75,
+        "upload_bytes": 12503769.6,
+        "submitted_vertices": 458073.9,
+        "flush_cache": 1.475,
+        "mesh_hits": 2.25
+      }
+    },
+    "final": {
+      "cold": {
+        "mean_ms": 12.8032,
+        "p95_ms": 45.1042
+      },
+      "warm": {
+        "mean_ms": 6.09965,
+        "p95_ms": 12.505
+      },
+      "profile_metadata": [
+        "# schema=2,mesh_revision=2,max_instances=2048,padding_ratio=8",
+        "# gpu=NVIDIA GeForce RTX 4060 Ti/PCIe/SSE2,gl=3.3.0 NVIDIA 610.88",
+        "# build=Oct 31 2026 22:18:43,shader_fnv64=5475228552932707015,segment=0"
+      ],
+      "warm_per_frame": {
+        "cpu_render_ms": 5.807766666666667,
+        "mesh_builds": 15.0,
+        "mesh_evictions": 15.033333333333333,
+        "upload_bytes": 4113648.0,
+        "submitted_vertices": 452548.875,
+        "flush_cache": 7.683333333333334,
+        "mesh_hits": 33.0
+      }
+    }
+  },
+  "visual_comparison": [
+    {
+      "frame": 0,
+      "maximum_channel_difference_8bit": 1,
+      "mean_absolute_rgba_difference": [
+        7.716049382716049e-07,
+        7.716049382716049e-07,
+        1.5432098765432098e-06,
+        0.0
+      ]
+    },
+    {
+      "frame": 59,
+      "maximum_channel_difference_8bit": 1,
+      "mean_absolute_rgba_difference": [
+        7.716049382716049e-07,
+        2.3148148148148148e-06,
+        7.716049382716049e-07,
+        0.0
+      ]
+    },
+    {
+      "frame": 119,
+      "maximum_channel_difference_8bit": 1,
+      "mean_absolute_rgba_difference": [
+        1.5432098765432098e-06,
+        1.5432098765432098e-06,
+        7.716049382716049e-07,
+        0.0
+      ]
+    },
+    {
+      "frame": 239,
+      "maximum_channel_difference_8bit": 1,
+      "mean_absolute_rgba_difference": [
+        7.716049382716049e-07,
+        7.716049382716049e-07,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "warm_mean_reduction_percent": 86.43334386106946
+}

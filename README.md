@@ -66,6 +66,20 @@ The periodic World log includes playerPursuers and playerRaidGrace.
 
 ## Rendering Performance
 
+2026-11-01: Actual saved-world play now prepares animation poses on a bounded CPU
+worker, culls off-screen character meshes, limits large-mesh batch padding and
+reuses spatial simulation calculations. The production Update/Display/HUD/swap
+test reduced moving-scene p95 from 77.63ms to 16.87ms. See
+[actual gameplay validation and limits](docs/GameplayOptimization_2026-11-01.md).
+Use tools/Measure-Gameplay.ps1 with a save copy for repeatable play-loop tests.
+
+2026-10-31: GPU meshes now use bounded LRU range reuse instead of clearing the
+entire arena. Modular parts share skeleton evaluation and the pose cache uses LRU.
+The 48-character render benchmark improved from 44.96ms to 6.10ms after warmup
+without reducing model or post-processing quality. This excludes game simulation.
+See [measurements and validation](docs/RendererOptimization_2026-10-31.md).
+Run the built `x64/Release/SimpleGame.exe` for optimized gameplay.
+
 The renderer queues ordered instances backed by disk-cached unit/static meshes.
 Text shares atlas pages with ordered geometry batches. Frame CSV and cache events
 are written under %LOCALAPPDATA%/GSE_Project/RenderLogs with bounded rotation.

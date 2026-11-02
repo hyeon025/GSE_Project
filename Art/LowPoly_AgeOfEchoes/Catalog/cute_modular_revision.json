@@ -1,0 +1,1078 @@
+{
+  "revision": 4,
+  "status": "PASS",
+  "npc_parts": 37,
+  "bones_unchanged": true,
+  "action_names_ranges_unchanged": true,
+  "parts": [
+    {
+      "asset_id": "SM_NPC_Arms_01_Cloth",
+      "vertices": 372,
+      "triangles": 704,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Arms_02_Armor",
+      "vertices": 532,
+      "triangles": 1008,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Arms_03_Leather",
+      "vertices": 372,
+      "triangles": 704,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Arms_04_Robe",
+      "vertices": 372,
+      "triangles": 704,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Back_01_Cape",
+      "vertices": 24,
+      "triangles": 44,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Back_02_Quiver",
+      "vertices": 188,
+      "triangles": 344,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Back_03_Pack",
+      "vertices": 184,
+      "triangles": 348,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Belt_01_Plain",
+      "vertices": 64,
+      "triangles": 116,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Belt_02_Pouches",
+      "vertices": 160,
+      "triangles": 292,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_FacialHair_01_Stubble",
+      "vertices": 42,
+      "triangles": 80,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_FacialHair_02_Beard",
+      "vertices": 90,
+      "triangles": 168,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Feet_01_Boots",
+      "vertices": 256,
+      "triangles": 480,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Feet_02_Wrapped",
+      "vertices": 352,
+      "triangles": 656,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Hair_01_Crop",
+      "vertices": 154,
+      "triangles": 284,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Hair_02_Bob",
+      "vertices": 226,
+      "triangles": 416,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Hair_03_Long",
+      "vertices": 226,
+      "triangles": 416,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Hair_04_Braid",
+      "vertices": 332,
+      "triangles": 612,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Hair_05_Swept",
+      "vertices": 172,
+      "triangles": 316,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Head_01_Masculine",
+      "vertices": 650,
+      "triangles": 1236,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Head_02_Feminine",
+      "vertices": 698,
+      "triangles": 1324,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Headgear_01_Hood",
+      "vertices": 224,
+      "triangles": 428,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Headgear_02_Helmet",
+      "vertices": 224,
+      "triangles": 428,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Headgear_03_Cap",
+      "vertices": 88,
+      "triangles": 168,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Legs_01_Trousers",
+      "vertices": 120,
+      "triangles": 228,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Legs_02_Patched",
+      "vertices": 168,
+      "triangles": 316,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Legs_03_Armored",
+      "vertices": 280,
+      "triangles": 532,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Mainhand_01_Sword",
+      "vertices": 81,
+      "triangles": 146,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Mainhand_02_Bow",
+      "vertices": 88,
+      "triangles": 164,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Mainhand_03_Staff",
+      "vertices": 74,
+      "triangles": 136,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Offhand_01_Shield",
+      "vertices": 154,
+      "triangles": 288,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Offhand_02_Lantern",
+      "vertices": 192,
+      "triangles": 352,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 1,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Torso_01_Tunic",
+      "vertices": 134,
+      "triangles": 240,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Torso_02_Armor",
+      "vertices": 208,
+      "triangles": 384,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Torso_03_Archer",
+      "vertices": 184,
+      "triangles": 340,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Torso_04_Robe",
+      "vertices": 168,
+      "triangles": 312,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Torso_05_Merchant",
+      "vertices": 166,
+      "triangles": 300,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    },
+    {
+      "asset_id": "SM_NPC_Torso_06_Healer",
+      "vertices": 198,
+      "triangles": 356,
+      "zero_area_triangles": 0,
+      "closed_components": true,
+      "max_weights": 2,
+      "invalid_weights": 0
+    }
+  ],
+  "errors": [],
+  "date": "2026-11-01",
+  "approved_concept": "References/Approved_Cute_Modular_Concept.png",
+  "npc_triangles_min": 3552,
+  "npc_triangles_max": 4956,
+  "previous_recipe_triangles": [
+    {
+      "appearance_id": "AOE_LOOK_001",
+      "triangles": 2601
+    },
+    {
+      "appearance_id": "AOE_LOOK_002",
+      "triangles": 2688
+    },
+    {
+      "appearance_id": "AOE_LOOK_003",
+      "triangles": 3155
+    },
+    {
+      "appearance_id": "AOE_LOOK_004",
+      "triangles": 2428
+    },
+    {
+      "appearance_id": "AOE_LOOK_005",
+      "triangles": 2936
+    },
+    {
+      "appearance_id": "AOE_LOOK_006",
+      "triangles": 3071
+    },
+    {
+      "appearance_id": "AOE_LOOK_007",
+      "triangles": 3133
+    },
+    {
+      "appearance_id": "AOE_LOOK_008",
+      "triangles": 2749
+    },
+    {
+      "appearance_id": "AOE_LOOK_009",
+      "triangles": 2557
+    },
+    {
+      "appearance_id": "AOE_LOOK_010",
+      "triangles": 2732
+    },
+    {
+      "appearance_id": "AOE_LOOK_011",
+      "triangles": 3155
+    },
+    {
+      "appearance_id": "AOE_LOOK_012",
+      "triangles": 2428
+    },
+    {
+      "appearance_id": "AOE_LOOK_013",
+      "triangles": 2936
+    },
+    {
+      "appearance_id": "AOE_LOOK_014",
+      "triangles": 3071
+    },
+    {
+      "appearance_id": "AOE_LOOK_015",
+      "triangles": 3089
+    },
+    {
+      "appearance_id": "AOE_LOOK_016",
+      "triangles": 2793
+    },
+    {
+      "appearance_id": "AOE_LOOK_017",
+      "triangles": 2557
+    },
+    {
+      "appearance_id": "AOE_LOOK_018",
+      "triangles": 2688
+    },
+    {
+      "appearance_id": "AOE_LOOK_019",
+      "triangles": 3199
+    },
+    {
+      "appearance_id": "AOE_LOOK_020",
+      "triangles": 2428
+    },
+    {
+      "appearance_id": "AOE_LOOK_021",
+      "triangles": 2936
+    },
+    {
+      "appearance_id": "AOE_LOOK_022",
+      "triangles": 3071
+    },
+    {
+      "appearance_id": "AOE_LOOK_023",
+      "triangles": 3089
+    },
+    {
+      "appearance_id": "AOE_LOOK_024",
+      "triangles": 2749
+    },
+    {
+      "appearance_id": "AOE_LOOK_025",
+      "triangles": 2557
+    },
+    {
+      "appearance_id": "AOE_LOOK_026",
+      "triangles": 2688
+    },
+    {
+      "appearance_id": "AOE_LOOK_027",
+      "triangles": 3155
+    },
+    {
+      "appearance_id": "AOE_LOOK_028",
+      "triangles": 2472
+    },
+    {
+      "appearance_id": "AOE_LOOK_029",
+      "triangles": 2936
+    },
+    {
+      "appearance_id": "AOE_LOOK_030",
+      "triangles": 3071
+    },
+    {
+      "appearance_id": "AOE_LOOK_031",
+      "triangles": 3089
+    },
+    {
+      "appearance_id": "AOE_LOOK_032",
+      "triangles": 2749
+    },
+    {
+      "appearance_id": "AOE_LOOK_033",
+      "triangles": 2557
+    },
+    {
+      "appearance_id": "AOE_LOOK_034",
+      "triangles": 2688
+    },
+    {
+      "appearance_id": "AOE_LOOK_035",
+      "triangles": 3155
+    },
+    {
+      "appearance_id": "AOE_LOOK_036",
+      "triangles": 2428
+    },
+    {
+      "appearance_id": "AOE_LOOK_037",
+      "triangles": 2980
+    },
+    {
+      "appearance_id": "AOE_LOOK_038",
+      "triangles": 3071
+    },
+    {
+      "appearance_id": "AOE_LOOK_039",
+      "triangles": 3089
+    },
+    {
+      "appearance_id": "AOE_LOOK_040",
+      "triangles": 2749
+    }
+  ],
+  "current_recipe_triangles": [
+    {
+      "appearance_id": "AOE_LOOK_001",
+      "triangles": 3632
+    },
+    {
+      "appearance_id": "AOE_LOOK_002",
+      "triangles": 4750
+    },
+    {
+      "appearance_id": "AOE_LOOK_003",
+      "triangles": 4204
+    },
+    {
+      "appearance_id": "AOE_LOOK_004",
+      "triangles": 3904
+    },
+    {
+      "appearance_id": "AOE_LOOK_005",
+      "triangles": 3756
+    },
+    {
+      "appearance_id": "AOE_LOOK_006",
+      "triangles": 4764
+    },
+    {
+      "appearance_id": "AOE_LOOK_007",
+      "triangles": 4250
+    },
+    {
+      "appearance_id": "AOE_LOOK_008",
+      "triangles": 4876
+    },
+    {
+      "appearance_id": "AOE_LOOK_009",
+      "triangles": 3640
+    },
+    {
+      "appearance_id": "AOE_LOOK_010",
+      "triangles": 4830
+    },
+    {
+      "appearance_id": "AOE_LOOK_011",
+      "triangles": 4292
+    },
+    {
+      "appearance_id": "AOE_LOOK_012",
+      "triangles": 3816
+    },
+    {
+      "appearance_id": "AOE_LOOK_013",
+      "triangles": 3844
+    },
+    {
+      "appearance_id": "AOE_LOOK_014",
+      "triangles": 4676
+    },
+    {
+      "appearance_id": "AOE_LOOK_015",
+      "triangles": 4258
+    },
+    {
+      "appearance_id": "AOE_LOOK_016",
+      "triangles": 4956
+    },
+    {
+      "appearance_id": "AOE_LOOK_017",
+      "triangles": 3552
+    },
+    {
+      "appearance_id": "AOE_LOOK_018",
+      "triangles": 4750
+    },
+    {
+      "appearance_id": "AOE_LOOK_019",
+      "triangles": 4284
+    },
+    {
+      "appearance_id": "AOE_LOOK_020",
+      "triangles": 3904
+    },
+    {
+      "appearance_id": "AOE_LOOK_021",
+      "triangles": 3756
+    },
+    {
+      "appearance_id": "AOE_LOOK_022",
+      "triangles": 4764
+    },
+    {
+      "appearance_id": "AOE_LOOK_023",
+      "triangles": 4170
+    },
+    {
+      "appearance_id": "AOE_LOOK_024",
+      "triangles": 4876
+    },
+    {
+      "appearance_id": "AOE_LOOK_025",
+      "triangles": 3640
+    },
+    {
+      "appearance_id": "AOE_LOOK_026",
+      "triangles": 4662
+    },
+    {
+      "appearance_id": "AOE_LOOK_027",
+      "triangles": 4292
+    },
+    {
+      "appearance_id": "AOE_LOOK_028",
+      "triangles": 3984
+    },
+    {
+      "appearance_id": "AOE_LOOK_029",
+      "triangles": 3844
+    },
+    {
+      "appearance_id": "AOE_LOOK_030",
+      "triangles": 4676
+    },
+    {
+      "appearance_id": "AOE_LOOK_031",
+      "triangles": 4258
+    },
+    {
+      "appearance_id": "AOE_LOOK_032",
+      "triangles": 4788
+    },
+    {
+      "appearance_id": "AOE_LOOK_033",
+      "triangles": 3552
+    },
+    {
+      "appearance_id": "AOE_LOOK_034",
+      "triangles": 4750
+    },
+    {
+      "appearance_id": "AOE_LOOK_035",
+      "triangles": 4204
+    },
+    {
+      "appearance_id": "AOE_LOOK_036",
+      "triangles": 3904
+    },
+    {
+      "appearance_id": "AOE_LOOK_037",
+      "triangles": 3836
+    },
+    {
+      "appearance_id": "AOE_LOOK_038",
+      "triangles": 4764
+    },
+    {
+      "appearance_id": "AOE_LOOK_039",
+      "triangles": 4170
+    },
+    {
+      "appearance_id": "AOE_LOOK_040",
+      "triangles": 4876
+    }
+  ],
+  "source_axes": {
+    "up": "+Z",
+    "front": "-Y"
+  },
+  "npc_height_m": 1.8,
+  "exports_updated": [
+    "Exports/Rigged/NPC_Modular_Rigged.glb",
+    "Exports/Rigged/NPC_Resident_Animated.glb",
+    "Exports/Rigged/MOB_07_AshenRevenant.glb",
+    "Exports/NPC_Modular_Library.glb",
+    "Exports/NPC_Parts/SM_NPC_Head_01_Masculine.glb",
+    "Exports/NPC_Parts/SM_NPC_Head_02_Feminine.glb",
+    "Exports/NPC_Parts/SM_NPC_Hair_01_Crop.glb",
+    "Exports/NPC_Parts/SM_NPC_Hair_02_Bob.glb",
+    "Exports/NPC_Parts/SM_NPC_Hair_03_Long.glb",
+    "Exports/NPC_Parts/SM_NPC_Hair_04_Braid.glb",
+    "Exports/NPC_Parts/SM_NPC_Hair_05_Swept.glb",
+    "Exports/NPC_Parts/SM_NPC_Torso_01_Tunic.glb",
+    "Exports/NPC_Parts/SM_NPC_Torso_02_Armor.glb",
+    "Exports/NPC_Parts/SM_NPC_Torso_03_Archer.glb",
+    "Exports/NPC_Parts/SM_NPC_Torso_04_Robe.glb",
+    "Exports/NPC_Parts/SM_NPC_Torso_05_Merchant.glb",
+    "Exports/NPC_Parts/SM_NPC_Torso_06_Healer.glb",
+    "Exports/NPC_Parts/SM_NPC_Arms_01_Cloth.glb",
+    "Exports/NPC_Parts/SM_NPC_Arms_02_Armor.glb",
+    "Exports/NPC_Parts/SM_NPC_Arms_03_Leather.glb",
+    "Exports/NPC_Parts/SM_NPC_Arms_04_Robe.glb",
+    "Exports/NPC_Parts/SM_NPC_Legs_01_Trousers.glb",
+    "Exports/NPC_Parts/SM_NPC_Legs_02_Patched.glb",
+    "Exports/NPC_Parts/SM_NPC_Legs_03_Armored.glb",
+    "Exports/NPC_Parts/SM_NPC_Feet_01_Boots.glb",
+    "Exports/NPC_Parts/SM_NPC_Feet_02_Wrapped.glb",
+    "Exports/NPC_Parts/SM_NPC_FacialHair_01_Stubble.glb",
+    "Exports/NPC_Parts/SM_NPC_FacialHair_02_Beard.glb",
+    "Exports/NPC_Parts/SM_NPC_Headgear_01_Hood.glb",
+    "Exports/NPC_Parts/SM_NPC_Headgear_02_Helmet.glb",
+    "Exports/NPC_Parts/SM_NPC_Headgear_03_Cap.glb",
+    "Exports/NPC_Parts/SM_NPC_Back_01_Cape.glb",
+    "Exports/NPC_Parts/SM_NPC_Back_02_Quiver.glb",
+    "Exports/NPC_Parts/SM_NPC_Back_03_Pack.glb",
+    "Exports/NPC_Parts/SM_NPC_Belt_01_Plain.glb",
+    "Exports/NPC_Parts/SM_NPC_Belt_02_Pouches.glb",
+    "Exports/NPC_Parts/SM_NPC_Mainhand_01_Sword.glb",
+    "Exports/NPC_Parts/SM_NPC_Mainhand_02_Bow.glb",
+    "Exports/NPC_Parts/SM_NPC_Mainhand_03_Staff.glb",
+    "Exports/NPC_Parts/SM_NPC_Offhand_01_Shield.glb",
+    "Exports/NPC_Parts/SM_NPC_Offhand_02_Lantern.glb"
+  ],
+  "unchanged_contracts": [
+    "37 part IDs and indices",
+    "40 appearance recipes",
+    "21 bind bones",
+    "18 humanoid keyframe actions",
+    "6 quadruped meshes, rigs and exports",
+    "environment meshes and buildings"
+  ],
+  "render_notes": "Closed NPC solids use single-sided materials. Unneeded rear faces are culled by the runtime; no textures or new slots.",
+  "all_144_animation_keyframe_hashes_unchanged": true,
+  "deformed_clip_checks": [
+    {
+      "clip": "Idle",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.001000131363980472,
+        1.9497228860855103
+      ]
+    },
+    {
+      "clip": "Walk",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009999971371144056,
+        1.9175218343734741
+      ]
+    },
+    {
+      "clip": "Run",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010001541813835502,
+        1.8740622997283936
+      ]
+    },
+    {
+      "clip": "Turn_L45",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009999723406508565,
+        1.9127391576766968
+      ]
+    },
+    {
+      "clip": "Turn_R45",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009999304311349988,
+        1.9127391576766968
+      ]
+    },
+    {
+      "clip": "Turn_L90",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009999769972637296,
+        1.9127391576766968
+      ]
+    },
+    {
+      "clip": "Turn_R90",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010000058682635427,
+        1.9127391576766968
+      ]
+    },
+    {
+      "clip": "WalkTurn_L45",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009998163441196084,
+        1.9175218343734741
+      ]
+    },
+    {
+      "clip": "WalkTurn_R45",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009998726891353726,
+        1.9175218343734741
+      ]
+    },
+    {
+      "clip": "RunTurn_L45",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0009999441681429744,
+        1.874062418937683
+      ]
+    },
+    {
+      "clip": "RunTurn_R45",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010000319452956319,
+        1.8740622997283936
+      ]
+    },
+    {
+      "clip": "Jump",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010001177433878183,
+        2.4517598152160645
+      ]
+    },
+    {
+      "clip": "JumpStart",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010000235633924603,
+        1.9467393159866333
+      ]
+    },
+    {
+      "clip": "JumpLoop",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0710001289844513,
+        1.8488627672195435
+      ]
+    },
+    {
+      "clip": "JumpLand",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010001239133998752,
+        1.9467393159866333
+      ]
+    },
+    {
+      "clip": "Attack",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        0.0010002071503549814,
+        1.9167392253875732
+      ]
+    },
+    {
+      "clip": "Hit",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        -0.010151997208595276,
+        1.9467393159866333
+      ]
+    },
+    {
+      "clip": "Death",
+      "sampled_vertices": 41085,
+      "z_bounds_m": [
+        -0.5811359286308289,
+        1.9467393159866333
+      ]
+    }
+  ],
+  "resident_glb_roundtrip": [
+    {
+      "clip": "Walk",
+      "frame": 7,
+      "imported_vertices_checked": 7476,
+      "max_position_error_m": 5.470978976518381e-07
+    },
+    {
+      "clip": "Run",
+      "frame": 7,
+      "imported_vertices_checked": 7476,
+      "max_position_error_m": 7.036855436126643e-07
+    },
+    {
+      "clip": "Attack",
+      "frame": 7,
+      "imported_vertices_checked": 7476,
+      "max_position_error_m": 4.995779363525799e-07
+    },
+    {
+      "clip": "Jump",
+      "frame": 7,
+      "imported_vertices_checked": 7476,
+      "max_position_error_m": 6.503806275759416e-07
+    },
+    {
+      "clip": "Turn_L90",
+      "frame": 7,
+      "imported_vertices_checked": 7476,
+      "max_position_error_m": 5.170509780327848e-07
+    }
+  ],
+  "keyframe_action_hashes": {
+    "Attack": "0729597a7c3466b9cfd4fa7b77547d3c5967424680931727bf7c56c083fb94e4",
+    "Attack.001": "2061222d598dff2341b9a9647f0eae3af6e2a5083b56f19e219b4848fa700578",
+    "Attack.002": "1994086d32099ac524e3aa84b70a73bf7bd71097e7a1f205e461e9624df98a55",
+    "Attack.003": "f9d33615a93a1d5e6ca815aa46b8d28fadb3f45f9ab3500025e118b315832ca5",
+    "Attack.004": "76a10f48e16d0f2137dc5cf7cc8059773d05b8e633d0d0fb4e026bcaa10acf46",
+    "Attack.005": "45ce29adaec00ae24946d532460a5d8fa009d0f07444b5ebb6e31d504a0bba2b",
+    "Attack.006": "a02285ef54e406cfec6220d322ee18d58bacc748dab9af0c06cde40a543e8933",
+    "Attack.007": "66e46ae7c4a888a06160c0ab701ac45049f3f63ac0163a902c55b8fe7114fb68",
+    "Death": "8ee6a4f92352d567c6478fc1218394c166c32b57b598728770be7920d1263f0b",
+    "Death.001": "54966a0b2c554d8cd2a0c4adc2013c0c85ca9135584618a7198c408c684075e2",
+    "Death.002": "6aa0a40bd34f93e305a7efa490bee9390576b518e3e5bcf430f1f9d294d54db5",
+    "Death.003": "e330a5bdec495cd62924c8e0c2a762162ca5dc48887d746d28e3fd9665c11d2d",
+    "Death.004": "aa606ed7424cf52d45e358cdcc718929ba5adb18b60174bc0804935a884b5f3c",
+    "Death.005": "0731f47b46bc97c16085201a11d8b1bf3e14b6b38f5e7a82a640af105ee0b0ce",
+    "Death.006": "8c54a88bb81a1f7508f1c5e6d3026be409ea29ddb807b737b2d1439c8860b697",
+    "Death.007": "f0c0c81cd767078a6ee000a03fddbe21873031166c0b8aa4df7df77bfb3a8e1a",
+    "Hit": "8b0683e6070df75e465c11fe9053f08a52b204dfcca3b3cf663c43bc2987ac73",
+    "Hit.001": "b6d7dc16ad39504f44f3838cab5ef2a23f28c5b23768468aa5e8e1d6fda6ab2b",
+    "Hit.002": "77c59434fb4779b09ec70cc11ff6d800635dfcb87082ec3f6f590da20242b2e9",
+    "Hit.003": "6af8f96713327739070e8362733a7386769926aa6bb294bb2064f4da6ef29276",
+    "Hit.004": "4f9416681501736b6a01de696bdb7b0f1dd044ac76cfece6ff9020812c357394",
+    "Hit.005": "e0a2c70dc202a7332e8d7b5a5d346d883608290067b5f85bb5a4ec74cb0a5095",
+    "Hit.006": "fe006c81050102dd97d0228d45bcc92048c47635568dede332d3d05a5b7db0b2",
+    "Hit.007": "c5d2033739a62bb4a73089290906a0dbfa2bd1b4d0880cfeeabf20cfbe91148a",
+    "Idle": "84a95b8c9171b53e7f9d2e11f31e65407563eacb6669400a18092b1c99395749",
+    "Idle.001": "d063d7112bbf67e1209fbd419d6986c0a788e8bd08916a8c22eaaead893ecb51",
+    "Idle.002": "b1e9829893fec438e1c0d2638375798409a0023268395ac50e2d2a804cdb8fb9",
+    "Idle.003": "92bd5941d54c943a3d9bf9929d24d8b23195c4b3b25ee4be969ce5f1dc75a61a",
+    "Idle.004": "2915051c2aae3efa0c48da7fa853beea665a8939d3e4cd47a16584df003a179e",
+    "Idle.005": "598890be582ca5567cb49977bf9abf78976af5b45073d35cc5572330346a9890",
+    "Idle.006": "d13e6a42f0de5296388625768f19e9de79491d9fcc34578a787a43a82fbc895c",
+    "Idle.007": "85074047e812d3804c5e1247feacf6a054fae95abc2b4347801e056cc2e6e34d",
+    "Jump": "1b5fd64a399a5acd6eedb13c6b9209339025352526a849cad5f2d5188930fdd2",
+    "Jump.001": "54d1771fd9842d1b29f5b9436319e0e96bcbee782d630fc6ca7cd3801f092022",
+    "Jump.002": "2ebbfc5252dc2ec428860c612ed416cb11d9524ff434b32b4a4c857b2d8da5cd",
+    "Jump.003": "0b6c9eab3df44a03b8b8fe764731c5da6b31f5080080cda3b69da3776cb558be",
+    "Jump.004": "c1c1e03039b3ea567e5119e5558fc5b444c79ee3ec64520a2f71affbf01769bb",
+    "Jump.005": "aa41c23aefe2235f533ba4db6ec0e4adac68df61789c4b806eba3bf79fd12cb8",
+    "Jump.006": "8da85342671b9abc393eb91c684bb62b7ad7523e460d7f73ca027d50efe0bf7b",
+    "Jump.007": "222f8d25774125ace0178e122068fca7d60f50d0d19a42da759af9ffaaee9c99",
+    "JumpLand": "6d81f446a9d0b3ac247789399d22cae50da665e9d70bb9be43cae2e4585ebf68",
+    "JumpLand.001": "07afc6ede7323f0337d0faa9939bbfa0467fd819685e712bb034a5de3d8f4fa0",
+    "JumpLand.002": "28fdcbc7df75689a3ccb6e3fa460cb2ca02f0bae8163f4fa45b99af02340c268",
+    "JumpLand.003": "f72d3d627a3496c2b25dd713ab0b2d016a78584b7b006e7995fcefa0991c3ad7",
+    "JumpLand.004": "3efd9dca56da119e1a94d97b433aeda38685f3d9846ff9fcba3103af9f0bd4dd",
+    "JumpLand.005": "dea56e26de8e7450b378f3a81b8b711fc41e6f908d8678024c724b0d968ee250",
+    "JumpLand.006": "13e7e65270e4170e8f0c23f60e740411928452f69b3447f5dee2a83bfe210003",
+    "JumpLand.007": "07d9998940bca1074852f1a375ab4056acbd4a966fc11ed733e5807ce850aa11",
+    "JumpLoop": "4e8968dee78353fd06df5cb2f9f568d0b0a455cf2240e48d5c88d4fa62208b6b",
+    "JumpLoop.001": "c33d504972b3a67ca022c4d7cfaacb3ec2642eba82b8cd7f44162d160236275d",
+    "JumpLoop.002": "c8bea3968f3470e88c9fd56e190928f74da92d87fa4ee494ba7d7ab641e12f7d",
+    "JumpLoop.003": "33e80519e3bca957965cda9efac410c75ab18d180ebd2de3bbaa8d4199be85a8",
+    "JumpLoop.004": "f122ae452733abaf367d0e401cbb3956f4b8e8f6bd1159f26a82acd00565a65e",
+    "JumpLoop.005": "fe8e480ffa718bfd2a3dcfb61792ad7b8521fe43473e3e57724092a59c413fba",
+    "JumpLoop.006": "77c25bddb01fcedf6795ee676b23d8061921807cc7c5e634f3444c7da88eaad4",
+    "JumpLoop.007": "07342a7bd065e754e02b9e5e8998ce9b76d3fa4ad01d96a59d1fe64f24470168",
+    "JumpStart": "17ad9219add4c2bd3e7c3dd840b4cfc274d108e23e67e39d01127558fdeaa45a",
+    "JumpStart.001": "699ca8fa8f61abcb41c7f89ee9c8f2bc2bb761fc90ab7879f95952bc8ae94000",
+    "JumpStart.002": "d3f22ca18b5dedd1e75bb6ce70dbf8511971ffd525b945bcf290c00f5640d977",
+    "JumpStart.003": "703ab7634a65b01ee26e6e3b9412b624c5cf36199345f623745e9673ae082673",
+    "JumpStart.004": "063c0a19b7bff111bd9a82db5942760c26c071ade7dde02a6f48b13a339a3992",
+    "JumpStart.005": "f32a65858ba131db2af01d1a205af688f10ea66fbfe1594a0491a348c31ff535",
+    "JumpStart.006": "702918da002b7a97a690dec0fa97b2a656ff91dbea6bf23425f1b069960bcc1c",
+    "JumpStart.007": "cf328d6a281e671671f351dbf2fa1b49e123d27191aefaf0fbf233f45ee48b7f",
+    "KEYPOSE_0_0": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_0_1": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_0_2": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_0_3": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_0_4": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_1_0": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_1_1": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_1_2": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_1_3": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "KEYPOSE_1_4": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "Run": "3e880b3eca82c32297feceed99a5523b6df81be0672ebc5c24734fb0907f833a",
+    "Run.001": "1bb40a67d2023ef194d3877046c25ebdc3775a02592cc996af465c1f20f98c30",
+    "Run.002": "5085c04be7eba88775dcd4d092e3b553aaef36db6caed8d0471c3587c771ea69",
+    "Run.003": "74ca169044911c79ce1e71618aff57c4562f660a7d4feac325d498c885351862",
+    "Run.004": "ff63684c3e42e9017be82f06566f949d95a62bf342da26587cadd1fbd415e818",
+    "Run.005": "89f6dc42809fabae4afc0e3149ccd03dde7b3403bf7486e65ac604efd7e26e28",
+    "Run.006": "bc12d26d4fe266c4a2e1523d38ae8cb6f3f00b5ba1b29c9f9b64d3d8dd1d4cd4",
+    "Run.007": "5762eaa2c9d2a2314c6fdd9ba75459f9aa57cf41649f84ae409449af466029b4",
+    "RunTurn_L45": "882cbfa5ea2c57899d95ac3d28cb3e11a389c449e6fbc3aed9d3b641b211c172",
+    "RunTurn_L45.001": "74f29b416b8246f5f60c17a6374874a774b8fac49316240843b0fdfdad236850",
+    "RunTurn_L45.002": "0b95e5082ccf07b32c328b32715ab4e6a3b1b3b3bafb3afe5624ce465c8e0896",
+    "RunTurn_L45.003": "dbc1f337e59f13393bb1688b2768847ece721dd4e406e210ca02aeadc85e3dd7",
+    "RunTurn_L45.004": "6f40d4934fec536e3f950d42c123ca181b79762636eeb7272a7723168b5f82e0",
+    "RunTurn_L45.005": "ebf5e5fd250c04c4bd1908a021ef28da2ba56136c45c6a67973e436684ef01d9",
+    "RunTurn_L45.006": "3c25d664e8b235dffd6c471da59d718c02a2a2a2e38eb55208ff7433246c8d34",
+    "RunTurn_L45.007": "9e969b07e9a98c1b04e6b7db46a0c2305b02dbd839ce5d20e50302b729a96d68",
+    "RunTurn_R45": "81bdf41268e8d0b3577a13a5ff40a7c6ab14434609922b0df71e8a01c47b5482",
+    "RunTurn_R45.001": "98ba7255f1814e81c70f4c068dd733340e471cc82e088ce3f4e3d6180edb34d5",
+    "RunTurn_R45.002": "d5fe83160e628cf452e407c4bdd100f9a97d665b943f399bd6c596184cc9ac50",
+    "RunTurn_R45.003": "f6463fd72e4d6e19eb2d078ccc507f01b7ebfcb9469081b3c3313c74e19acef0",
+    "RunTurn_R45.004": "3ceebc0d0a26298dc5b32c75238897a9c84593361a4aac791e7e80ef3ac47cc1",
+    "RunTurn_R45.005": "88fe49c2124608dbcc5d905fc8d03132b2e91205740331f14d75802d4e0fd2a4",
+    "RunTurn_R45.006": "55405664abf63641f3b700cddbbf0d4b911a23e5ecce854d5c5cb3aff8966b35",
+    "RunTurn_R45.007": "57358fc75fc5521d5257b8ccef71856a25b88378b2981616f81c165d95d09996",
+    "Turn_L45": "95e1ad05fd926d46335780026752d49fe69fe7e2acfad9fa71a26aed32762b8d",
+    "Turn_L45.001": "e73473957bcf3f43ba36ba86a708790aba29ab1ac5721ccbcbb15fe78c2702b6",
+    "Turn_L45.002": "3dd7ae473616f6f60997a364b6bcaad47cfb43eb827504177dc4b61dd9fa8628",
+    "Turn_L45.003": "4b90aea9bd0d74d42623a773971ced502b050d203041d68890a8b5af6ec54ad9",
+    "Turn_L45.004": "df4311274e9746e3dce21969fc160cd21e1a458dd5914473d2db28bb8eb2b411",
+    "Turn_L45.005": "f46cdb8526e740c44e07f7938a5600e58a7a2fa9caad9d6113657448f0cc6529",
+    "Turn_L45.006": "949198a33a8cd412a34f87a490c196f638912f273a2bffb6f01d2d090f556625",
+    "Turn_L45.007": "fc90e044d02630759357a286f5fdf7f6c7a0e8b33f8fbd2cdd79f44bfbc54082",
+    "Turn_L90": "829997240b228665a85df1d6dbfa1802529f4a78ff9322bed77cac06a9e60f09",
+    "Turn_L90.001": "1e2b5a3d59cb73c737fcf7767226d7dc9416624b37b48ed7d32a486cc99bbfde",
+    "Turn_L90.002": "d4c3ca3287a58f1bc4b0d23b8e057857a71318ea7be6f5d8be112db81dc9ca2b",
+    "Turn_L90.003": "6b4ebd9b74b37ec5c696f6d282cbcb75a7ebf5563ea2cf2fd8e3bdad3096edaf",
+    "Turn_L90.004": "bedb0e53dd41b20ecc613ad476612f322f93d8eab2af5378b39f62ae0bbb7a07",
+    "Turn_L90.005": "7a646ca182734389a77f20528502e065646b2108c87fd1b2837a28f28c1e7c70",
+    "Turn_L90.006": "5739515dccb04d9d705d709d03e0893f2da98cf174a2cc2bee4a0e720c7d7e3a",
+    "Turn_L90.007": "cbfe457695490656529f2f097dcbc699f3d45255747952010b5b00f6cab8aa4d",
+    "Turn_R45": "1d48e0192bd09d77e4bda878493e4e6551c16382c167093c7d232d7e8e7fea0d",
+    "Turn_R45.001": "b693c09925a48ff08518840d4e11238dce088a29564a7e7dde3d209c57e072ad",
+    "Turn_R45.002": "fcf35e602d5aac0ed8bd1caa2b65c8fdc10ca049073f7c84f04b3ba18befb575",
+    "Turn_R45.003": "128c2955f7ef200b610586266c248e09d8b7169294f475495930ba48956e93a2",
+    "Turn_R45.004": "b289b8641f1519f0243972bb164415a93ed2080f2177c9b758cb9c539ab4f127",
+    "Turn_R45.005": "9a56a090f959a835b5c9a2ff2b98e75572588ef4f1c3dca2493ef721975a5798",
+    "Turn_R45.006": "060c092a68251706ba6d7dd55fabd882df4c20fe12a0e3f1958870de7c6ab468",
+    "Turn_R45.007": "91b122e5adb061cc727aa591f9a58d0b8399f26805efb25a4ccae3070f347895",
+    "Turn_R90": "0f04eba959be6a38c23b9563cc16e7759fdbde41a3b3c30b04415dfaf9fcdd80",
+    "Turn_R90.001": "63c015f93783e23002ea4bf4873bcbfc9ea86830180ba442112b64d98bbdce93",
+    "Turn_R90.002": "09a39d8eae8e92789b37bf55f4a16c846e4c0252493bba139212d19d21cc13a4",
+    "Turn_R90.003": "b304e612fb324349f206dbc166f6df72e84fc4a3f958f92edde49b517d9a51ea",
+    "Turn_R90.004": "8e2a891f97f73d44863a43dea44b94858e07db96d819c36a19b0f8aece4bd6e1",
+    "Turn_R90.005": "a2eb2349de9e8bc22faf3361c498fe484607b5f68a8294ce4aa31f115d566814",
+    "Turn_R90.006": "45e1bc3bc907f53be40bb92228552f9f128bf956628341ce8d6cd9bde4471d9d",
+    "Turn_R90.007": "c0b1986f8e9295e30240ea206204e7ddb883fd3c10895358b1e55d2d1ceaf152",
+    "Walk": "6f8bb926d8eda3775f7f29e89ef7d1ca346663f068ea6dc2460a6237b4f287c7",
+    "Walk.001": "d3cb2a4a2a94934e0bdb556cdf5e2511c89b7c3cc6d10d914255b315c2b1385f",
+    "Walk.002": "6372a2b600f4c6b096548ff721389a98e99f79a114faeee43e0a187dddb26180",
+    "Walk.003": "c7f38459b73e5867d8e3a3f2867abeb933c1d4bf8591d6277738c1b86bb28a9d",
+    "Walk.004": "5aeb3243a4060201118e62df7c774978a36bc7df89863346f6c656ce74d8c406",
+    "Walk.005": "345e55b053db27b7dbc7c8f844650d7b8b346530bd50ea9f4ad80495b531698a",
+    "Walk.006": "6c58b9858fbc89d5d8e89e739d9e5c7b9bd6f97c6d56b3ad8fd1f221f685674e",
+    "Walk.007": "7ced4a630883bac567dcdcc163cd79815643bb82077d1aeaf9e7310a21d6787c",
+    "WalkTurn_L45": "1114666c3bcee7af244fdd64ea199f9b8deaa3c465a8dfc2474d4acf98861071",
+    "WalkTurn_L45.001": "7cea7d919627e7ab35cabe055d2e0b9e83f7261dbafb1a3fcf9db98ef347e719",
+    "WalkTurn_L45.002": "39945003c6175c5c72bcaf89ec09e0e17aab6da6ca689ad4e0cc0c5aab1e2319",
+    "WalkTurn_L45.003": "14af35abfe75452faf2fe2c47fe81be6809c13d567838295ca9e546cf03effcc",
+    "WalkTurn_L45.004": "b90b1fc4a8670f97da72473cfd8022a49e06c3be4cbfada866d7206c7f2b400f",
+    "WalkTurn_L45.005": "096df37726e10fdd5c5fd2285f2932d6e97987f883f367c042e6649466535cbb",
+    "WalkTurn_L45.006": "3497de57dbe639d5275ceb6302d4f10b0fbd686950fb1d637a5bde4ce073a0a6",
+    "WalkTurn_L45.007": "4bb5ff3339a2ad54952cfc0940e4d27d0edb9543cd0c7898ebc4cb3316009701",
+    "WalkTurn_R45": "bd746268ec33b8626a3cfc05b89a2fae50f72c772cc3ccaf667c8dd211fc199b",
+    "WalkTurn_R45.001": "ecd89f6d5a70492292c16815751c2cb0988b81456ffe25b344bb643703c0cd44",
+    "WalkTurn_R45.002": "85fe053792d94ac0b03cd8ecdc737c73a1018c0d201292bc2617f05777eb7b58",
+    "WalkTurn_R45.003": "4d38378b4f80933190a3d88d78cdbf9651b049a929ae9253408b57375b67dc49",
+    "WalkTurn_R45.004": "e4176d66efdd4d874616210ed4aa78b343615919a765602a970a0ac282ec6f5f",
+    "WalkTurn_R45.005": "e81a8b31361018bad1dd308982a6b0c7ca6827ad436bd266edb63f6d1b51b4fa",
+    "WalkTurn_R45.006": "a1aefe239562de83a650fbc85121fc5540f496e43e88d84f497d8b6af9698001",
+    "WalkTurn_R45.007": "63eb12e23e91bef01e1ec5b06eea757ee07c1b1b251cd5a717ed952a3878679f"
+  },
+  "bound_animation_action_count": 144,
+  "source_action_datablocks": 154,
+  "legacy_unbound_action_datablocks": [
+    "KEYPOSE_0_0",
+    "KEYPOSE_0_1",
+    "KEYPOSE_0_2",
+    "KEYPOSE_0_3",
+    "KEYPOSE_0_4",
+    "KEYPOSE_1_0",
+    "KEYPOSE_1_1",
+    "KEYPOSE_1_2",
+    "KEYPOSE_1_3",
+    "KEYPOSE_1_4"
+  ],
+  "all_source_action_keyframes_unchanged": true
+}

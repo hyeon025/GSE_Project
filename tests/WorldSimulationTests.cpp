@@ -5,6 +5,82 @@
 #include <set>
 #include "../SimpleGame/WorldSimulation.h"
 
+bool ReferenceObstacle(int tx, int ty)
+{
+    Game::Vec p(tx * 32.0 + 16, ty * 32.0 + 16);
+    if (Game::SettlementClearing(p) || Game::Road(p) < 50 || Game::Hash(tx, ty, 37) % 100 >= 14)
+        return false;
+    int cx = Game::Chunk(p.x), cy = Game::Chunk(p.y);
+    for (int y = cy - 1; y <= cy + 1; ++y)
+        for (int x = cx - 1; x <= cx + 1; ++x)
+            if (Game::Distance(Game::GetSite(x, y).p, p) < 66) return false;
+    return true;
+}
+
+void CheckObstacleMemoization()
+{
+    for (int v = 0; v < Society::VillageCount; ++v)
+    {
+        auto center = Game::VillageCenter(v);
+        int tx = (int)std::floor(center.x / 32), ty = (int)std::floor(center.y / 32);
+        for (int y = ty - 30; y <= ty + 30; ++y)
+            for (int x = tx - 30; x <= tx + 30; ++x)
+            {
+                bool expected = ReferenceObstacle(x, y);
+                assert(Game::Obstacle(x, y) == expected);
+                // Distant keys force replacements; a stale tile value must never leak.
+                Game::Obstacle(x + 123456, y - 98765);
+                assert(Game::Obstacle(x, y) == expected);
+            }
+    }
+}
+
+void CheckOrderedLocalNews()
+{
+    Game::World w;
+    Society::Initialize(w);
+    w.npcs.resize(40);
+    w.society.elapsed = 1000;
+    w.society.nextNews = 2000;
+    w.society.letters.clear();
+    for (size_t i = 0; i < w.npcs.size(); ++i)
+    {
+        auto& n = w.npcs[i];
+        const double base = i < 20 ? -10010 : 10010;
+        // Include cell boundaries, exact-distance ties and disconnected groups.
+        n.p = Game::Vec(base + (i % 5) * 65, base + (i / 5 % 4) * 31);
+        n.life.alive = i % 9 != 0;
+        n.life.migrationCooldown = 2000;
+        for (int origin = 0; origin < Society::VillageCount; ++origin)
+        {
+            n.life.known[origin].time = (double)((i * 17 + origin * 19) % 311);
+            n.life.known[origin].stock = (int)i + origin;
+        }
+    }
+    auto reference = w;
+    for (auto& n : reference.npcs)
+    {
+        if (!n.life.alive) continue;
+        n.life.known[n.life.village] = reference.society.villages[n.life.village].news[n.life.village];
+        for (const auto& visitor : reference.npcs)
+        {
+            if (!visitor.life.alive || Game::Distance(n.p, visitor.p) > 65) continue;
+            for (int origin = 0; origin < Society::VillageCount; ++origin)
+                if (visitor.life.known[origin].time > n.life.known[origin].time)
+                    n.life.known[origin] = visitor.life.known[origin];
+        }
+    }
+    Society::ExchangeNews(w);
+    for (size_t i = 0; i < w.npcs.size(); ++i)
+        for (int origin = 0; origin < Society::VillageCount; ++origin)
+        {
+            const auto& actual = w.npcs[i].life.known[origin];
+            const auto& expected = reference.npcs[i].life.known[origin];
+            assert(actual.time == expected.time && actual.stock == expected.stock &&
+                   actual.residents == expected.residents && actual.danger == expected.danger);
+        }
+}
+
 void CheckPopulationAndRoads()
 {
     Game::World w;
@@ -403,6 +479,8 @@ void CheckMailAndMigration()
 
 int main()
 {
+    CheckObstacleMemoization();
+    CheckOrderedLocalNews();
     Game::World rumorWorld;
     Society::Initialize(rumorWorld);
     rumorWorld.society.elapsed = 12;

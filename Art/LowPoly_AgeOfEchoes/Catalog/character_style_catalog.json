@@ -1,0 +1,266 @@
+{
+  "version": 1,
+  "date": "2026-11-02",
+  "color_space": "sRGB; runtime converts to linear",
+  "skin_colors": [
+    [
+      0.93,
+      0.75,
+      0.56
+    ],
+    [
+      0.86,
+      0.63,
+      0.43
+    ],
+    [
+      0.73,
+      0.47,
+      0.29
+    ],
+    [
+      0.55,
+      0.33,
+      0.2
+    ],
+    [
+      0.37,
+      0.23,
+      0.16
+    ]
+  ],
+  "hair_colors": [
+    [
+      0.12,
+      0.09,
+      0.075
+    ],
+    [
+      0.32,
+      0.16,
+      0.075
+    ],
+    [
+      0.74,
+      0.55,
+      0.25
+    ],
+    [
+      0.6,
+      0.25,
+      0.115
+    ],
+    [
+      0.43,
+      0.4,
+      0.34
+    ],
+    [
+      0.22,
+      0.13,
+      0.1
+    ],
+    [
+      0.76,
+      0.75,
+      0.69
+    ],
+    [
+      0.13,
+      0.2,
+      0.25
+    ]
+  ],
+  "cloth_colors": [
+    [
+      0.14,
+      0.4,
+      0.46
+    ],
+    [
+      0.63,
+      0.27,
+      0.19
+    ],
+    [
+      0.28,
+      0.4,
+      0.61
+    ],
+    [
+      0.36,
+      0.48,
+      0.25
+    ],
+    [
+      0.53,
+      0.29,
+      0.48
+    ],
+    [
+      0.71,
+      0.53,
+      0.26
+    ],
+    [
+      0.33,
+      0.47,
+      0.45
+    ],
+    [
+      0.48,
+      0.23,
+      0.28
+    ],
+    [
+      0.5,
+      0.43,
+      0.3
+    ],
+    [
+      0.43,
+      0.37,
+      0.57
+    ],
+    [
+      0.73,
+      0.58,
+      0.43
+    ],
+    [
+      0.23,
+      0.34,
+      0.4
+    ],
+    [
+      0.47,
+      0.49,
+      0.46
+    ]
+  ],
+  "trim_colors": [
+    [
+      0.83,
+      0.65,
+      0.32
+    ],
+    [
+      0.83,
+      0.69,
+      0.43
+    ],
+    [
+      0.71,
+      0.79,
+      0.82
+    ],
+    [
+      0.67,
+      0.65,
+      0.4
+    ],
+    [
+      0.78,
+      0.63,
+      0.62
+    ],
+    [
+      0.4,
+      0.31,
+      0.21
+    ],
+    [
+      0.74,
+      0.7,
+      0.48
+    ],
+    [
+      0.69,
+      0.55,
+      0.38
+    ],
+    [
+      0.77,
+      0.73,
+      0.59
+    ],
+    [
+      0.74,
+      0.68,
+      0.81
+    ],
+    [
+      0.42,
+      0.31,
+      0.26
+    ],
+    [
+      0.68,
+      0.68,
+      0.57
+    ],
+    [
+      0.76,
+      0.66,
+      0.48
+    ]
+  ],
+  "expressions": [
+    {
+      "index": 0,
+      "name": "Gentle",
+      "morph_target": null
+    },
+    {
+      "index": 1,
+      "name": "Neutral",
+      "morph_target": "Expression_Neutral"
+    },
+    {
+      "index": 2,
+      "name": "Determined",
+      "morph_target": "Expression_Determined"
+    },
+    {
+      "index": 3,
+      "name": "Concerned",
+      "morph_target": "Expression_Concerned"
+    },
+    {
+      "index": 4,
+      "name": "Sleepy",
+      "morph_target": "Expression_Sleepy"
+    },
+    {
+      "index": 5,
+      "name": "Cheerful",
+      "morph_target": "Expression_Cheerful"
+    }
+  ],
+  "player": {
+    "skin": 1,
+    "hair": 7,
+    "cloth": 0,
+    "expression": 2,
+    "parts": {
+      "Head": 1,
+      "Hair": 5,
+      "Torso": 1,
+      "Arms": 1,
+      "Legs": 1,
+      "Feet": 1,
+      "Back": 1,
+      "Belt": 2
+    }
+  },
+  "npc_policy": {
+    "period": 2880,
+    "unique_color_expression_combinations_per_period": 2880,
+    "reserved_player_cloth_index": 0,
+    "algorithm": "serial=((max(id,1)-1)*137)%2880; cloth=1+serial%12; serial/=12; hair=serial%8; serial/=8; skin=serial%5; serial/=5; expression=(serial+cloth*5+hair*3+skin*2)%6; all divisions are integer",
+    "saved_fields": "artCatalogVersion=2; artPalettes=[skin,hair,cloth]; artParts retains existing IDs",
+    "expression_persistence": "derived from the persistent NPC ID; independent of frame, job and position"
+  },
+  "mesh_policy": "37 existing shared part meshes, no new meshes for colors or expressions; two head meshes each have five relative morph targets",
+  "runtime_policy": "Four linear RGB palette colors are instance attributes. Color indices are excluded from pose cache keys; only expression affects geometry."
+}

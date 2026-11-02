@@ -16,27 +16,38 @@
       "slot": "Head",
       "index": 1,
       "label_ko": "남성형 공통 머리",
-      "vertices": 174,
-      "triangles": 308,
+      "vertices": 650,
+      "triangles": 1236,
       "bounds_m": [
         [
-          -0.3292,
-          -0.3193,
-          1.2
+          -0.374,
+          -0.29219,
+          1.15
         ],
         [
-          0.3292,
-          0.2592,
+          0.374,
+          0.245,
           1.8
         ]
       ],
       "materials": [
-        "MAT_AOE_Skin",
-        "MAT_AOE_Eye",
-        "MAT_AOE_Hair",
-        "MAT_AOE_Leather"
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Ear",
+        "MAT_AOE_NPC_Eye",
+        "MAT_AOE_NPC_Glint",
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_Blush",
+        "MAT_AOE_NPC_Mouth"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Head_01_Masculine.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Head_01_Masculine.glb",
+      "quality_revision": 4,
+      "expression_targets": [
+        "Expression_Neutral",
+        "Expression_Determined",
+        "Expression_Concerned",
+        "Expression_Sleepy",
+        "Expression_Cheerful"
+      ]
     },
     {
       "asset_id": "SM_NPC_Head_02_Feminine",
@@ -44,27 +55,38 @@
       "slot": "Head",
       "index": 2,
       "label_ko": "여성형 공통 머리",
-      "vertices": 174,
-      "triangles": 308,
+      "vertices": 698,
+      "triangles": 1324,
       "bounds_m": [
         [
-          -0.3292,
-          -0.3193,
-          1.2
+          -0.374,
+          -0.29219,
+          1.15
         ],
         [
-          0.3292,
-          0.2592,
+          0.374,
+          0.245,
           1.8
         ]
       ],
       "materials": [
-        "MAT_AOE_Skin",
-        "MAT_AOE_Eye",
-        "MAT_AOE_Hair",
-        "MAT_AOE_Leather"
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Ear",
+        "MAT_AOE_NPC_Eye",
+        "MAT_AOE_NPC_Glint",
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_Blush",
+        "MAT_AOE_NPC_Mouth"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Head_02_Feminine.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Head_02_Feminine.glb",
+      "quality_revision": 4,
+      "expression_targets": [
+        "Expression_Neutral",
+        "Expression_Determined",
+        "Expression_Concerned",
+        "Expression_Sleepy",
+        "Expression_Cheerful"
+      ]
     },
     {
       "asset_id": "SM_NPC_Hair_01_Crop",
@@ -72,24 +94,26 @@
       "slot": "Hair",
       "index": 1,
       "label_ko": "짧은 머리",
-      "vertices": 36,
-      "triangles": 68,
+      "vertices": 154,
+      "triangles": 284,
       "bounds_m": [
         [
-          -0.3078,
-          -0.2771,
-          1.48
+          -0.327,
+          -0.28555,
+          1.45
         ],
         [
-          0.3078,
-          0.3011,
-          1.822
+          0.327,
+          0.265,
+          1.872
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair"
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_HairLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_01_Crop.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_01_Crop.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Hair_02_Bob",
@@ -97,24 +121,26 @@
       "slot": "Hair",
       "index": 2,
       "label_ko": "단발",
-      "vertices": 92,
-      "triangles": 168,
+      "vertices": 226,
+      "triangles": 416,
       "bounds_m": [
         [
-          -0.3401,
-          -0.2771,
-          1.37
+          -0.4124,
+          -0.28547,
+          1.25
         ],
         [
-          0.3401,
-          0.3011,
-          1.822
+          0.4124,
+          0.295,
+          1.872
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair"
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_HairLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_02_Bob.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_02_Bob.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Hair_03_Long",
@@ -122,24 +148,26 @@
       "slot": "Hair",
       "index": 3,
       "label_ko": "긴 머리",
-      "vertices": 92,
-      "triangles": 168,
+      "vertices": 226,
+      "triangles": 416,
       "bounds_m": [
         [
-          -0.3401,
-          -0.2771,
-          1.15
+          -0.41222,
+          -0.28547,
+          1.05
         ],
         [
-          0.3401,
-          0.3011,
-          1.822
+          0.41222,
+          0.295,
+          1.872
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair"
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_HairLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_03_Long.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_03_Long.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Hair_04_Braid",
@@ -147,25 +175,27 @@
       "slot": "Hair",
       "index": 4,
       "label_ko": "땋은 긴 머리",
-      "vertices": 116,
-      "triangles": 200,
+      "vertices": 332,
+      "triangles": 612,
       "bounds_m": [
         [
-          -0.3078,
-          -0.2771,
-          1.06
+          -0.327,
+          -0.28547,
+          0.8925
         ],
         [
-          0.3078,
-          0.3253,
-          1.822
+          0.423,
+          0.265,
+          1.872
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair",
-        "MAT_AOE_Linen"
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_HairLight",
+        "MAT_AOE_NPC_Linen"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_04_Braid.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_04_Braid.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Hair_05_Swept",
@@ -173,24 +203,26 @@
       "slot": "Hair",
       "index": 5,
       "label_ko": "옆으로 넘긴 짧은 머리",
-      "vertices": 36,
-      "triangles": 68,
+      "vertices": 172,
+      "triangles": 316,
       "bounds_m": [
         [
-          -0.3078,
-          -0.2771,
-          1.42
+          -0.327,
+          -0.28555,
+          1.45
         ],
         [
-          0.3078,
-          0.3011,
-          1.822
+          0.327,
+          0.265,
+          1.94674
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair"
+        "MAT_AOE_NPC_Hair",
+        "MAT_AOE_NPC_HairLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_05_Swept.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Hair_05_Swept.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Torso_01_Tunic",
@@ -198,24 +230,29 @@
       "slot": "Torso",
       "index": 1,
       "label_ko": "주민 천 튜닉",
-      "vertices": 32,
-      "triangles": 60,
+      "vertices": 134,
+      "triangles": 240,
       "bounds_m": [
         [
-          -0.2356,
-          -0.1571,
-          0.72
+          -0.258,
+          -0.19,
+          0.693
         ],
         [
-          0.2356,
-          0.1571,
-          1.17
+          0.258,
+          0.15,
+          1.193
         ]
       ],
       "materials": [
-        "MAT_AOE_Cloth"
+        "MAT_AOE_NPC_Teal",
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_TealTrim",
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_Brass"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_01_Tunic.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_01_Tunic.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Torso_02_Armor",
@@ -223,25 +260,29 @@
       "slot": "Torso",
       "index": 2,
       "label_ko": "수호자 판금 흉갑",
-      "vertices": 104,
-      "triangles": 188,
+      "vertices": 208,
+      "triangles": 384,
       "bounds_m": [
         [
-          -0.375,
-          -0.1949,
-          0.72
+          -0.258,
+          -0.192,
+          0.655
         ],
         [
-          0.375,
-          0.17,
-          1.18
+          0.258,
+          0.181,
+          1.193
         ]
       ],
       "materials": [
-        "MAT_AOE_Iron",
-        "MAT_AOE_IronEdge"
+        "MAT_AOE_NPC_IronDark",
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Iron",
+        "MAT_AOE_NPC_IronEdge",
+        "MAT_AOE_NPC_Brass"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_02_Armor.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_02_Armor.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Torso_03_Archer",
@@ -249,26 +290,30 @@
       "slot": "Torso",
       "index": 3,
       "label_ko": "궁수 가죽 조끼",
-      "vertices": 80,
-      "triangles": 140,
+      "vertices": 184,
+      "triangles": 340,
       "bounds_m": [
         [
-          -0.2356,
-          -0.1895,
-          0.72
+          -0.258,
+          -0.21156,
+          0.7
         ],
         [
-          0.2356,
-          0.1571,
-          1.17
+          0.258,
+          0.15,
+          1.193
         ]
       ],
       "materials": [
-        "MAT_AOE_MossCloth",
-        "MAT_AOE_Leather",
-        "MAT_AOE_Brass"
+        "MAT_AOE_NPC_Moss",
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_MossLight",
+        "MAT_AOE_NPC_Brass",
+        "MAT_AOE_NPC_LeatherLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_03_Archer.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_03_Archer.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Torso_04_Robe",
@@ -276,25 +321,28 @@
       "slot": "Torso",
       "index": 4,
       "label_ko": "구도자 긴 로브",
-      "vertices": 64,
-      "triangles": 112,
+      "vertices": 168,
+      "triangles": 312,
       "bounds_m": [
         [
-          -0.2864,
-          -0.194,
-          0.22
+          -0.295,
+          -0.192,
+          0.27
         ],
         [
-          0.2864,
-          0.194,
-          1.17
+          0.295,
+          0.192,
+          1.193
         ]
       ],
       "materials": [
-        "MAT_AOE_Linen",
-        "MAT_AOE_Leather"
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Rust",
+        "MAT_AOE_NPC_Leather"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_04_Robe.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_04_Robe.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Torso_05_Merchant",
@@ -302,26 +350,29 @@
       "slot": "Torso",
       "index": 5,
       "label_ko": "상인 겹옷",
-      "vertices": 88,
-      "triangles": 152,
+      "vertices": 166,
+      "triangles": 300,
       "bounds_m": [
         [
-          -0.2356,
-          -0.1972,
-          0.72
+          -0.258,
+          -0.208,
+          0.7
         ],
         [
-          0.2356,
-          0.1571,
-          1.17
+          0.258,
+          0.15,
+          1.193
         ]
       ],
       "materials": [
-        "MAT_AOE_Wine",
-        "MAT_AOE_Leather",
-        "MAT_AOE_Brass"
+        "MAT_AOE_NPC_Wine",
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_Rust",
+        "MAT_AOE_NPC_Brass"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_05_Merchant.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_05_Merchant.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Torso_06_Healer",
@@ -329,26 +380,28 @@
       "slot": "Torso",
       "index": 6,
       "label_ko": "치유사 앞치마",
-      "vertices": 80,
-      "triangles": 140,
+      "vertices": 198,
+      "triangles": 356,
       "bounds_m": [
         [
-          -0.2356,
-          -0.1915,
-          0.55
+          -0.28,
+          -0.205,
+          0.4
         ],
         [
-          0.2356,
-          0.1571,
-          1.17
+          0.28,
+          0.176,
+          1.193
         ]
       ],
       "materials": [
-        "MAT_AOE_Cloth",
-        "MAT_AOE_Linen",
-        "MAT_AOE_MossCloth"
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_Skin",
+        "MAT_AOE_NPC_Rust",
+        "MAT_AOE_NPC_LeatherLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_06_Healer.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Torso_06_Healer.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Arms_01_Cloth",
@@ -356,25 +409,28 @@
       "slot": "Arms",
       "index": 1,
       "label_ko": "천 소매와 손",
-      "vertices": 88,
-      "triangles": 152,
+      "vertices": 372,
+      "triangles": 704,
       "bounds_m": [
         [
-          -0.5471,
-          -0.103,
-          0.635
+          -0.56234,
+          -0.12157,
+          0.6415
         ],
         [
-          0.5471,
-          0.103,
-          1.1664
+          0.56234,
+          0.08869,
+          1.1658
         ]
       ],
       "materials": [
-        "MAT_AOE_Cloth",
-        "MAT_AOE_Skin"
+        "MAT_AOE_NPC_Teal",
+        "MAT_AOE_NPC_TealTrim",
+        "MAT_AOE_NPC_LeatherLight",
+        "MAT_AOE_NPC_Skin"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_01_Cloth.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_01_Cloth.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Arms_02_Armor",
@@ -382,26 +438,28 @@
       "slot": "Arms",
       "index": 2,
       "label_ko": "갑옷 소매와 장갑",
-      "vertices": 112,
-      "triangles": 192,
+      "vertices": 532,
+      "triangles": 1008,
       "bounds_m": [
         [
-          -0.5471,
-          -0.103,
-          0.635
+          -0.56234,
+          -0.12359,
+          0.6415
         ],
         [
-          0.5471,
-          0.103,
-          1.1664
+          0.56234,
+          0.12,
+          1.20675
         ]
       ],
       "materials": [
-        "MAT_AOE_Iron",
-        "MAT_AOE_Leather",
-        "MAT_AOE_IronEdge"
+        "MAT_AOE_NPC_IronDark",
+        "MAT_AOE_NPC_Iron",
+        "MAT_AOE_NPC_IronEdge",
+        "MAT_AOE_NPC_Leather"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_02_Armor.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_02_Armor.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Arms_03_Leather",
@@ -409,25 +467,28 @@
       "slot": "Arms",
       "index": 3,
       "label_ko": "궁수 가죽 소매와 손",
-      "vertices": 88,
-      "triangles": 152,
+      "vertices": 372,
+      "triangles": 704,
       "bounds_m": [
         [
-          -0.5471,
-          -0.103,
-          0.635
+          -0.56234,
+          -0.12157,
+          0.6415
         ],
         [
-          0.5471,
-          0.103,
-          1.1664
+          0.56234,
+          0.08869,
+          1.1658
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_Skin"
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_LeatherLight",
+        "MAT_AOE_NPC_Skin"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_03_Leather.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_03_Leather.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Arms_04_Robe",
@@ -435,25 +496,28 @@
       "slot": "Arms",
       "index": 4,
       "label_ko": "로브 소매와 손",
-      "vertices": 88,
-      "triangles": 152,
+      "vertices": 372,
+      "triangles": 704,
       "bounds_m": [
         [
-          -0.5471,
-          -0.103,
-          0.635
+          -0.56234,
+          -0.12157,
+          0.6415
         ],
         [
-          0.5471,
-          0.103,
-          1.1664
+          0.56234,
+          0.08869,
+          1.1658
         ]
       ],
       "materials": [
-        "MAT_AOE_Linen",
-        "MAT_AOE_Skin"
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_LinenShade",
+        "MAT_AOE_NPC_LeatherLight",
+        "MAT_AOE_NPC_Skin"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_04_Robe.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Arms_04_Robe.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Legs_01_Trousers",
@@ -461,24 +525,25 @@
       "slot": "Legs",
       "index": 1,
       "label_ko": "기본 바지",
-      "vertices": 64,
-      "triangles": 116,
+      "vertices": 120,
+      "triangles": 228,
       "bounds_m": [
         [
-          -0.2124,
-          -0.1386,
-          0.16
+          -0.21331,
+          -0.1275,
+          0.22617
         ],
         [
-          0.2124,
-          0.1386,
-          0.77
+          0.21331,
+          0.1275,
+          0.792
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather"
+        "MAT_AOE_NPC_Trousers"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Legs_01_Trousers.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Legs_01_Trousers.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Legs_02_Patched",
@@ -486,25 +551,26 @@
       "slot": "Legs",
       "index": 2,
       "label_ko": "기워 입은 바지",
-      "vertices": 80,
-      "triangles": 140,
+      "vertices": 168,
+      "triangles": 316,
       "bounds_m": [
         [
-          -0.2124,
-          -0.1386,
-          0.16
+          -0.21331,
+          -0.1275,
+          0.22617
         ],
         [
-          0.2124,
-          0.1386,
-          0.77
+          0.21331,
+          0.1275,
+          0.792
         ]
       ],
       "materials": [
-        "MAT_AOE_Cloth",
-        "MAT_AOE_Linen"
+        "MAT_AOE_NPC_Teal",
+        "MAT_AOE_NPC_Linen"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Legs_02_Patched.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Legs_02_Patched.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Legs_03_Armored",
@@ -512,25 +578,26 @@
       "slot": "Legs",
       "index": 3,
       "label_ko": "갑옷 하의",
-      "vertices": 88,
-      "triangles": 156,
+      "vertices": 280,
+      "triangles": 532,
       "bounds_m": [
         [
-          -0.2273,
-          -0.1495,
-          0.16
+          -0.21331,
+          -0.1435,
+          0.225
         ],
         [
-          0.2273,
-          0.1386,
-          0.77
+          0.21331,
+          0.1275,
+          0.792
         ]
       ],
       "materials": [
-        "MAT_AOE_Iron",
-        "MAT_AOE_IronEdge"
+        "MAT_AOE_NPC_IronDark",
+        "MAT_AOE_NPC_Iron"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Legs_03_Armored.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Legs_03_Armored.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Feet_01_Boots",
@@ -538,24 +605,27 @@
       "slot": "Feet",
       "index": 1,
       "label_ko": "가죽 장화",
-      "vertices": 80,
-      "triangles": 144,
+      "vertices": 256,
+      "triangles": 480,
       "bounds_m": [
         [
-          -0.215,
-          -0.2,
-          0.0
+          -0.227,
+          -0.2225,
+          0.001
         ],
         [
-          0.215,
-          0.11,
-          0.27
+          0.227,
+          0.1045,
+          0.329
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather"
+        "MAT_AOE_NPC_Sole",
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_LeatherLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Feet_01_Boots.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Feet_01_Boots.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Feet_02_Wrapped",
@@ -563,25 +633,28 @@
       "slot": "Feet",
       "index": 2,
       "label_ko": "천을 감은 장화",
-      "vertices": 176,
-      "triangles": 312,
+      "vertices": 352,
+      "triangles": 656,
       "bounds_m": [
         [
-          -0.222,
-          -0.2,
-          0.0
+          -0.227,
+          -0.2225,
+          0.001
         ],
         [
-          0.222,
-          0.11,
-          0.27
+          0.227,
+          0.1045,
+          0.329
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_Linen"
+        "MAT_AOE_NPC_Sole",
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_LinenShade",
+        "MAT_AOE_NPC_Linen"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Feet_02_Wrapped.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Feet_02_Wrapped.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_FacialHair_01_Stubble",
@@ -589,24 +662,25 @@
       "slot": "FacialHair",
       "index": 1,
       "label_ko": "짧은 수염",
-      "vertices": 24,
-      "triangles": 44,
+      "vertices": 42,
+      "triangles": 80,
       "bounds_m": [
         [
-          -0.1986,
-          -0.2463,
-          1.27
+          -0.24973,
+          -0.293,
+          1.27288
         ],
         [
-          0.1986,
-          0.0863,
-          1.38
+          0.24973,
+          -0.24811,
+          1.45984
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair"
+        "MAT_AOE_NPC_Hair"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_FacialHair_01_Stubble.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_FacialHair_01_Stubble.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_FacialHair_02_Beard",
@@ -614,24 +688,25 @@
       "slot": "FacialHair",
       "index": 2,
       "label_ko": "긴 수염",
-      "vertices": 24,
-      "triangles": 44,
+      "vertices": 90,
+      "triangles": 168,
       "bounds_m": [
         [
-          -0.1986,
-          -0.2463,
-          1.19
+          -0.25895,
+          -0.304,
+          1.26335
         ],
         [
-          0.1986,
-          0.0863,
-          1.38
+          0.25895,
+          -0.2372,
+          1.46364
         ]
       ],
       "materials": [
-        "MAT_AOE_Hair"
+        "MAT_AOE_NPC_Hair"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_FacialHair_02_Beard.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_FacialHair_02_Beard.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Headgear_01_Hood",
@@ -639,24 +714,26 @@
       "slot": "Headgear",
       "index": 1,
       "label_ko": "순례자 후드",
-      "vertices": 96,
-      "triangles": 176,
+      "vertices": 224,
+      "triangles": 428,
       "bounds_m": [
         [
-          -0.34,
-          -0.2679,
-          1.21
+          -0.369,
+          -0.2975,
+          1.345
         ],
         [
-          0.34,
-          0.315,
-          1.88
+          0.369,
+          0.294,
+          1.91
         ]
       ],
       "materials": [
-        "MAT_AOE_Linen"
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_LinenShade"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Headgear_01_Hood.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Headgear_01_Hood.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Headgear_02_Helmet",
@@ -664,25 +741,26 @@
       "slot": "Headgear",
       "index": 2,
       "label_ko": "철제 투구",
-      "vertices": 96,
-      "triangles": 176,
+      "vertices": 224,
+      "triangles": 428,
       "bounds_m": [
         [
-          -0.3195,
-          -0.303,
-          1.36
+          -0.369,
+          -0.2975,
+          1.345
         ],
         [
-          0.3195,
-          0.2679,
-          1.85
+          0.369,
+          0.294,
+          1.91
         ]
       ],
       "materials": [
-        "MAT_AOE_Iron",
-        "MAT_AOE_IronEdge"
+        "MAT_AOE_NPC_Iron",
+        "MAT_AOE_NPC_IronEdge"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Headgear_02_Helmet.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Headgear_02_Helmet.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Headgear_03_Cap",
@@ -690,25 +768,26 @@
       "slot": "Headgear",
       "index": 3,
       "label_ko": "상인 모자",
-      "vertices": 48,
-      "triangles": 88,
+      "vertices": 88,
+      "triangles": 168,
       "bounds_m": [
         [
-          -0.33,
-          -0.33,
-          1.645
+          -0.354,
+          -0.31,
+          1.6945
         ],
         [
-          0.33,
-          0.33,
-          1.84
+          0.354,
+          0.294,
+          1.91
         ]
       ],
       "materials": [
-        "MAT_AOE_Wine",
-        "MAT_AOE_Leather"
+        "MAT_AOE_NPC_Wine",
+        "MAT_AOE_NPC_Leather"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Headgear_03_Cap.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Headgear_03_Cap.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Back_01_Cape",
@@ -716,24 +795,25 @@
       "slot": "Back",
       "index": 1,
       "label_ko": "짧은 망토",
-      "vertices": 8,
-      "triangles": 12,
+      "vertices": 24,
+      "triangles": 44,
       "bounds_m": [
         [
-          -0.29,
-          0.18,
-          0.42
+          -0.3,
+          0.17,
+          0.5
         ],
         [
-          0.29,
-          0.29,
+          0.3,
+          0.38,
           1.13
         ]
       ],
       "materials": [
-        "MAT_AOE_Wine"
+        "MAT_AOE_NPC_Moss"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Back_01_Cape.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Back_01_Cape.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Back_02_Quiver",
@@ -741,26 +821,28 @@
       "slot": "Back",
       "index": 2,
       "label_ko": "화살통",
-      "vertices": 64,
-      "triangles": 100,
+      "vertices": 188,
+      "triangles": 344,
       "bounds_m": [
         [
-          0.0615,
-          0.13,
-          0.6637
+          0.11254,
+          0.14,
+          0.71976
         ],
         [
-          0.3285,
-          0.31,
-          1.39
+          0.3525,
+          0.32,
+          1.4403
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_WoodLight",
-        "MAT_AOE_Linen"
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_LeatherLight",
+        "MAT_AOE_NPC_Wood",
+        "MAT_AOE_NPC_Linen"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Back_02_Quiver.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Back_02_Quiver.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Back_03_Pack",
@@ -768,26 +850,27 @@
       "slot": "Back",
       "index": 3,
       "label_ko": "여행 배낭",
-      "vertices": 56,
-      "triangles": 96,
+      "vertices": 184,
+      "triangles": 348,
       "bounds_m": [
         [
-          -0.2,
-          0.155,
-          0.69
+          -0.185,
+          0.125,
+          0.74
         ],
         [
-          0.2,
-          0.4135,
-          1.21
+          0.185,
+          0.425,
+          1.25
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_Linen",
-        "MAT_AOE_LeatherLight"
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_LeatherLight",
+        "MAT_AOE_NPC_Linen"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Back_03_Pack.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Back_03_Pack.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Belt_01_Plain",
@@ -795,25 +878,26 @@
       "slot": "Belt",
       "index": 1,
       "label_ko": "가죽 허리띠",
-      "vertices": 40,
-      "triangles": 72,
+      "vertices": 64,
+      "triangles": 116,
       "bounds_m": [
         [
-          -0.219,
-          -0.187,
-          0.785
+          -0.237,
+          -0.2055,
+          0.7765
         ],
         [
-          0.219,
-          0.1598,
-          0.847
+          0.237,
+          0.164,
+          0.8535
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_Brass"
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_Brass"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Belt_01_Plain.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Belt_01_Plain.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Belt_02_Pouches",
@@ -821,26 +905,27 @@
       "slot": "Belt",
       "index": 2,
       "label_ko": "주머니 허리띠",
-      "vertices": 88,
-      "triangles": 160,
+      "vertices": 160,
+      "triangles": 292,
       "bounds_m": [
         [
-          -0.265,
-          -0.187,
-          0.655
+          -0.2745,
+          -0.2055,
+          0.6615
         ],
         [
-          0.265,
-          0.1598,
-          0.847
+          0.2745,
+          0.164,
+          0.8535
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_Brass",
-        "MAT_AOE_LeatherLight"
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_Brass",
+        "MAT_AOE_NPC_LeatherLight"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Belt_02_Pouches.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Belt_02_Pouches.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Mainhand_01_Sword",
@@ -848,26 +933,27 @@
       "slot": "Mainhand",
       "index": 1,
       "label_ko": "직검",
-      "vertices": 60,
-      "triangles": 104,
+      "vertices": 81,
+      "triangles": 146,
       "bounds_m": [
         [
-          0.37,
-          -0.065,
-          0.585
+          0.375,
+          -0.0735,
+          0.6015
         ],
         [
-          0.59,
-          0.005,
-          1.44
+          0.605,
+          -0.0065,
+          1.41
         ]
       ],
       "materials": [
-        "MAT_AOE_Leather",
-        "MAT_AOE_IronEdge",
-        "MAT_AOE_Brass"
+        "MAT_AOE_NPC_Leather",
+        "MAT_AOE_NPC_Brass",
+        "MAT_AOE_NPC_IronEdge"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Mainhand_01_Sword.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Mainhand_01_Sword.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Mainhand_02_Bow",
@@ -875,25 +961,27 @@
       "slot": "Mainhand",
       "index": 2,
       "label_ko": "사냥 활",
-      "vertices": 80,
-      "triangles": 132,
+      "vertices": 88,
+      "triangles": 164,
       "bounds_m": [
         [
-          0.2916,
-          -0.0299,
-          0.2662
+          0.47099,
+          -0.04772,
+          0.30859
         ],
         [
-          0.5028,
-          0.0099,
-          1.2138
+          0.6655,
+          0.00772,
+          1.11141
         ]
       ],
       "materials": [
-        "MAT_AOE_WoodLight",
-        "MAT_AOE_Linen"
+        "MAT_AOE_NPC_Wood",
+        "MAT_AOE_NPC_Linen",
+        "MAT_AOE_NPC_Leather"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Mainhand_02_Bow.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Mainhand_02_Bow.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Mainhand_03_Staff",
@@ -901,25 +989,27 @@
       "slot": "Mainhand",
       "index": 3,
       "label_ko": "순례자 지팡이",
-      "vertices": 24,
-      "triangles": 40,
+      "vertices": 74,
+      "triangles": 136,
       "bounds_m": [
         [
-          0.4174,
-          -0.0853,
-          0.08
+          0.41,
+          -0.095,
+          0.1
         ],
         [
-          0.5426,
-          0.0253,
-          1.55
+          0.57,
+          0.045,
+          1.48
         ]
       ],
       "materials": [
-        "MAT_AOE_Wood",
-        "MAT_AOE_StoneLight"
+        "MAT_AOE_NPC_Wood",
+        "MAT_AOE_NPC_MossLight",
+        "MAT_AOE_NPC_Brass"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Mainhand_03_Staff.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Mainhand_03_Staff.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Offhand_01_Shield",
@@ -927,25 +1017,28 @@
       "slot": "Offhand",
       "index": 1,
       "label_ko": "철테 연 모양 방패",
-      "vertices": 34,
-      "triangles": 56,
+      "vertices": 154,
+      "triangles": 288,
       "bounds_m": [
         [
-          -0.7017,
-          -0.18,
-          0.4
+          -0.66,
+          -0.243,
+          0.575
         ],
         [
-          -0.2583,
-          -0.0922,
-          1.01
+          -0.32,
+          -0.0775,
+          1.005
         ]
       ],
       "materials": [
-        "MAT_AOE_Wood",
-        "MAT_AOE_Iron"
+        "MAT_AOE_NPC_IronDark",
+        "MAT_AOE_NPC_Wood",
+        "MAT_AOE_NPC_IronEdge",
+        "MAT_AOE_NPC_Iron"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Offhand_01_Shield.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Offhand_01_Shield.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_NPC_Offhand_02_Lantern",
@@ -953,25 +1046,26 @@
       "slot": "Offhand",
       "index": 2,
       "label_ko": "작은 희망의 등불",
-      "vertices": 96,
-      "triangles": 168,
+      "vertices": 192,
+      "triangles": 352,
       "bounds_m": [
         [
-          -0.575,
-          -0.115,
-          0.29
+          -0.58,
+          -0.14,
+          0.3575
         ],
         [
-          -0.385,
-          0.045,
-          0.72
+          -0.4,
+          0.04,
+          0.70865
         ]
       ],
       "materials": [
-        "MAT_AOE_Iron",
-        "MAT_AOE_Amber"
+        "MAT_AOE_NPC_Amber",
+        "MAT_AOE_NPC_IronDark"
       ],
-      "glb_file": "Exports/NPC_Parts/SM_NPC_Offhand_02_Lantern.glb"
+      "glb_file": "Exports/NPC_Parts/SM_NPC_Offhand_02_Lantern.glb",
+      "quality_revision": 4
     },
     {
       "asset_id": "SM_ENV_Grass_01_Meadow",
@@ -1526,92 +1620,105 @@
       "kind": "environment",
       "slot": "Building",
       "index": 1,
-      "label_ko": "서민 초가집",
-      "vertices": 314,
-      "triangles": 520,
+      "label_ko": "기둥과 창문이 있는 초가집",
+      "vertices": 912,
+      "triangles": 1416,
       "bounds_m": [
         [
-          -1.669,
-          -1.538,
+          -2.1912,
+          -1.8504,
           0.0
         ],
         [
-          1.669,
-          1.538,
-          3.3
+          2.1912,
+          1.8504,
+          5.18
         ]
       ],
       "materials": [
-        "MAT_AOE_Stone",
-        "MAT_AOE_Plaster",
-        "MAT_AOE_Wood",
-        "MAT_AOE_Dark",
-        "MAT_AOE_WoodLight",
-        "MAT_AOE_Brass",
-        "MAT_AOE_Thatch"
+        "MAT_AOE_Building_Stone",
+        "MAT_AOE_Building_Plaster",
+        "MAT_AOE_Building_StoneLight",
+        "MAT_AOE_Building_Wood",
+        "MAT_AOE_Building_Dark",
+        "MAT_AOE_Building_WoodLight",
+        "MAT_AOE_Building_Iron",
+        "MAT_AOE_Building_Brass",
+        "MAT_AOE_Building_Amber",
+        "MAT_AOE_Building_Thatch",
+        "MAT_AOE_Building_ThatchLight"
       ],
-      "glb_file": "Exports/Environment/SM_ENV_Building_01_Cottage.glb"
+      "glb_file": "Exports/Environment/SM_ENV_Building_01_Cottage.glb",
+      "building_revision": 2
     },
     {
       "asset_id": "SM_ENV_Building_02_Smithy",
       "kind": "environment",
       "slot": "Building",
       "index": 2,
-      "label_ko": "대장간",
-      "vertices": 400,
-      "triangles": 668,
+      "label_ko": "석재 굴뚝 대장간",
+      "vertices": 936,
+      "triangles": 1452,
       "bounds_m": [
         [
-          -1.917,
-          -2.34,
+          -2.1912,
+          -2.1091,
           0.0
         ],
         [
-          1.917,
-          1.688,
-          3.55
+          2.1912,
+          1.8504,
+          5.18
         ]
       ],
       "materials": [
-        "MAT_AOE_Stone",
-        "MAT_AOE_Plaster",
-        "MAT_AOE_Wood",
-        "MAT_AOE_Dark",
-        "MAT_AOE_WoodLight",
-        "MAT_AOE_Brass",
-        "MAT_AOE_Roof",
-        "MAT_AOE_Iron"
+        "MAT_AOE_Building_Stone",
+        "MAT_AOE_Building_Plaster",
+        "MAT_AOE_Building_StoneLight",
+        "MAT_AOE_Building_Wood",
+        "MAT_AOE_Building_Dark",
+        "MAT_AOE_Building_WoodLight",
+        "MAT_AOE_Building_Iron",
+        "MAT_AOE_Building_Brass",
+        "MAT_AOE_Building_Amber",
+        "MAT_AOE_Building_Roof",
+        "MAT_AOE_Building_IronEdge",
+        "MAT_AOE_Building_RoofLight"
       ],
-      "glb_file": "Exports/Environment/SM_ENV_Building_02_Smithy.glb"
+      "glb_file": "Exports/Environment/SM_ENV_Building_02_Smithy.glb",
+      "building_revision": 2
     },
     {
       "asset_id": "SM_ENV_Building_03_Market",
       "kind": "environment",
       "slot": "Building",
       "index": 3,
-      "label_ko": "마을 시장 가판대",
-      "vertices": 212,
-      "triangles": 332,
+      "label_ko": "천막과 진열대가 있는 시장 가판대",
+      "vertices": 380,
+      "triangles": 596,
       "bounds_m": [
         [
-          -1.5,
-          -0.855,
+          -1.38,
+          -1.2425,
           0.0
         ],
         [
-          1.5,
-          0.8245,
-          2.1934
+          1.38,
+          1.2,
+          3.8
         ]
       ],
       "materials": [
-        "MAT_AOE_Wood",
-        "MAT_AOE_WoodLight",
-        "MAT_AOE_MossCloth",
-        "MAT_AOE_Linen",
-        "MAT_AOE_Thatch"
+        "MAT_AOE_Building_Wood",
+        "MAT_AOE_Building_Stone",
+        "MAT_AOE_Building_WoodLight",
+        "MAT_AOE_Building_MossCloth",
+        "MAT_AOE_Building_Linen",
+        "MAT_AOE_Building_Thatch",
+        "MAT_AOE_Building_ThatchLight"
       ],
-      "glb_file": "Exports/Environment/SM_ENV_Building_03_Market.glb"
+      "glb_file": "Exports/Environment/SM_ENV_Building_03_Market.glb",
+      "building_revision": 2
     },
     {
       "asset_id": "SM_ENV_Building_04_RuinedChapel",
@@ -1670,6 +1777,42 @@
         "MAT_AOE_Iron"
       ],
       "glb_file": "Exports/Environment/SM_ENV_Building_05_BellTower.glb"
+    },
+    {
+      "asset_id": "SM_ENV_Building_06_TimberHouse",
+      "kind": "environment",
+      "slot": "Building",
+      "index": 6,
+      "label_ko": "목골 주택",
+      "glb_file": "Exports/Environment/SM_ENV_Building_06_TimberHouse.glb",
+      "vertices": 880,
+      "triangles": 1360,
+      "bounds_m": [
+        [
+          -2.1912,
+          -1.8504,
+          0.0
+        ],
+        [
+          2.1912,
+          1.8504,
+          4.92
+        ]
+      ],
+      "materials": [
+        "MAT_AOE_Building_Stone",
+        "MAT_AOE_Building_Plaster",
+        "MAT_AOE_Building_StoneLight",
+        "MAT_AOE_Building_Wood",
+        "MAT_AOE_Building_Dark",
+        "MAT_AOE_Building_WoodLight",
+        "MAT_AOE_Building_Iron",
+        "MAT_AOE_Building_Brass",
+        "MAT_AOE_Building_Amber",
+        "MAT_AOE_Building_Roof",
+        "MAT_AOE_Building_RoofLight"
+      ],
+      "building_revision": 2
     }
   ]
 }

@@ -199,16 +199,16 @@ public:
     {
         for (auto& npc : world.npcs)
         {
-            if (!npc.artParts.empty())
+            if(npc.artParts.empty())
             {
-                continue;
+                auto parts=Art::Assets().Recipe((unsigned)npc.id);
+                if(!parts.empty()) {npc.artParts=std::move(parts);world.dirty=true;}
             }
-            auto parts = Art::Assets().Recipe((unsigned)npc.id);
-            if (!parts.empty())
+            if(npc.artCatalogVersion<2 && !npc.artParts.empty())
             {
-                npc.artParts = std::move(parts);
-                npc.artCatalogVersion = 1;
-                world.dirty = true;
+                auto style=Art::Styles::Npc((unsigned)npc.id);
+                npc.artPalettes={{(int)style.skin,(int)style.hair,(int)style.cloth}};
+                npc.artCatalogVersion=2;world.dirty=true;
             }
         }
         m_InspectedNpc = 0;
@@ -328,11 +328,13 @@ public:
         graph.Update(dt);
     }
 
-    void DrawVillageBuilding(int kind)
+    void DrawVillageBuilding(int kind, bool residence = false)
     {
         auto p = Project({});
         const char* ids[] = {"SM_ENV_Building_01_Cottage", "SM_ENV_Building_02_Smithy", "SM_ENV_Building_03_Market"};
-        if (Art::Environment(r, ids[kind % 3], (float)p.x, (float)p.y, zoom, 8, SceneryOpacity(p, 56, 130, 32)))
+        const char* homes[] = {"SM_ENV_Building_01_Cottage", "SM_ENV_Building_06_TimberHouse"};
+        const char* asset = residence ? homes[kind % 2] : ids[kind % 3];
+        if (Art::Environment(r, asset, (float)p.x, (float)p.y, zoom, 20, SceneryOpacity(p, 76, 140, 42), true))
         {
             return;
         }
@@ -350,7 +352,7 @@ public:
                 Color stone(.48f, .49f, .44f), shade(.28f, .33f, .32f), mortar(.20f, .24f, .23f);
                 Color roof = kind == 2 ? Color(.29f, .43f, .38f) : Color(.37f, .32f, .31f);
                 mesh.Oval(0, 0, 18, 9, 65, 32, Color(.02f, .03f, .03f, .42f), Color(.02f, .03f, .03f, 0));
-                // The foundation matches the existing +/-25 by +/-23 collision footprint.
+                // Compact legacy fallback when the shared building GLB is unavailable.
                 mesh.Prism(25, 23, 72, stone, shade, stone);
                 for (int z = 12; z < 72; z += 12)
                 {
@@ -456,7 +458,7 @@ public:
                     lot,
                     [this, village](int plot)
                     {
-                        DrawVillageBuilding(plot % 3);
+                        DrawVillageBuilding(plot % 2, true);
                         if (Game::Distance(world.player.p, Game::HouseEntrance(village, plot)) < 90)
                         {
                             for (const auto& owner : world.npcs)
@@ -468,7 +470,7 @@ public:
                                 auto p = Project({});
                                 r.Text(
                                     (float)p.x - 35 * zoom,
-                                    (float)p.y - 120 * zoom,
+                                    (float)p.y - 145 * zoom,
                                     owner.Name(),
                                     Color(.9f, .86f, .7f),
                                     12
@@ -478,7 +480,7 @@ public:
                         }
                     }
                 );
-                house.depthOffset = IsometricView::GroundHalfExtents({25, 23}).y * zoom;
+                house.depthOffset = IsometricView::GroundHalfExtents({Game::BuildingHalfWidth, Game::BuildingHalfDepth}).y * zoom;
             }
             for (int building = 0; building < 3; ++building)
             {
@@ -493,7 +495,8 @@ public:
                         DrawVillageBuilding(b);
                     }
                 );
-                actor.depthOffset = IsometricView::GroundHalfExtents({25, 23}).y * zoom;
+                actor.depthOffset = IsometricView::GroundHalfExtents({building == 2 ? 25 : Game::BuildingHalfWidth,
+                                                                    building == 2 ? 23 : Game::BuildingHalfDepth}).y * zoom;
             }
             for (int type = 0; type < 2; ++type)
             {
@@ -764,6 +767,9 @@ public:
     {
         Game::Vec screen = Project(p);
         float scale = zoom * (child ? .65f : 1.f);
+        const float margin = 180 * scale;
+        if (!r.VisibleRect((float)screen.x-margin, (float)screen.y-margin,
+                           (float)screen.x+margin, (float)screen.y+margin)) return;
         CharacterMesh::Appearance appearance;
         appearance.facing = player ? playerMotion.facing : CharacterFacing::Front;
         appearance.pose = player ? playerMotion.Pose() : CharacterMotion::IdlePose;
@@ -780,7 +786,13 @@ public:
         Art::DrawRequest imported;
         imported.assets = (!cameraOverride && id > 0 && id <= (int)world.npcs.size())
                               ? world.npcs[id - 1].artParts
-                              : Art::Assets().Recipe(player ? 0 : (unsigned)id);
+                              : (player ? Art::Assets().PlayerRecipe() : Art::Assets().Recipe((unsigned)id));
+        imported.style=player ? Art::Styles::Player() : Art::Styles::Npc((unsigned)id);
+        if(!player && !cameraOverride && id>0 && id<=(int)world.npcs.size())
+        {
+            const auto& palettes=world.npcs[id-1].artPalettes;
+            imported.style.skin=(unsigned)palettes[0];imported.style.hair=(unsigned)palettes[1];imported.style.cloth=(unsigned)palettes[2];
+        }
         imported.x = x;
         imported.y = y;
         imported.scale = scale;
@@ -789,6 +801,8 @@ public:
         bool sprinting = player ? playerMotion.sprinting : (motion && motion->sprinting);
         imported.clip = moving ? (sprinting ? "Run" : "Walk") : "Idle";
         imported.seconds = world.time;
+        imported.deferAnimation = true;
+        imported.preciseDepth = true;
         if (Art::Draw(r, imported))
         {
             return;

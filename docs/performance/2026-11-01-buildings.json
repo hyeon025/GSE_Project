@@ -1,0 +1,17 @@
+{
+  "scene": "copied save, real Update/Display/HUD/SwapBuffers, moving, 180 frames",
+  "source_model_revision": 2,
+  "timings": {
+    "skip_0": {
+      "mean_ms": 18.0088,
+      "p95_ms": 21.3923,
+      "max_ms": 225.459
+    },
+    "skip_60": {
+      "mean_ms": 16.6988,
+      "p95_ms": 21.3923,
+      "max_ms": 33.3621
+    }
+  },
+  "limitations": "Short deterministic run; initial model/font loading remains; occasional long frames are not eliminated."
+}

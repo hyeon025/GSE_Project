@@ -195,24 +195,26 @@ namespace Society
             std::cout << "[World] villages=" << VillageCount << " settled=" << w.society.settledVillages
                       << " residentsPerVillage=" << ResidentsPerVillage << " npcRecords=" << w.npcs.size() << '\n';
         }
+        // Build housing occupancy once, then preserve NPC order when assigning empty lots.
+        std::array<std::array<bool, HousingCapacity>, VillageCount> occupied = {};
         for (auto& n : w.npcs)
         {
             InitializeNpc(n);
+            if (n.life.alive && n.life.houseLot >= 0 && n.life.houseLot < HousingCapacity)
+            {
+                occupied[n.life.village][n.life.houseLot] = true;
+            }
+        }
+        for (auto& n : w.npcs)
+        {
             if (n.life.houseLot < 0)
             {
-                std::array<bool, HousingCapacity> occupied = {};
-                for (const auto& other : w.npcs)
-                {
-                    if (other.life.alive && other.life.village == n.life.village && other.life.houseLot >= 0)
-                    {
-                        occupied[other.life.houseLot] = true;
-                    }
-                }
                 for (int lot = 0; lot < HousingCapacity; ++lot)
                 {
-                    if (!occupied[lot])
+                    if (!occupied[n.life.village][lot])
                     {
                         n.life.houseLot = lot;
+                        if (n.life.alive) occupied[n.life.village][lot] = true;
                         break;
                     }
                 }
@@ -877,6 +879,19 @@ namespace Society
                 }
             }
         }
+        // Positions do not change during news exchange. Use spatial buckets, retaining
+        // original vector order so same-tick propagation remains deterministic.
+        using NewsCell = std::pair<std::int64_t, std::int64_t>;
+        std::map<NewsCell, std::vector<size_t>> nearby;
+        const auto cellOf = [](Game::Vec p) -> NewsCell
+        {
+            return {(std::int64_t)std::floor(p.x / 65), (std::int64_t)std::floor(p.y / 65)};
+        };
+        for (size_t i = 0; i < w.npcs.size(); ++i)
+        {
+            if (w.npcs[i].life.alive) nearby[cellOf(w.npcs[i].p)].push_back(i);
+        }
+        std::vector<size_t> visitors;
         for (auto& npc : w.npcs)
         {
             auto& life = npc.life;
@@ -885,8 +900,21 @@ namespace Society
                 continue;
             }
             life.known[life.village] = s.villages[life.village].news[life.village];
-            for (const auto& visitor : w.npcs)
+            visitors.clear();
+            const auto cell = cellOf(npc.p);
+            for (int dy = -1; dy <= 1; ++dy)
             {
+                for (int dx = -1; dx <= 1; ++dx)
+                {
+                    auto found = nearby.find({cell.first + dx, cell.second + dy});
+                    if (found != nearby.end())
+                        visitors.insert(visitors.end(), found->second.begin(), found->second.end());
+                }
+            }
+            std::sort(visitors.begin(), visitors.end());
+            for (size_t index : visitors)
+            {
+                const auto& visitor = w.npcs[index];
                 if (!visitor.life.alive || Game::Distance(npc.p, visitor.p) > 65)
                 {
                     continue;

@@ -230,9 +230,12 @@ namespace Art
             std::array<float, 4> color = {{1, 1, 1, 1}};
             Vec3 emission;
             bool doubleSided = false;
+            PaletteRole paletteRole = PaletteRole::None;
+            std::array<std::vector<float>,5> expressions;
         };
 
         std::vector<Primitive> primitives;
+        std::vector<std::vector<Mat>> inverseBinds;
 
         ~Impl()
         {
@@ -420,6 +423,18 @@ namespace Art
         {
             throw std::runtime_error("Required glTF extensions are unsupported");
         }
+        for (size_t s = 0; s < m.data->skins_count; ++s)
+        {
+            const auto& skin = m.data->skins[s];
+            auto values = Unpack(skin.inverse_bind_matrices);
+            if (!values.empty() && values.size() != skin.joints_count * 16)
+                throw std::runtime_error("Invalid inverse bind matrix count");
+            std::vector<Mat> binds(skin.joints_count, Identity());
+            if (!values.empty())
+                for (size_t j = 0; j < binds.size(); ++j)
+                    std::copy_n(values.data() + j * 16, 16, binds[j].begin());
+            m.inverseBinds.push_back(std::move(binds));
+        }
         size_t vertexCount = 0;
         for (size_t i = 0; i < m.data->nodes_count; ++i)
         {
@@ -431,9 +446,9 @@ namespace Art
             for (size_t j = 0; j < node.mesh->primitives_count; ++j)
             {
                 auto& source = node.mesh->primitives[j];
-                if (source.type != cgltf_primitive_type_triangles || source.targets_count)
+                if (source.type != cgltf_primitive_type_triangles || source.targets_count>32)
                 {
-                    throw std::runtime_error("Only triangle meshes without morph targets are supported");
+                    throw std::runtime_error("Only triangle meshes with at most 32 morph targets are supported");
                 }
                 Impl::Primitive p;
                 p.node = i;
@@ -481,6 +496,7 @@ namespace Art
                 if (source.material)
                 {
                     auto& mat = *source.material;
+                    p.paletteRole = Styles::Role(Name(mat.name));
                     if (mat.pbr_metallic_roughness.base_color_texture.texture || mat.normal_texture.texture ||
                         mat.emissive_texture.texture)
                     {
@@ -495,6 +511,20 @@ namespace Art
                     float strength = mat.has_emissive_strength ? mat.emissive_strength.emissive_strength : 1;
                     p.emission = {p.emission.x * strength, p.emission.y * strength, p.emission.z * strength};
                     p.doubleSided = mat.double_sided != 0;
+                }
+                for(size_t target=0;target<source.targets_count;++target)
+                {
+                    if(target>=node.mesh->target_names_count)continue;
+                    unsigned expression=0;
+                    for(unsigned e=1;e<Styles::ExpressionCount;++e)
+                        if(Name(node.mesh->target_names[target])==std::string("Expression_")+Styles::Expression(e))expression=e;
+                    if(!expression)continue;
+                    const auto& morph=source.targets[target];
+                    for(size_t a=0;a<morph.attributes_count;++a)
+                        if(morph.attributes[a].type==cgltf_attribute_type_position)
+                            p.expressions[expression-1]=Unpack(morph.attributes[a].data);
+                    if(p.expressions[expression-1].size()!=p.positions.size())
+                        throw std::runtime_error("Expression POSITION target size mismatch");
                 }
                 m.primitives.push_back(std::move(p));
             }
@@ -560,85 +590,93 @@ namespace Art
     }
 
     std::vector<Triangle>
-    Model::Sample(const std::string& mesh, const std::string& clip, double seconds, bool loop) const
+    Model::Sample(const std::string& mesh, const std::string& clip, double seconds, bool loop, unsigned expression) const
+    {
+        return SampleMeshes({mesh}, clip, seconds, loop, expression);
+    }
+
+    std::vector<Triangle> Model::SampleMeshes(
+        const std::vector<std::string>& meshes, const std::string& clip, double seconds, bool loop, unsigned expression) const
     {
         auto& m = *impl;
         auto world = m.Pose(clip, seconds, loop);
-        std::vector<Triangle> result;
-        for (const auto& p : m.primitives)
+        std::vector<std::vector<Mat>> palettes(m.data->skins_count);
+        for (size_t s = 0; s < palettes.size(); ++s)
         {
-            auto& node = m.data->nodes[p.node];
-            if (!mesh.empty() && Name(node.name) != mesh && Name(node.mesh->name) != mesh)
-            {
-                continue;
-            }
-            std::vector<Mat> palette;
-            if (node.skin)
-            {
-                auto inverse = Unpack(node.skin->inverse_bind_matrices);
-                if (!inverse.empty() && inverse.size() != node.skin->joints_count * 16)
-                {
-                    throw std::runtime_error("Invalid inverse bind matrix count");
-                }
-                for (size_t j = 0; j < node.skin->joints_count; ++j)
-                {
-                    Mat bind = Identity();
-                    if (!inverse.empty())
-                    {
-                        // The last matrix ends at size(); do not subscript that one-past-end position.
-                        std::copy_n(inverse.data() + j * 16, bind.size(), bind.begin());
-                    }
-                    palette.push_back(Multiply(world[node.skin->joints[j] - m.data->nodes], bind));
-                }
-            }
-            std::vector<Vec3> vertices(p.positions.size() / 3);
-            for (size_t i = 0; i < vertices.size(); ++i)
-            {
-                Vec3 position = {p.positions[i * 3], p.positions[i * 3 + 1], p.positions[i * 3 + 2]};
-                if (!node.skin)
-                {
-                    vertices[i] = Transform(world[p.node], position);
-                }
-                else
-                {
-                    Vec3 sum = {};
-                    float total = 0;
-                    for (size_t k = 0; k < 4; ++k)
-                    {
-                        float weight = p.weights[i * 4 + k], joint = p.joints[i * 4 + k];
-                        if (weight < 0 || joint < 0 || joint >= palette.size() || joint != std::floor(joint))
-                        {
-                            throw std::runtime_error("Invalid skin weights/joint index");
-                        }
-                        auto point = Transform(palette[(size_t)joint], position);
-                        sum.x += point.x * weight;
-                        sum.y += point.y * weight;
-                        sum.z += point.z * weight;
-                        total += weight;
-                    }
-                    if (total < 1e-6f)
-                    {
-                        throw std::runtime_error("Unweighted skinned vertex");
-                    }
-                    vertices[i] = {sum.x / total, sum.y / total, sum.z / total};
-                }
-            }
-            for (size_t i = 0; i < p.indices.size(); i += 3)
-            {
-                Triangle triangle;
-                for (int k = 0; k < 3; ++k)
-                {
-                    triangle.points[k] = vertices[p.indices[i + k]];
-                }
-                triangle.color = p.color;
-                triangle.emission = p.emission;
-                triangle.doubleSided = p.doubleSided;
-                result.push_back(triangle);
-            }
+            const auto& skin = m.data->skins[s];
+            palettes[s].reserve(skin.joints_count);
+            for (size_t j = 0; j < skin.joints_count; ++j)
+                palettes[s].push_back(Multiply(world[skin.joints[j] - m.data->nodes], m.inverseBinds[s][j]));
         }
-        if (result.empty())
+        std::vector<Triangle> result;
+        for (const auto& mesh : meshes)
         {
-            throw std::runtime_error("Selected mesh was not found: " + mesh);
+            const size_t firstTriangle = result.size();
+            for (const auto& p : m.primitives)
+            {
+                auto& node = m.data->nodes[p.node];
+                if (!mesh.empty() && Name(node.name) != mesh && Name(node.mesh->name) != mesh)
+                {
+                    continue;
+                }
+                const auto* palette = node.skin ? &palettes[node.skin - m.data->skins] : nullptr;
+                std::vector<Vec3> vertices(p.positions.size() / 3);
+                for (size_t i = 0; i < vertices.size(); ++i)
+                {
+                    Vec3 position = {p.positions[i * 3], p.positions[i * 3 + 1], p.positions[i * 3 + 2]};
+                    unsigned selected=expression%Styles::ExpressionCount;
+                    if(selected && !p.expressions[selected-1].empty())
+                    {
+                        const auto& delta=p.expressions[selected-1];
+                        position.x+=delta[i*3];position.y+=delta[i*3+1];position.z+=delta[i*3+2];
+                    }
+                    if (!node.skin)
+                    {
+                        vertices[i] = Transform(world[p.node], position);
+                    }
+                    else
+                    {
+                        Vec3 sum = {};
+                        float total = 0;
+                        for (size_t k = 0; k < 4; ++k)
+                        {
+                            float weight = p.weights[i * 4 + k], joint = p.joints[i * 4 + k];
+                            if (weight < 0 || joint < 0 || joint >= palette->size() || joint != std::floor(joint))
+                            {
+                                throw std::runtime_error("Invalid skin weights/joint index");
+                            }
+                            if (weight == 0) continue;
+                            auto point = Transform((*palette)[(size_t)joint], position);
+                            sum.x += point.x * weight;
+                            sum.y += point.y * weight;
+                            sum.z += point.z * weight;
+                            total += weight;
+                        }
+                        if (total < 1e-6f)
+                        {
+                            throw std::runtime_error("Unweighted skinned vertex");
+                        }
+                        vertices[i] = {sum.x / total, sum.y / total, sum.z / total};
+                    }
+                }
+                for (size_t i = 0; i < p.indices.size(); i += 3)
+                {
+                    Triangle triangle;
+                    for (int k = 0; k < 3; ++k)
+                    {
+                        triangle.points[k] = vertices[p.indices[i + k]];
+                    }
+                    triangle.color = p.color;
+                    triangle.emission = p.emission;
+                    triangle.doubleSided = p.doubleSided;
+                    triangle.paletteRole = p.paletteRole;
+                    result.push_back(triangle);
+                }
+            }
+            if (result.size() == firstTriangle)
+            {
+                throw std::runtime_error("Selected mesh was not found: " + mesh);
+            }
         }
         return result;
     }
@@ -862,6 +900,18 @@ namespace Art
     std::vector<std::string> Library::Recipe(unsigned identity) const
     {
         return impl->recipes.empty() ? std::vector<std::string>{} : impl->recipes[identity % impl->recipes.size()];
+    }
+
+    std::vector<std::string> Library::PlayerRecipe() const
+    {
+        std::vector<std::string> result;
+        for(const auto& slot:std::vector<std::pair<std::string,int>>{{"Head",1},{"Hair",5},{"Torso",1},{"Arms",1},{"Legs",1},{"Feet",1},{"Back",1},{"Belt",2}})
+        {
+            auto part=Part(slot.first,slot.second);
+            if(!part)return {};
+            result.push_back(part->id);
+        }
+        return result;
     }
 
     const std::wstring& Library::Root() const

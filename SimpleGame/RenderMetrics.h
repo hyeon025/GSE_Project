@@ -67,9 +67,14 @@ struct RenderBatchLimits
 {
     static constexpr size_t Instances = 2048;
     static constexpr std::uint64_t PaddingRatio = 8;
+    static constexpr std::uint64_t LargeMeshPaddingRatio = 2;
+    static constexpr std::uint64_t LargeMeshVertices = 1024;
 
     static bool ExceedsPadding(std::uint64_t useful, std::uint64_t maximum, size_t count)
     {
-        return maximum * count > useful * PaddingRatio;
+        // One detailed character must not make thousands of tiny grass/UI instances
+        // execute the character's full vertex count. Small primitive batches stay broad.
+        const auto ratio = maximum > LargeMeshVertices ? LargeMeshPaddingRatio : PaddingRatio;
+        return maximum * count > useful * ratio;
     }
 };

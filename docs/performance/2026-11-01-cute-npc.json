@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-01",
+  "scope": "actual production Update/Display/HUD/swap, copied save, no writes",
+  "mode": "move",
+  "frames": 180,
+  "warmup_frames": 60,
+  "travelled_units": 236.635,
+  "warm": {
+    "mean_ms": 16.6355,
+    "p95_ms": 16.7378,
+    "max_ms": 16.8918,
+    "update_ms": 0.232207
+  },
+  "cold_first_use_max_ms": 240.255,
+  "limitations": "Short fixed-step movement check; not a long-play guarantee. First-use asset/pose work can still stall."
+}

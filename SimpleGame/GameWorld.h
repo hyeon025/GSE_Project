@@ -291,6 +291,8 @@ namespace Game
         return Distance(p, Vec(a.x + x * t, a.y + y * t));
     }
 
+    constexpr double BuildingHalfWidth = 33, BuildingHalfDepth = 28;
+
     inline Vec HousePosition(int village, int lot)
     {
         // Sixty private plots; the four central plots are reserved for the market.
@@ -365,10 +367,15 @@ namespace Game
         return -1;
     }
 
-    inline bool Obstacle(int tx, int ty)
+    inline bool ObstacleUncached(int tx, int ty)
     {
+        // Most tiles cannot contain scenery; reject them before expensive road/settlement tests.
+        if (Hash(tx, ty, 37) % 100 >= 14)
+        {
+            return false;
+        }
         Vec p(tx * 32.0 + 16, ty * 32.0 + 16);
-        if (SettlementClearing(p) || Road(p) < 50 || Hash(tx, ty, 37) % 100 >= 14)
+        if (SettlementClearing(p) || Road(p) < 50)
         {
             return false;
         }
@@ -387,6 +394,27 @@ namespace Game
         return true;
     }
 
+    inline bool Obstacle(int tx, int ty)
+    {
+        // Scenery is a pure function of tile coordinates. A bounded direct-mapped cache
+        // avoids recalculating roads for every NPC steering probe and every frame.
+        struct Entry
+        {
+            int x = 0, y = 0;
+            bool value = false, valid = false;
+        };
+        static thread_local std::array<Entry, 8192> cache;
+        auto& entry = cache[Hash(tx, ty, 37) % cache.size()];
+        if (!entry.valid || entry.x != tx || entry.y != ty)
+        {
+            entry.x = tx;
+            entry.y = ty;
+            entry.value = ObstacleUncached(tx, ty);
+            entry.valid = true;
+        }
+        return entry.value;
+    }
+
     inline bool Walkable(Vec p)
     {
         for (int v = 0; v < Society::VillageCount; ++v)
@@ -400,7 +428,7 @@ namespace Game
                     !((cellX == 3 || cellX == 4) && (cellY == 3 || cellY == 4)))
                 {
                     Vec house(VillageCenter(v).x + (cellX - 3.5) * 112, VillageCenter(v).y + (cellY - 3.5) * 112);
-                    if (std::abs(p.x - house.x) < 25 && std::abs(p.y - house.y) < 23)
+                    if (std::abs(p.x - house.x) < BuildingHalfWidth && std::abs(p.y - house.y) < BuildingHalfDepth)
                     {
                         return false;
                     }
@@ -409,7 +437,9 @@ namespace Game
             for (int b = 0; b < 3; ++b)
             {
                 Vec c = VillageBuilding(v, b);
-                if (std::abs(p.x - c.x) < 25 && std::abs(p.y - c.y) < 23)
+                const double halfWidth = b == 2 ? 25 : BuildingHalfWidth;
+                const double halfDepth = b == 2 ? 23 : BuildingHalfDepth;
+                if (std::abs(p.x - c.x) < halfWidth && std::abs(p.y - c.y) < halfDepth)
                 {
                     return false;
                 }
@@ -682,10 +712,10 @@ namespace Game
         return std::isfinite(p.x) && std::isfinite(p.y) && std::abs(p.x) < 1e10 && std::abs(p.y) < 1e10;
     }
 
-    inline bool Load(World& w, bool& damaged)
+    inline bool Load(World& w, bool& damaged, const std::wstring& sourcePath = L"")
     {
         damaged = false;
-        std::wstring path = SavePath();
+        std::wstring path = sourcePath.empty() ? SavePath() : sourcePath;
         if (path.empty())
         {
             return false;

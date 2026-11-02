@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-02",
+  "mode": "move",
+  "frames": 180,
+  "warmup_frames": 60,
+  "warm": {
+    "mean_ms": 16.6472,
+    "p95_ms": 17.2057,
+    "max_ms": 17.7138,
+    "update_ms": 0.266357
+  },
+  "all_frame_max_ms": 587.976,
+  "limitations": "Short movement check with copied save. First-use loading/pose work can stall; not a long-play guarantee."
+}

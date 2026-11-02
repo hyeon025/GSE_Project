@@ -31,9 +31,18 @@ void Renderer::OpenProfileSegment()
     const auto* version = glGetString(GL_VERSION);
     m_FrameLog << "# schema=2,mesh_revision=" << RenderMeshCache::Revision
                << ",max_instances=" << RenderBatchLimits::Instances
-               << ",padding_ratio=" << RenderBatchLimits::PaddingRatio << '\n';
+               << ",padding_ratio=" << RenderBatchLimits::PaddingRatio
+               << ",large_mesh_padding_ratio=" << RenderBatchLimits::LargeMeshPaddingRatio
+               << ",large_mesh_vertices=" << RenderBatchLimits::LargeMeshVertices << '\n';
     m_FrameLog << "# gpu=" << (renderer ? reinterpret_cast<const char*>(renderer) : "unknown")
                << ",gl=" << (version ? reinterpret_cast<const char*>(version) : "unknown") << '\n';
+    m_FrameLog << "# build_mode="
+#ifdef _DEBUG
+               << "Debug"
+#else
+               << "Release"
+#endif
+               << '\n';
     m_FrameLog << "# build=" << __DATE__ << ' ' << __TIME__ << ",shader_fnv64=" << m_ShaderFingerprint
                << ",segment=" << m_LogSegment << '\n';
     m_FrameLog
@@ -57,7 +66,7 @@ void Renderer::OpenProfileSegment()
     {
         m_FrameLog << ',' << name;
     }
-    m_FrameLog << '\n';
+    m_FrameLog << ",game_update_ms,previous_swap_ms\n";
 }
 
 void Renderer::WriteProfileFrame(double renderMs)
@@ -81,7 +90,7 @@ void Renderer::WriteProfileFrame(double renderMs)
     {
         m_FrameLog << ',' << value;
     }
-    m_FrameLog << '\n';
+    m_FrameLog << ',' << m_GameUpdateMs << ',' << m_PreviousSwapMs << '\n';
     if (!m_FrameLog)
     {
         m_LogFailed = true;

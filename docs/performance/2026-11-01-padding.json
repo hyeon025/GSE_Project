@@ -1,0 +1,37 @@
+{
+  "scene": "48 ordered 6000-vertex meshes, each followed by 64 tiny triangles; 1440x900 default HDR",
+  "frames": 90,
+  "warmup": 30,
+  "scope": "synthetic batch benchmark; excludes game simulation and art skinning",
+  "runs": {
+    "padding-before": {
+      "mean_ms": 1.68687,
+      "p95_ms": 2.2352,
+      "average_counters": {
+        "draw_calls": 105.0,
+        "useful_vertices": 297243.0,
+        "submitted_vertices": 2312235.0,
+        "upload_bytes": 349440.0
+      }
+    },
+    "padding-after": {
+      "mean_ms": 0.615967,
+      "p95_ms": 0.7895,
+      "average_counters": {
+        "draw_calls": 105.0,
+        "useful_vertices": 297243.0,
+        "submitted_vertices": 585099.0,
+        "upload_bytes": 349440.0
+      }
+    }
+  },
+  "visual": {
+    "max_channel_difference_8bit": 0,
+    "mean_difference_rgba": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  }
+}

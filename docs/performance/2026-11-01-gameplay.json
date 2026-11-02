@@ -1,0 +1,127 @@
+{
+  "date": "2026-11-01",
+  "scene": "copied user save, actual production Update + Display + full HUD + SwapBuffers + glFinish",
+  "hardware": "RTX 4060 Ti, OpenGL 3.3",
+  "build": "MSVC x64 /O2 /MD",
+  "frames_per_run": 180,
+  "warmup_frames": 60,
+  "fixed_simulation_dt": 0.016666666666666666,
+  "runs": {
+    "play-before": {
+      "raw_summary": "mode=idle frames=180 hud=true swap=true fixed_dt=0.0166667\ntravelled_units=0 combat=0\nskip=0 mean_ms=29.1077 p95_ms=75.3883 max_ms=101.937 update_ms=0.646278\nskip=60 mean_ms=29.1684 p95_ms=76.8474 max_ms=82.1809 update_ms=0.704431\n",
+      "timings": {
+        "skip_0": {
+          "mean_ms": 29.1077,
+          "p95_ms": 75.3883,
+          "max_ms": 101.937,
+          "update_ms": 0.646278
+        },
+        "skip_60": {
+          "mean_ms": 29.1684,
+          "p95_ms": 76.8474,
+          "max_ms": 82.1809,
+          "update_ms": 0.704431
+        }
+      }
+    },
+    "play-before-move": {
+      "raw_summary": "mode=move frames=180 hud=true swap=true fixed_dt=0.0166667\ntravelled_units=254.125 combat=0\nskip=0 mean_ms=29.1344 p95_ms=76.9729 max_ms=98.3192 update_ms=0.676732\nskip=60 mean_ms=29.3231 p95_ms=77.6279 max_ms=98.3192 update_ms=0.740706\n",
+      "timings": {
+        "skip_0": {
+          "mean_ms": 29.1344,
+          "p95_ms": 76.9729,
+          "max_ms": 98.3192,
+          "update_ms": 0.676732
+        },
+        "skip_60": {
+          "mean_ms": 29.3231,
+          "p95_ms": 77.6279,
+          "max_ms": 98.3192,
+          "update_ms": 0.740706
+        }
+      }
+    },
+    "play-before-combat": {
+      "raw_summary": "mode=combat frames=180 hud=true swap=true fixed_dt=0.0166667\ntravelled_units=300 combat=1\nskip=0 mean_ms=16.9655 p95_ms=17.037 max_ms=87.6882 update_ms=0.604264\nskip=60 mean_ms=16.6431 p95_ms=16.9177 max_ms=17.2668 update_ms=0.665868\n",
+      "timings": {
+        "skip_0": {
+          "mean_ms": 16.9655,
+          "p95_ms": 17.037,
+          "max_ms": 87.6882,
+          "update_ms": 0.604264
+        },
+        "skip_60": {
+          "mean_ms": 16.6431,
+          "p95_ms": 16.9177,
+          "max_ms": 17.2668,
+          "update_ms": 0.665868
+        }
+      }
+    },
+    "play-final-idle": {
+      "raw_summary": "mode=idle frames=180 hud=true swap=true fixed_dt=0.0166667\ntravelled_units=0 combat=0\nskip=0 mean_ms=16.9561 p95_ms=17.004 max_ms=76.8208 update_ms=0.284188\nskip=60 mean_ms=16.6516 p95_ms=16.9407 max_ms=17.5556 update_ms=0.280926\n",
+      "timings": {
+        "skip_0": {
+          "mean_ms": 16.9561,
+          "p95_ms": 17.004,
+          "max_ms": 76.8208,
+          "update_ms": 0.284188
+        },
+        "skip_60": {
+          "mean_ms": 16.6516,
+          "p95_ms": 16.9407,
+          "max_ms": 17.5556,
+          "update_ms": 0.280926
+        }
+      }
+    },
+    "play-final": {
+      "raw_summary": "mode=move frames=180 hud=true swap=true fixed_dt=0.0166667\ntravelled_units=254.125 combat=0\nskip=0 mean_ms=17.4913 p95_ms=16.8914 max_ms=181.231 update_ms=0.272011\nskip=60 mean_ms=16.645 p95_ms=16.8679 max_ms=17.0495 update_ms=0.281838\n",
+      "timings": {
+        "skip_0": {
+          "mean_ms": 17.4913,
+          "p95_ms": 16.8914,
+          "max_ms": 181.231,
+          "update_ms": 0.272011
+        },
+        "skip_60": {
+          "mean_ms": 16.645,
+          "p95_ms": 16.8679,
+          "max_ms": 17.0495,
+          "update_ms": 0.281838
+        }
+      }
+    },
+    "play-final-combat": {
+      "raw_summary": "mode=combat frames=180 hud=true swap=true fixed_dt=0.0166667\ntravelled_units=300 combat=1\nskip=0 mean_ms=17.0137 p95_ms=16.9097 max_ms=84.1085 update_ms=0.21501\nskip=60 mean_ms=16.6428 p95_ms=16.8742 max_ms=20.5872 update_ms=0.223648\n",
+      "timings": {
+        "skip_0": {
+          "mean_ms": 17.0137,
+          "p95_ms": 16.9097,
+          "max_ms": 84.1085,
+          "update_ms": 0.21501
+        },
+        "skip_60": {
+          "mean_ms": 16.6428,
+          "p95_ms": 16.8742,
+          "max_ms": 20.5872,
+          "update_ms": 0.223648
+        }
+      }
+    }
+  },
+  "save_copy_unchanged": true,
+  "limits": [
+    "Three-second deterministic test runs, not an unrestricted long play session.",
+    "Autosave and monitor are disabled in the harness; production frame logs now measure their Idle cost.",
+    "First-use model/font/cache work remains; asynchronous poses can briefly reuse the most recent completed pose."
+  ],
+  "tests": [
+    "ArtAssetTests passed",
+    "RenderBatchTests passed",
+    "PoseWorkerTests passed",
+    "WorldSimulationTests passed",
+    "Actual app GL error checks passed in idle/move/combat",
+    "x64 Release and Debug builds succeeded"
+  ]
+}

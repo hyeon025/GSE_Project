@@ -14,6 +14,9 @@ namespace Art
         float x = 0, y = 0, scale = 1, opacity = 1;
         float unitsPerMeter = 30;
         float yaw = 0;
+        bool deferAnimation = false;
+        bool preciseDepth = false;
+        CharacterStyle style;
     };
 
     float FacingYaw(CharacterFacing facing);
@@ -26,6 +29,7 @@ namespace Art
         float y,
         float scale,
         float unitsPerMeter,
-        float opacity = 1
+        float opacity = 1,
+        bool preciseDepth = false
     );
 }

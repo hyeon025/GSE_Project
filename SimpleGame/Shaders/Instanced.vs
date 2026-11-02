@@ -6,6 +6,10 @@ layout(location = 3) in vec4 a_ColorB;
 layout(location = 4) in vec4 a_ColorC;
 layout(location = 5) in vec4 a_Options;
 layout(location = 6) in vec4 a_UvRect;
+layout(location = 7) in vec4 a_Skin;
+layout(location = 8) in vec4 a_Hair;
+layout(location = 9) in vec4 a_Cloth;
+layout(location = 10) in vec4 a_Trim;
 uniform samplerBuffer u_Meshes;
 uniform vec2 u_Viewport;
 out vec4 v_Color;
@@ -39,6 +43,25 @@ void main()
         1.0 - position.y / u_Viewport.y * 2.0, 0, 1);
     v_Color = a_Options.x < 0.5 ? color :
         color.r * a_ColorA + color.g * a_ColorB + color.b * a_ColorC;
+    if(a_Options.w > .5 && color.r < -.5)
+    {
+        // Negative red stores a palette role, green stores the baked face light.
+        // One pose/mesh serves every NPC color combination in the same draw batch.
+        int role=int(-color.r+.5);
+        vec3 base=a_Skin.rgb;
+        if(role==2)base*=vec3(.76,.55,.52);
+        else if(role==3)base=mix(base,vec3(.55,.14,.10),.24);
+        else if(role==4)base=a_Hair.rgb;
+        else if(role==5)base=min(vec3(1),a_Hair.rgb*1.3+vec3(.012));
+        else if(role==6)base=a_Cloth.rgb;
+        else if(role==7)base=a_Trim.rgb;
+        else if(role==8 || role==9)
+        {
+            base=mix(vec3(.65,.57,.40),a_Cloth.rgb,.12);
+            if(role==9)base*=.70;
+        }
+        v_Color=vec4(pow(max(vec3(0),base*color.g),vec3(1.0/2.2)),color.a);
+    }
     v_Color.a *= a_Options.y;
     v_Uv = a_UvRect.xy + first.xy * a_UvRect.zw;
 }

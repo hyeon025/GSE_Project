@@ -9,5 +9,8 @@
   "keyframe_actions_total": 144,
   "animated_glb_files": 9,
   "quadruped_rig_revision": 2,
-  "quadruped_bones_per_rig": 21
+  "quadruped_bones_per_rig": 21,
+  "character_quality_revision": 4,
+  "arm_mesh_variants_rebuilt": 4,
+  "humanoid_actions_revised": 36
 }
