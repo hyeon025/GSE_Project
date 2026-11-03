@@ -14,17 +14,14 @@ $command = Join-Path $out 'build-render-benchmark.cmd'
 @echo off
 call "$developer" -arch=x64 >nul
 if errorlevel 1 exit /b 1
-cl /nologo /EHsc /O2 /std:c++14 /MD /Fo:x64\perf\benchmark-objects\ /Fe:"$out\$Label.exe" tests\ArtRenderBenchmark.cpp SimpleGame\ArtAsset.cpp SimpleGame\ArtPresentation.cpp SimpleGame\Renderer.cpp SimpleGame\RendererBatch.cpp SimpleGame\RendererStorage.cpp SimpleGame\RendererText.cpp SimpleGame\RendererProfile.cpp /link /LIBPATH:SimpleGame\Dependencies\x64 freeglut.lib glew32.lib opengl32.lib gdi32.lib user32.lib
+msbuild SimpleGame\Dependencies\GLFW\GLFW.vcxproj /nologo /v:minimal /p:Configuration=Release /p:Platform=x64
+if errorlevel 1 exit /b 1
+cl /nologo /DGLEW_STATIC /D_CRT_SECURE_NO_WARNINGS /I SimpleGame\Dependencies\GLEW\glew-2.2.0\include /EHsc /O2 /std:c++14 /MD /Fo:x64\perf\benchmark-objects\ /Fe:"$out\$Label.exe" tests\ArtRenderBenchmark.cpp SimpleGame\ArtAsset.cpp SimpleGame\ArtPresentation.cpp SimpleGame\Renderer.cpp SimpleGame\RendererBatch.cpp SimpleGame\RendererStorage.cpp SimpleGame\RendererText.cpp SimpleGame\RendererProfile.cpp SimpleGame\Dependencies\GLEW\glew-2.2.0\src\glew.c /link SimpleGame\Dependencies\GLFW\build\x64\Release\glfw3.lib opengl32.lib gdi32.lib user32.lib
 "@ | Set-Content -LiteralPath $command -Encoding Default
 Push-Location $root
 try {
     & cmd /c $command
     if ($LASTEXITCODE -ne 0) { throw 'Benchmark build failed.' }
-    foreach ($name in @('freeglut.dll', 'glew32.dll')) {
-        $dll = @("x64\Release\$name", "x64\Debug\$name") | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
-        if (-not $dll) { throw "Missing runtime library: $name" }
-        Copy-Item -LiteralPath $dll -Destination $out -Force
-    }
     & "$out\$Label.exe" $Label $data
     if ($LASTEXITCODE -ne 0) { throw 'Benchmark execution failed.' }
     Get-Content -LiteralPath "$out\$Label.txt"

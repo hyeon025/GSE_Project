@@ -9,8 +9,9 @@ Distributed under the What The Hell License.
 #include <cmath>
 #include <iostream>
 #include <memory>
-#include "Dependencies/glew.h"
-#include "Dependencies/freeglut.h"
+#include "Dependencies/GLEW/glew-2.2.0/include/GL/glew.h"
+#define GLFW_INCLUDE_NONE
+#include "Dependencies/GLFW/glfw-3.4/include/GLFW/glfw3.h"
 #include "Renderer.h"
 #include "GameWorld.h"
 #include "GameStory.h"
@@ -26,7 +27,9 @@ std::unique_ptr<LevelOneView> g_LevelView;
 std::unique_ptr<WorldMonitor> g_Monitor;
 std::vector<Site> g_Sites;
 bool g_Keys[256] = {};
-int g_LastTick = 0, g_Width = 1440, g_Height = 900;
+double g_LastTick = 0;
+int g_Width = 1440, g_Height = 900;
+GLFWwindow* g_Window = nullptr;
 double g_UpdateMs = 0, g_PreviousSwapMs = 0;
 int g_TargetKind = -1, g_TargetIndex = -1, g_Panel = 0;
 int g_JournalOffset = 0;
@@ -1473,8 +1476,8 @@ void Display()
     );
     g_Renderer->EndFrame();
     auto swapStart = std::chrono::steady_clock::now();
-    glutSwapBuffers();
-    g_PreviousSwapMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now()-swapStart).count();
+    glfwSwapBuffers(g_Window);
+    g_PreviousSwapMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - swapStart).count();
 }
 
 IsometricView::Point MovementInput()
@@ -1565,8 +1568,8 @@ void Update(float dt)
 void Idle()
 {
     auto updateStart = std::chrono::steady_clock::now();
-    int now = glutGet(GLUT_ELAPSED_TIME);
-    float dt = std::min(.05f, (now - g_LastTick) / 1000.f);
+    double now = glfwGetTime();
+    float dt = (float)std::max(0.0, std::min(.05, now - g_LastTick));
     g_LastTick = now;
     g_ToastTime = std::max(0.f, g_ToastTime - dt);
     Update(dt);
@@ -1584,8 +1587,7 @@ void Idle()
             Persist();
         }
     }
-    g_UpdateMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now()-updateStart).count();
-    glutPostRedisplay();
+    g_UpdateMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - updateStart).count();
 }
 
 void Reshape(int w, int h)
@@ -1692,18 +1694,18 @@ void KeyUp(unsigned char key, int, int)
 
 void SpecialKey(int key, int, int)
 {
-    if (key == GLUT_KEY_F8)
+    if (key == GLFW_KEY_F8)
     {
         bool loaded = Art::Reload();
         std::cout << "[Art] reload=" << (loaded ? "ok" : "failed; previous catalog retained") << '\n';
         return;
     }
-    if (key == GLUT_KEY_F1 && !InCombat())
+    if (key == GLFW_KEY_F1 && !InCombat())
     {
         Act(EnterLevel);
         return;
     }
-    if (key == GLUT_KEY_F6 && g_Renderer)
+    if (key == GLFW_KEY_F6 && g_Renderer)
     {
         auto settings = g_Renderer->GetPostProcessing();
         settings.enabled = !settings.enabled;
@@ -1716,7 +1718,7 @@ void Mouse(int button, int state, int x, int y)
 {
     g_MouseX = x;
     g_MouseY = y;
-    if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN)
+    if (button != GLFW_MOUSE_BUTTON_LEFT || state != GLFW_PRESS)
     {
         return;
     }
@@ -1765,7 +1767,7 @@ void Wheel(int, int direction, int, int)
 
 void Entry(int state)
 {
-    if (state == GLUT_LEFT)
+    if (state == GLFW_FALSE)
     {
         std::fill(std::begin(g_Keys), std::end(g_Keys), false);
     }
@@ -1773,7 +1775,7 @@ void Entry(int state)
 
 void Visibility(int state)
 {
-    g_Focused = state == GLUT_VISIBLE;
+    g_Focused = state == GLFW_TRUE;
     if (!g_Focused)
     {
         std::fill(std::begin(g_Keys), std::end(g_Keys), false);
@@ -1798,16 +1800,62 @@ void OnClose()
 
 int main(int argc, char** argv)
 {
-    glutInit(&argc, argv);
-    glutInitContextVersion(3, 3);
-    glutInitContextProfile(GLUT_CORE_PROFILE);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_MULTISAMPLE);
-    glutSetOption(GLUT_MULTISAMPLE, 4);
-    g_Width = std::max(800, std::min(g_Width, glutGet(GLUT_SCREEN_WIDTH) - 100));
-    g_Height = std::max(600, std::min(g_Height, glutGet(GLUT_SCREEN_HEIGHT) - 140));
-    glutInitWindowSize(g_Width, g_Height);
-    glutInitWindowPosition(60, 40);
-    glutCreateWindow("Age of Echoes");
+    glfwSetErrorCallback(
+        [](int code, const char* description)
+        {
+            std::cerr << "[GLFW] error=" << code << " " << description << '\n';
+        }
+    );
+    if (!glfwInit())
+    {
+        return 1;
+    }
+
+    struct WindowLifetime
+    {
+        ~WindowLifetime()
+        {
+            if (g_Window)
+            {
+                glfwDestroyWindow(g_Window);
+            }
+            g_Window = nullptr;
+            glfwTerminate();
+        }
+    } lifetime;
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    if (auto* monitor = glfwGetPrimaryMonitor())
+    {
+        if (const auto* mode = glfwGetVideoMode(monitor))
+        {
+            g_Width = std::max(800, std::min(g_Width, mode->width - 100));
+            g_Height = std::max(600, std::min(g_Height, mode->height - 140));
+        }
+    }
+    g_Window = glfwCreateWindow(g_Width, g_Height, "Age of Echoes", nullptr, nullptr);
+    if (!g_Window)
+    {
+        return 1;
+    }
+    glfwSetWindowPos(g_Window, 60, 40);
+    glfwMakeContextCurrent(g_Window);
+    int swapInterval = 1;
+    for (int i = 1; i < argc; ++i)
+    {
+        if (std::string(argv[i]) == "--no-vsync")
+        {
+            swapInterval = 0;
+        }
+    }
+    glfwSwapInterval(swapInterval);
+    std::cout << "[Window] backend=GLFW version=" << glfwGetVersionString() << " swapInterval=" << swapInterval
+              << " samples=4\n";
+    glfwGetFramebufferSize(g_Window, &g_Width, &g_Height);
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK || !GLEW_VERSION_3_3)
     {
@@ -1818,6 +1866,7 @@ int main(int argc, char** argv)
     g_Renderer.reset(new Renderer(g_Width, g_Height));
     if (!g_Renderer->IsInitialized())
     {
+        g_Renderer.reset();
         return 1;
     }
     g_Scene.reset(new GameScene(*g_Renderer, g_World));
@@ -1869,30 +1918,147 @@ int main(int argc, char** argv)
         );
     }
     RefreshTargets();
-    g_LastTick = glutGet(GLUT_ELAPSED_TIME);
+    g_LastTick = glfwGetTime();
     if (InCombat() && !g_SaveBlocked)
     {
         LevelOne::Notice(CurrentLevel(), LevelOne::AreaName(CurrentLevel()));
     }
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-    glutIgnoreKeyRepeat(1);
-    glutDisplayFunc(Display);
-    glutIdleFunc(Idle);
-    glutReshapeFunc(Reshape);
-    glutKeyboardFunc(KeyDown);
-    glutKeyboardUpFunc(KeyUp);
-    glutMouseFunc(Mouse);
-    glutSpecialFunc(SpecialKey);
-    glutPassiveMotionFunc(Motion);
-    glutMotionFunc(Motion);
-    glutMouseWheelFunc(Wheel);
-    glutEntryFunc(Entry);
-    glutVisibilityFunc(Visibility);
-    glutCloseFunc(OnClose);
+    glfwSetFramebufferSizeCallback(
+        g_Window,
+        [](GLFWwindow*, int width, int height)
+        {
+            if (width > 0 && height > 0)
+            {
+                Reshape(width, height);
+            }
+        }
+    );
+    glfwSetKeyCallback(
+        g_Window,
+        [](GLFWwindow*, int key, int, int action, int)
+        {
+            if (action == GLFW_REPEAT)
+            {
+                return;
+            }
+            if (key >= GLFW_KEY_F1 && key <= GLFW_KEY_F25)
+            {
+                if (action == GLFW_PRESS)
+                {
+                    SpecialKey(key, 0, 0);
+                }
+                return;
+            }
+            int mapped = -1;
+            if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z)
+            {
+                mapped = 'a' + key - GLFW_KEY_A;
+            }
+            else if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
+            {
+                mapped = '0' + key - GLFW_KEY_0;
+            }
+            else if (key == GLFW_KEY_ESCAPE)
+            {
+                mapped = 27;
+            }
+            else if (key == GLFW_KEY_SPACE)
+            {
+                mapped = ' ';
+            }
+            if (mapped < 0)
+            {
+                return;
+            }
+            if (action == GLFW_PRESS)
+            {
+                KeyDown((unsigned char)mapped, 0, 0);
+            }
+            else if (action == GLFW_RELEASE)
+            {
+                KeyUp((unsigned char)mapped, 0, 0);
+            }
+        }
+    );
+    glfwSetCursorPosCallback(
+        g_Window,
+        [](GLFWwindow* window, double x, double y)
+        {
+            int width, height;
+            glfwGetWindowSize(window, &width, &height);
+            Motion((int)(x * g_Width / std::max(1, width)), (int)(y * g_Height / std::max(1, height)));
+        }
+    );
+    glfwSetMouseButtonCallback(
+        g_Window,
+        [](GLFWwindow* window, int button, int action, int)
+        {
+            double x, y;
+            int width, height;
+            glfwGetCursorPos(window, &x, &y);
+            glfwGetWindowSize(window, &width, &height);
+            Mouse(button, action, (int)(x * g_Width / std::max(1, width)), (int)(y * g_Height / std::max(1, height)));
+        }
+    );
+    glfwSetScrollCallback(
+        g_Window,
+        [](GLFWwindow*, double, double y)
+        {
+            if (y != 0)
+            {
+                Wheel(0, y > 0 ? 1 : -1, g_MouseX, g_MouseY);
+            }
+        }
+    );
+    glfwSetCursorEnterCallback(
+        g_Window,
+        [](GLFWwindow*, int entered)
+        {
+            Entry(entered);
+        }
+    );
+    glfwSetWindowFocusCallback(
+        g_Window,
+        [](GLFWwindow* window, int focused)
+        {
+            Visibility(focused && !glfwGetWindowAttrib(window, GLFW_ICONIFIED));
+        }
+    );
+    glfwSetWindowIconifyCallback(
+        g_Window,
+        [](GLFWwindow* window, int iconified)
+        {
+            Visibility(!iconified && glfwGetWindowAttrib(window, GLFW_FOCUSED));
+        }
+    );
+    Visibility(glfwGetWindowAttrib(g_Window, GLFW_FOCUSED));
     std::cout << "Level 1: auto-fire | WASD move | Space sprint | Esc/P pause | F1 resume field from world\n"
               << "F6 toggle post-processing\n"
               << "WASD move | Space sprint | E interact | 1-3 choose | Q innate | R adjacent\n"
               << "J journal | C abilities | wheel zoom | Esc close panel | window close saves\n";
-    glutMainLoop();
+    while (!glfwWindowShouldClose(g_Window))
+    {
+        int width, height;
+        glfwGetFramebufferSize(g_Window, &width, &height);
+        if (glfwGetWindowAttrib(g_Window, GLFW_ICONIFIED) || width == 0 || height == 0)
+        {
+            glfwWaitEventsTimeout(.1);
+        }
+        else
+        {
+            glfwPollEvents();
+        }
+        if (glfwWindowShouldClose(g_Window))
+        {
+            break;
+        }
+        Idle();
+        if (width > 0 && height > 0 && !glfwGetWindowAttrib(g_Window, GLFW_ICONIFIED))
+        {
+            Display();
+        }
+    }
+    // Renderer resources must be released while their GL context is still current.
+    OnClose();
     return 0;
 }

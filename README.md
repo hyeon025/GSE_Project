@@ -149,3 +149,11 @@ events and a settlement map. No external packages or network services are requir
 The server binds only to loopback; use `-Port 8766` when the default port is busy.
 See [the monitoring guide](docs/WorldMonitor.md) for the JSON contract, count
 definitions, connection states, limitations and optional test commands.
+
+## Window Framework
+
+The application uses GLFW 3.4 with an explicit update/render/event loop. The
+solution builds vendored GLFW and GLEW 2.2.0 sources statically for each target;
+no GLFW, FreeGLUT or GLEW DLL installation is required. Open `SimpleGame.sln`
+with Visual Studio 2022 C++ tools and a Windows 10/11 SDK. See
+[GLFW migration](docs/GLFWMigration.md) for build and performance checks.

@@ -10,7 +10,7 @@
 #include <fstream>
 #include "RenderMetrics.h"
 #include "RenderMeshCache.h"
-#include "Dependencies/glew.h"
+#include "Dependencies/GLEW/glew-2.2.0/include/GL/glew.h"
 
 struct Color
 {
