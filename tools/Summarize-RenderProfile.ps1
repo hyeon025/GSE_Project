@@ -11,6 +11,8 @@ $totals = @{}
 $cpuTimes = New-Object 'System.Collections.Generic.List[double]'
 $intervals = New-Object 'System.Collections.Generic.List[double]'
 $drawCounts = New-Object 'System.Collections.Generic.List[double]'
+$updateTimes = New-Object 'System.Collections.Generic.List[double]'
+$swapTimes = New-Object 'System.Collections.Generic.List[double]'
 $columns = @('draw_calls', 'draw_instanced', 'world_draws', 'post_draws', 'ui_draws',
     'instances', 'useful_vertices', 'submitted_vertices', 'upload_bytes', 'texture_upload_bytes',
     'mesh_hits', 'mesh_misses', 'mesh_builds', 'disk_hits', 'disk_misses', 'disk_rejected',
@@ -42,6 +44,12 @@ foreach ($file in $files) {
                 }
                 $cpuTimes.Add([double]::Parse($row.cpu_render_ms, $culture))
                 $drawCounts.Add([double]::Parse($row.draw_calls, $culture))
+                if ($row.PSObject.Properties['game_update_ms']) {
+                    $updateTimes.Add([double]::Parse($row.game_update_ms, $culture))
+                }
+                if ($row.PSObject.Properties['previous_swap_ms']) {
+                    $swapTimes.Add([double]::Parse($row.previous_swap_ms, $culture))
+                }
                 $interval = [double]::Parse($row.frame_interval_ms, $culture)
                 if ($interval -gt 0) { $intervals.Add($interval) }
             }
@@ -51,6 +59,8 @@ if ($frames -eq 0) { throw 'No frames remain after filtering.' }
 $cpuTimes.Sort()
 $intervals.Sort()
 $drawCounts.Sort()
+$updateTimes.Sort()
+$swapTimes.Sort()
 function Percentile($values, [double] $percent) {
     if ($values.Count -eq 0) { return $null }
     $index = [Math]::Max(0, [int][Math]::Ceiling($values.Count * $percent) - 1)
@@ -73,6 +83,8 @@ foreach ($column in $columns) {
     cpu_render_ms_p50 = Percentile $cpuTimes .50
     cpu_render_ms_p95 = Percentile $cpuTimes .95
     frame_interval_ms_p95 = Percentile $intervals .95
+    game_update_ms_p95 = Percentile $updateTimes .95
+    previous_swap_ms_p95 = Percentile $swapTimes .95
     vertex_padding_ratio = $(if ($totals.useful_vertices -gt 0) {
         [Math]::Round($totals.submitted_vertices / $totals.useful_vertices, 3)
     } else { $null })

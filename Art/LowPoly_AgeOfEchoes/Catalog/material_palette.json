@@ -666,6 +666,1228 @@
         1.0
       ],
       "emission_strength": 0.0
+    },
+    {
+      "material_id": "MAT_AOE_BearDorsal",
+      "palette_key": "BearDorsal",
+      "base_color_linear_rgba": [
+        0.046501703560352325,
+        0.02468840964138508,
+        0.013332520611584187,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_BearUnderfur",
+      "palette_key": "BearUnderfur",
+      "base_color_linear_rgba": [
+        0.11951489746570587,
+        0.06264400482177734,
+        0.029644276946783066,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_BoarDorsal",
+      "palette_key": "BoarDorsal",
+      "base_color_linear_rgba": [
+        0.037380777299404144,
+        0.02251124009490013,
+        0.014126328751444817,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_BoarUnderfur",
+      "palette_key": "BoarUnderfur",
+      "base_color_linear_rgba": [
+        0.11280833184719086,
+        0.0610431432723999,
+        0.030227959156036377,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_ClothTrim",
+      "palette_key": "ClothTrim",
+      "base_color_linear_rgba": [
+        0.06700000166893005,
+        0.0989999994635582,
+        0.08399999886751175,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_EyeGlint",
+      "palette_key": "EyeGlint",
+      "base_color_linear_rgba": [
+        0.699999988079071,
+        0.6499999761581421,
+        0.4699999988079071,
+        1.0
+      ],
+      "roughness": 0.4000000059604645,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_EyeIvory",
+      "palette_key": "EyeIvory",
+      "base_color_linear_rgba": [
+        0.41999998688697815,
+        0.3700000047683716,
+        0.25999999046325684,
+        1.0
+      ],
+      "roughness": 0.6000000238418579,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_GoatDorsal",
+      "palette_key": "GoatDorsal",
+      "base_color_linear_rgba": [
+        0.14554797112941742,
+        0.1332760453224182,
+        0.08565782010555267,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_GoatUnderfur",
+      "palette_key": "GoatUnderfur",
+      "base_color_linear_rgba": [
+        0.1324586123228073,
+        0.12147919088602066,
+        0.079536072909832,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_HairPlane",
+      "palette_key": "HairPlane",
+      "base_color_linear_rgba": [
+        0.02199999988079071,
+        0.009999999776482582,
+        0.004999999888241291,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_HareDorsal",
+      "palette_key": "HareDorsal",
+      "base_color_linear_rgba": [
+        0.11060008406639099,
+        0.09035045653581619,
+        0.05680388584733009,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_HareUnderfur",
+      "palette_key": "HareUnderfur",
+      "base_color_linear_rgba": [
+        0.27135175466537476,
+        0.23160602152347565,
+        0.14421844482421875,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_InnerEar",
+      "palette_key": "InnerEar",
+      "base_color_linear_rgba": [
+        0.17000000178813934,
+        0.07400000095367432,
+        0.04800000041723251,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_SkinShade",
+      "palette_key": "SkinShade",
+      "base_color_linear_rgba": [
+        0.2199999988079071,
+        0.0689999982714653,
+        0.03500000014901161,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_StagDorsal",
+      "palette_key": "StagDorsal",
+      "base_color_linear_rgba": [
+        0.1332760453224182,
+        0.05680388584733009,
+        0.020450390875339508,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_StagUnderfur",
+      "palette_key": "StagUnderfur",
+      "base_color_linear_rgba": [
+        0.3080137372016907,
+        0.18961746990680695,
+        0.08147121220827103,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_Stitch",
+      "palette_key": "Stitch",
+      "base_color_linear_rgba": [
+        0.25,
+        0.20000000298023224,
+        0.11999999731779099,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_WolfDorsal",
+      "palette_key": "WolfDorsal",
+      "base_color_linear_rgba": [
+        0.04980248957872391,
+        0.05680388584733009,
+        0.04980248957872391,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_WolfUnderfur",
+      "palette_key": "WolfUnderfur",
+      "base_color_linear_rgba": [
+        0.13907036185264587,
+        0.13976465165615082,
+        0.10305363684892654,
+        1.0
+      ],
+      "roughness": 0.800000011920929,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "emission_strength": 0
+    },
+    {
+      "material_id": "MAT_AOE_Building_Amber",
+      "palette_key": "Building_Amber",
+      "base_color_linear_rgba": [
+        0.9551045894622803,
+        0.2846466898918152,
+        0.021980946883559227,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        0.3100000023841858,
+        0.03500000014901161,
+        1.0
+      ],
+      "emission_strength": 0.5,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Brass",
+      "palette_key": "Building_Brass",
+      "base_color_linear_rgba": [
+        0.2846466898918152,
+        0.1259673833847046,
+        0.021980946883559227,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Dark",
+      "palette_key": "Building_Dark",
+      "base_color_linear_rgba": [
+        0.005981059744954109,
+        0.007850573398172855,
+        0.006693375762552023,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Iron",
+      "palette_key": "Building_Iron",
+      "base_color_linear_rgba": [
+        0.06372379511594772,
+        0.08353512734174728,
+        0.0889815241098404,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_IronEdge",
+      "palette_key": "Building_IronEdge",
+      "base_color_linear_rgba": [
+        0.19599418342113495,
+        0.21404114365577698,
+        0.1873166710138321,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Linen",
+      "palette_key": "Building_Linen",
+      "base_color_linear_rgba": [
+        0.1873166710138321,
+        0.16264718770980835,
+        0.0889815241098404,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_MossCloth",
+      "palette_key": "Building_MossCloth",
+      "base_color_linear_rgba": [
+        0.03968190774321556,
+        0.07323895394802094,
+        0.0300741046667099,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Plaster",
+      "palette_key": "Building_Plaster",
+      "base_color_linear_rgba": [
+        0.27383843064308167,
+        0.21404114365577698,
+        0.11928018927574158,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Roof",
+      "palette_key": "Building_Roof",
+      "base_color_linear_rgba": [
+        0.04696420207619667,
+        0.06372379511594772,
+        0.06372379511594772,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_RoofLight",
+      "palette_key": "Building_RoofLight",
+      "base_color_linear_rgba": [
+        0.05353919044137001,
+        0.07264512777328491,
+        0.07264512777328491,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Stone",
+      "palette_key": "Building_Stone",
+      "base_color_linear_rgba": [
+        0.08353512734174728,
+        0.10048151016235352,
+        0.08353512734174728,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_StoneLight",
+      "palette_key": "Building_StoneLight",
+      "base_color_linear_rgba": [
+        0.17886750400066376,
+        0.17886750400066376,
+        0.11928018927574158,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Thatch",
+      "palette_key": "Building_Thatch",
+      "base_color_linear_rgba": [
+        0.15487249195575714,
+        0.09462962299585342,
+        0.027211781591176987,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_ThatchLight",
+      "palette_key": "Building_ThatchLight",
+      "base_color_linear_rgba": [
+        0.1765546351671219,
+        0.10787776857614517,
+        0.03102143108844757,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_Wood",
+      "palette_key": "Building_Wood",
+      "base_color_linear_rgba": [
+        0.05087608844041824,
+        0.021980946883559227,
+        0.00854038167744875,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_Building_WoodLight",
+      "palette_key": "Building_WoodLight",
+      "base_color_linear_rgba": [
+        0.1259673833847046,
+        0.059253521263599396,
+        0.017389101907610893,
+        1.0
+      ],
+      "roughness": 0.8799999952316284,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "backface_culling": true
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Skin",
+      "palette_key": "NPC_Skin",
+      "base_color_linear_rgba": [
+        0.7105664610862732,
+        0.3546920716762543,
+        0.15487249195575714,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Blush",
+      "palette_key": "NPC_Blush",
+      "base_color_linear_rgba": [
+        0.6209158897399902,
+        0.17064493894577026,
+        0.07828831672668457,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Ear",
+      "palette_key": "NPC_Ear",
+      "base_color_linear_rgba": [
+        0.4623613655567169,
+        0.1259673833847046,
+        0.059253521263599396,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Eye",
+      "palette_key": "NPC_Eye",
+      "base_color_linear_rgba": [
+        0.010816383175551891,
+        0.005753953941166401,
+        0.004118273500353098,
+        1.0
+      ],
+      "roughness": 0.44999998807907104,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Ivory",
+      "palette_key": "NPC_Ivory",
+      "base_color_linear_rgba": [
+        0.911407470703125,
+        0.7484140992164612,
+        0.47699978947639465,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Glint",
+      "palette_key": "NPC_Glint",
+      "base_color_linear_rgba": [
+        1.0,
+        0.9551045894622803,
+        0.8073459267616272,
+        1.0
+      ],
+      "roughness": 0.30000001192092896,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Mouth",
+      "palette_key": "NPC_Mouth",
+      "base_color_linear_rgba": [
+        0.15487249195575714,
+        0.03310476616024971,
+        0.0134117491543293,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Hair",
+      "palette_key": "NPC_Hair",
+      "base_color_linear_rgba": [
+        0.06838485598564148,
+        0.01633814536035061,
+        0.005753953941166401,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_HairLight",
+      "palette_key": "NPC_HairLight",
+      "base_color_linear_rgba": [
+        0.11928018927574158,
+        0.0300741046667099,
+        0.008825832977890968,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Teal",
+      "palette_key": "NPC_Teal",
+      "base_color_linear_rgba": [
+        0.05497173219919205,
+        0.15487249195575714,
+        0.17886750400066376,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_TealTrim",
+      "palette_key": "NPC_TealTrim",
+      "base_color_linear_rgba": [
+        0.13286831974983215,
+        0.27383843064308167,
+        0.2632734179496765,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Linen",
+      "palette_key": "NPC_Linen",
+      "base_color_linear_rgba": [
+        0.6559306979179382,
+        0.5382355451583862,
+        0.3069993257522583,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_LinenShade",
+      "palette_key": "NPC_LinenShade",
+      "base_color_linear_rgba": [
+        0.3931231200695038,
+        0.3069993257522583,
+        0.16264718770980835,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Rust",
+      "palette_key": "NPC_Rust",
+      "base_color_linear_rgba": [
+        0.34239163994789124,
+        0.07323895394802094,
+        0.027211781591176987,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Moss",
+      "palette_key": "NPC_Moss",
+      "base_color_linear_rgba": [
+        0.09462962299585342,
+        0.15487249195575714,
+        0.03968190774321556,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_MossLight",
+      "palette_key": "NPC_MossLight",
+      "base_color_linear_rgba": [
+        0.1873166710138321,
+        0.24286681413650513,
+        0.06838485598564148,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Wine",
+      "palette_key": "NPC_Wine",
+      "base_color_linear_rgba": [
+        0.17064493894577026,
+        0.0300741046667099,
+        0.043233636766672134,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Leather",
+      "palette_key": "NPC_Leather",
+      "base_color_linear_rgba": [
+        0.07323895394802094,
+        0.03310476616024971,
+        0.01633814536035061,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_LeatherLight",
+      "palette_key": "NPC_LeatherLight",
+      "base_color_linear_rgba": [
+        0.17886750400066376,
+        0.07828831672668457,
+        0.027211781591176987,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Sole",
+      "palette_key": "NPC_Sole",
+      "base_color_linear_rgba": [
+        0.03310476616024971,
+        0.018478473648428917,
+        0.01130952499806881,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Trousers",
+      "palette_key": "NPC_Trousers",
+      "base_color_linear_rgba": [
+        0.07323895394802094,
+        0.06838485598564148,
+        0.04889732599258423,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Iron",
+      "palette_key": "NPC_Iron",
+      "base_color_linear_rgba": [
+        0.2049017697572708,
+        0.2529500722885132,
+        0.2632734179496765,
+        1.0
+      ],
+      "roughness": 0.6499999761581421,
+      "metallic": 0.550000011920929,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_IronEdge",
+      "palette_key": "NPC_IronEdge",
+      "base_color_linear_rgba": [
+        0.38005632162094116,
+        0.4200332760810852,
+        0.38005632162094116,
+        1.0
+      ],
+      "roughness": 0.6000000238418579,
+      "metallic": 0.5,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_IronDark",
+      "palette_key": "NPC_IronDark",
+      "base_color_linear_rgba": [
+        0.059253521263599396,
+        0.08353512734174728,
+        0.09462962299585342,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.4000000059604645,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Brass",
+      "palette_key": "NPC_Brass",
+      "base_color_linear_rgba": [
+        0.47699978947639465,
+        0.24286681413650513,
+        0.05497173219919205,
+        1.0
+      ],
+      "roughness": 0.5799999833106995,
+      "metallic": 0.6000000238418579,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Wood",
+      "palette_key": "NPC_Wood",
+      "base_color_linear_rgba": [
+        0.19599418342113495,
+        0.07828831672668457,
+        0.021980946883559227,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
+    },
+    {
+      "material_id": "MAT_AOE_NPC_Amber",
+      "palette_key": "NPC_Amber",
+      "base_color_linear_rgba": [
+        0.9551045894622803,
+        0.4200332760810852,
+        0.03968190774321556,
+        1.0
+      ],
+      "roughness": 0.7799999713897705,
+      "metallic": 0.0,
+      "emission_linear_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "emission_strength": 0.0,
+      "double_sided": false
     }
-  ]
+  ],
+  "character_quality_revision": 3
 }

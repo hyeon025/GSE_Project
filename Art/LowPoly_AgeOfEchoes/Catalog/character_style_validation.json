@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-02",
+  "status": "PASS",
+  "shared_part_meshes": 37,
+  "expressions": 6,
+  "head_morph_targets_per_mesh": 5,
+  "skin_colors": 5,
+  "hair_colors": 8,
+  "npc_cloth_palettes": 12,
+  "player_cloth_palette": 0,
+  "unique_color_expression_combinations": 2880,
+  "tests": {
+    "CharacterStyleTests": "PASS: stable IDs, 2880 unique profiles, player palette excluded from NPCs, finite colors",
+    "ArtAssetTests": "PASS: all assets/clips, six distinct head morphs under skinning, non-head shape unchanged",
+    "source_roundtrip": "PASS: existing rig/keyframes unchanged, default-morph GLB reimport matches source",
+    "legacy_npc_migration": "PASS: existing part IDs retained; repeated sync retains palettes; isolated save, no writes"
+  },
+  "color_only_draw": {
+    "mesh_builds": 0,
+    "mesh_misses": 0,
+    "mesh_hits": 31,
+    "draw_calls": 17,
+    "instances": 31
+  }
+}

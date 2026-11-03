@@ -27,6 +27,7 @@ std::unique_ptr<WorldMonitor> g_Monitor;
 std::vector<Site> g_Sites;
 bool g_Keys[256] = {};
 int g_LastTick = 0, g_Width = 1440, g_Height = 900;
+double g_UpdateMs = 0, g_PreviousSwapMs = 0;
 int g_TargetKind = -1, g_TargetIndex = -1, g_Panel = 0;
 int g_JournalOffset = 0;
 Ability g_Secondary = Matter;
@@ -1444,6 +1445,7 @@ void Display()
     {
         return;
     }
+    g_Renderer->SetGameFrameTiming(g_UpdateMs, g_PreviousSwapMs);
     g_Renderer->BeginFrame();
     g_Renderer->BeginWorld();
     if (InCombat())
@@ -1470,7 +1472,9 @@ void Display()
         }
     );
     g_Renderer->EndFrame();
+    auto swapStart = std::chrono::steady_clock::now();
     glutSwapBuffers();
+    g_PreviousSwapMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now()-swapStart).count();
 }
 
 IsometricView::Point MovementInput()
@@ -1560,6 +1564,7 @@ void Update(float dt)
 
 void Idle()
 {
+    auto updateStart = std::chrono::steady_clock::now();
     int now = glutGet(GLUT_ELAPSED_TIME);
     float dt = std::min(.05f, (now - g_LastTick) / 1000.f);
     g_LastTick = now;
@@ -1579,6 +1584,7 @@ void Idle()
             Persist();
         }
     }
+    g_UpdateMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now()-updateStart).count();
     glutPostRedisplay();
 }
 

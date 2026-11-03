@@ -1,64 +1,65 @@
-﻿asset_id,kind,slot,index,label_ko,vertices,triangles
-SM_NPC_Head_01_Masculine,npc,Head,1,남성형 공통 머리,174,308
-SM_NPC_Head_02_Feminine,npc,Head,2,여성형 공통 머리,174,308
-SM_NPC_Hair_01_Crop,npc,Hair,1,짧은 머리,36,68
-SM_NPC_Hair_02_Bob,npc,Hair,2,단발,92,168
-SM_NPC_Hair_03_Long,npc,Hair,3,긴 머리,92,168
-SM_NPC_Hair_04_Braid,npc,Hair,4,땋은 긴 머리,116,200
-SM_NPC_Hair_05_Swept,npc,Hair,5,옆으로 넘긴 짧은 머리,36,68
-SM_NPC_Torso_01_Tunic,npc,Torso,1,주민 천 튜닉,32,60
-SM_NPC_Torso_02_Armor,npc,Torso,2,수호자 판금 흉갑,104,188
-SM_NPC_Torso_03_Archer,npc,Torso,3,궁수 가죽 조끼,80,140
-SM_NPC_Torso_04_Robe,npc,Torso,4,구도자 긴 로브,64,112
-SM_NPC_Torso_05_Merchant,npc,Torso,5,상인 겹옷,88,152
-SM_NPC_Torso_06_Healer,npc,Torso,6,치유사 앞치마,80,140
-SM_NPC_Arms_01_Cloth,npc,Arms,1,천 소매와 손,88,152
-SM_NPC_Arms_02_Armor,npc,Arms,2,갑옷 소매와 장갑,112,192
-SM_NPC_Arms_03_Leather,npc,Arms,3,궁수 가죽 소매와 손,88,152
-SM_NPC_Arms_04_Robe,npc,Arms,4,로브 소매와 손,88,152
-SM_NPC_Legs_01_Trousers,npc,Legs,1,기본 바지,64,116
-SM_NPC_Legs_02_Patched,npc,Legs,2,기워 입은 바지,80,140
-SM_NPC_Legs_03_Armored,npc,Legs,3,갑옷 하의,88,156
-SM_NPC_Feet_01_Boots,npc,Feet,1,가죽 장화,80,144
-SM_NPC_Feet_02_Wrapped,npc,Feet,2,천을 감은 장화,176,312
-SM_NPC_FacialHair_01_Stubble,npc,FacialHair,1,짧은 수염,24,44
-SM_NPC_FacialHair_02_Beard,npc,FacialHair,2,긴 수염,24,44
-SM_NPC_Headgear_01_Hood,npc,Headgear,1,순례자 후드,96,176
-SM_NPC_Headgear_02_Helmet,npc,Headgear,2,철제 투구,96,176
-SM_NPC_Headgear_03_Cap,npc,Headgear,3,상인 모자,48,88
-SM_NPC_Back_01_Cape,npc,Back,1,짧은 망토,8,12
-SM_NPC_Back_02_Quiver,npc,Back,2,화살통,64,100
-SM_NPC_Back_03_Pack,npc,Back,3,여행 배낭,56,96
-SM_NPC_Belt_01_Plain,npc,Belt,1,가죽 허리띠,40,72
-SM_NPC_Belt_02_Pouches,npc,Belt,2,주머니 허리띠,88,160
-SM_NPC_Mainhand_01_Sword,npc,Mainhand,1,직검,60,104
-SM_NPC_Mainhand_02_Bow,npc,Mainhand,2,사냥 활,80,132
-SM_NPC_Mainhand_03_Staff,npc,Mainhand,3,순례자 지팡이,24,40
-SM_NPC_Offhand_01_Shield,npc,Offhand,1,철테 연 모양 방패,34,56
-SM_NPC_Offhand_02_Lantern,npc,Offhand,2,작은 희망의 등불,96,168
-SM_ENV_Grass_01_Meadow,environment,Grass,1,초원 풀,42,56
-SM_ENV_Grass_02_Dense,environment,Grass,2,밀집 풀,60,80
-SM_ENV_Grass_03_Dry,environment,Grass,3,마른 풀,36,48
-SM_ENV_Rock_01_Small,environment,Rock,1,작은 바위,36,60
-SM_ENV_Rock_02_Medium,environment,Rock,2,중간 바위,48,80
-SM_ENV_Rock_03_Boulder,environment,Rock,3,큰 바위,90,160
-SM_ENV_Shrub_01_Moss,environment,Shrub,1,관목,48,80
-SM_ENV_Shrub_02_Berry,environment,Shrub,2,열매 덤불,108,180
-SM_ENV_Tree_01_Oak,environment,Tree,1,참나무,186,308
-SM_ENV_Tree_02_Pine,environment,Tree,2,침엽수,110,184
-SM_ENV_Tree_03_Dead,environment,Tree,3,고사목,164,268
-SM_ENV_Tree_04_Young,environment,Tree,4,어린 나무,186,308
-SM_ENV_Wood_01_Stump,environment,Wood,1,그루터기,48,80
-SM_ENV_Wood_02_FallenLog,environment,Wood,2,쓰러진 통나무,32,56
-SM_ENV_Ruin_01_WallTall,environment,Ruin,1,폐허 돌벽,120,220
-SM_ENV_Ruin_02_WallBroken,environment,Ruin,2,무너진 돌벽,72,132
-SM_ENV_Ground_01_PathStones,environment,Ground,1,징검 돌길,144,264
-SM_ENV_Village_01_Fence,environment,Village,1,목책 구간,96,176
-SM_ENV_Village_02_Crate,environment,Village,2,나무 상자,56,92
-SM_ENV_Village_03_Barrel,environment,Village,3,나무 통,80,148
-SM_ENV_Village_04_Well,environment,Village,4,마을 우물,92,156
-SM_ENV_Building_01_Cottage,environment,Building,1,서민 초가집,314,520
-SM_ENV_Building_02_Smithy,environment,Building,2,대장간,400,668
-SM_ENV_Building_03_Market,environment,Building,3,마을 시장 가판대,212,332
-SM_ENV_Building_04_RuinedChapel,environment,Building,4,촛불이 남은 폐허 예배당,428,764
-SM_ENV_Building_05_BellTower,environment,Building,5,낡은 마을 종탑,109,178
+asset_id,kind,slot,index,label_ko,vertices,triangles,glb_file
+SM_NPC_Head_01_Masculine,npc,Head,1,남성형 공통 머리,650,1236,Exports/NPC_Parts/SM_NPC_Head_01_Masculine.glb
+SM_NPC_Head_02_Feminine,npc,Head,2,여성형 공통 머리,698,1324,Exports/NPC_Parts/SM_NPC_Head_02_Feminine.glb
+SM_NPC_Hair_01_Crop,npc,Hair,1,짧은 머리,154,284,Exports/NPC_Parts/SM_NPC_Hair_01_Crop.glb
+SM_NPC_Hair_02_Bob,npc,Hair,2,단발,226,416,Exports/NPC_Parts/SM_NPC_Hair_02_Bob.glb
+SM_NPC_Hair_03_Long,npc,Hair,3,긴 머리,226,416,Exports/NPC_Parts/SM_NPC_Hair_03_Long.glb
+SM_NPC_Hair_04_Braid,npc,Hair,4,땋은 긴 머리,332,612,Exports/NPC_Parts/SM_NPC_Hair_04_Braid.glb
+SM_NPC_Hair_05_Swept,npc,Hair,5,옆으로 넘긴 짧은 머리,172,316,Exports/NPC_Parts/SM_NPC_Hair_05_Swept.glb
+SM_NPC_Torso_01_Tunic,npc,Torso,1,주민 천 튜닉,134,240,Exports/NPC_Parts/SM_NPC_Torso_01_Tunic.glb
+SM_NPC_Torso_02_Armor,npc,Torso,2,수호자 판금 흉갑,208,384,Exports/NPC_Parts/SM_NPC_Torso_02_Armor.glb
+SM_NPC_Torso_03_Archer,npc,Torso,3,궁수 가죽 조끼,184,340,Exports/NPC_Parts/SM_NPC_Torso_03_Archer.glb
+SM_NPC_Torso_04_Robe,npc,Torso,4,구도자 긴 로브,168,312,Exports/NPC_Parts/SM_NPC_Torso_04_Robe.glb
+SM_NPC_Torso_05_Merchant,npc,Torso,5,상인 겹옷,166,300,Exports/NPC_Parts/SM_NPC_Torso_05_Merchant.glb
+SM_NPC_Torso_06_Healer,npc,Torso,6,치유사 앞치마,198,356,Exports/NPC_Parts/SM_NPC_Torso_06_Healer.glb
+SM_NPC_Arms_01_Cloth,npc,Arms,1,천 소매와 손,372,704,Exports/NPC_Parts/SM_NPC_Arms_01_Cloth.glb
+SM_NPC_Arms_02_Armor,npc,Arms,2,갑옷 소매와 장갑,532,1008,Exports/NPC_Parts/SM_NPC_Arms_02_Armor.glb
+SM_NPC_Arms_03_Leather,npc,Arms,3,궁수 가죽 소매와 손,372,704,Exports/NPC_Parts/SM_NPC_Arms_03_Leather.glb
+SM_NPC_Arms_04_Robe,npc,Arms,4,로브 소매와 손,372,704,Exports/NPC_Parts/SM_NPC_Arms_04_Robe.glb
+SM_NPC_Legs_01_Trousers,npc,Legs,1,기본 바지,120,228,Exports/NPC_Parts/SM_NPC_Legs_01_Trousers.glb
+SM_NPC_Legs_02_Patched,npc,Legs,2,기워 입은 바지,168,316,Exports/NPC_Parts/SM_NPC_Legs_02_Patched.glb
+SM_NPC_Legs_03_Armored,npc,Legs,3,갑옷 하의,280,532,Exports/NPC_Parts/SM_NPC_Legs_03_Armored.glb
+SM_NPC_Feet_01_Boots,npc,Feet,1,가죽 장화,256,480,Exports/NPC_Parts/SM_NPC_Feet_01_Boots.glb
+SM_NPC_Feet_02_Wrapped,npc,Feet,2,천을 감은 장화,352,656,Exports/NPC_Parts/SM_NPC_Feet_02_Wrapped.glb
+SM_NPC_FacialHair_01_Stubble,npc,FacialHair,1,짧은 수염,42,80,Exports/NPC_Parts/SM_NPC_FacialHair_01_Stubble.glb
+SM_NPC_FacialHair_02_Beard,npc,FacialHair,2,긴 수염,90,168,Exports/NPC_Parts/SM_NPC_FacialHair_02_Beard.glb
+SM_NPC_Headgear_01_Hood,npc,Headgear,1,순례자 후드,224,428,Exports/NPC_Parts/SM_NPC_Headgear_01_Hood.glb
+SM_NPC_Headgear_02_Helmet,npc,Headgear,2,철제 투구,224,428,Exports/NPC_Parts/SM_NPC_Headgear_02_Helmet.glb
+SM_NPC_Headgear_03_Cap,npc,Headgear,3,상인 모자,88,168,Exports/NPC_Parts/SM_NPC_Headgear_03_Cap.glb
+SM_NPC_Back_01_Cape,npc,Back,1,짧은 망토,24,44,Exports/NPC_Parts/SM_NPC_Back_01_Cape.glb
+SM_NPC_Back_02_Quiver,npc,Back,2,화살통,188,344,Exports/NPC_Parts/SM_NPC_Back_02_Quiver.glb
+SM_NPC_Back_03_Pack,npc,Back,3,여행 배낭,184,348,Exports/NPC_Parts/SM_NPC_Back_03_Pack.glb
+SM_NPC_Belt_01_Plain,npc,Belt,1,가죽 허리띠,64,116,Exports/NPC_Parts/SM_NPC_Belt_01_Plain.glb
+SM_NPC_Belt_02_Pouches,npc,Belt,2,주머니 허리띠,160,292,Exports/NPC_Parts/SM_NPC_Belt_02_Pouches.glb
+SM_NPC_Mainhand_01_Sword,npc,Mainhand,1,직검,81,146,Exports/NPC_Parts/SM_NPC_Mainhand_01_Sword.glb
+SM_NPC_Mainhand_02_Bow,npc,Mainhand,2,사냥 활,88,164,Exports/NPC_Parts/SM_NPC_Mainhand_02_Bow.glb
+SM_NPC_Mainhand_03_Staff,npc,Mainhand,3,순례자 지팡이,74,136,Exports/NPC_Parts/SM_NPC_Mainhand_03_Staff.glb
+SM_NPC_Offhand_01_Shield,npc,Offhand,1,철테 연 모양 방패,154,288,Exports/NPC_Parts/SM_NPC_Offhand_01_Shield.glb
+SM_NPC_Offhand_02_Lantern,npc,Offhand,2,작은 희망의 등불,192,352,Exports/NPC_Parts/SM_NPC_Offhand_02_Lantern.glb
+SM_ENV_Grass_01_Meadow,environment,Grass,1,초원 풀,42,56,Exports/Environment/SM_ENV_Grass_01_Meadow.glb
+SM_ENV_Grass_02_Dense,environment,Grass,2,밀집 풀,60,80,Exports/Environment/SM_ENV_Grass_02_Dense.glb
+SM_ENV_Grass_03_Dry,environment,Grass,3,마른 풀,36,48,Exports/Environment/SM_ENV_Grass_03_Dry.glb
+SM_ENV_Rock_01_Small,environment,Rock,1,작은 바위,36,60,Exports/Environment/SM_ENV_Rock_01_Small.glb
+SM_ENV_Rock_02_Medium,environment,Rock,2,중간 바위,48,80,Exports/Environment/SM_ENV_Rock_02_Medium.glb
+SM_ENV_Rock_03_Boulder,environment,Rock,3,큰 바위,90,160,Exports/Environment/SM_ENV_Rock_03_Boulder.glb
+SM_ENV_Shrub_01_Moss,environment,Shrub,1,관목,48,80,Exports/Environment/SM_ENV_Shrub_01_Moss.glb
+SM_ENV_Shrub_02_Berry,environment,Shrub,2,열매 덤불,108,180,Exports/Environment/SM_ENV_Shrub_02_Berry.glb
+SM_ENV_Tree_01_Oak,environment,Tree,1,참나무,186,308,Exports/Environment/SM_ENV_Tree_01_Oak.glb
+SM_ENV_Tree_02_Pine,environment,Tree,2,침엽수,110,184,Exports/Environment/SM_ENV_Tree_02_Pine.glb
+SM_ENV_Tree_03_Dead,environment,Tree,3,고사목,164,268,Exports/Environment/SM_ENV_Tree_03_Dead.glb
+SM_ENV_Tree_04_Young,environment,Tree,4,어린 나무,186,308,Exports/Environment/SM_ENV_Tree_04_Young.glb
+SM_ENV_Wood_01_Stump,environment,Wood,1,그루터기,48,80,Exports/Environment/SM_ENV_Wood_01_Stump.glb
+SM_ENV_Wood_02_FallenLog,environment,Wood,2,쓰러진 통나무,32,56,Exports/Environment/SM_ENV_Wood_02_FallenLog.glb
+SM_ENV_Ruin_01_WallTall,environment,Ruin,1,폐허 돌벽,120,220,Exports/Environment/SM_ENV_Ruin_01_WallTall.glb
+SM_ENV_Ruin_02_WallBroken,environment,Ruin,2,무너진 돌벽,72,132,Exports/Environment/SM_ENV_Ruin_02_WallBroken.glb
+SM_ENV_Ground_01_PathStones,environment,Ground,1,징검 돌길,144,264,Exports/Environment/SM_ENV_Ground_01_PathStones.glb
+SM_ENV_Village_01_Fence,environment,Village,1,목책 구간,96,176,Exports/Environment/SM_ENV_Village_01_Fence.glb
+SM_ENV_Village_02_Crate,environment,Village,2,나무 상자,56,92,Exports/Environment/SM_ENV_Village_02_Crate.glb
+SM_ENV_Village_03_Barrel,environment,Village,3,나무 통,80,148,Exports/Environment/SM_ENV_Village_03_Barrel.glb
+SM_ENV_Village_04_Well,environment,Village,4,마을 우물,92,156,Exports/Environment/SM_ENV_Village_04_Well.glb
+SM_ENV_Building_01_Cottage,environment,Building,1,기둥과 창문이 있는 초가집,912,1416,Exports/Environment/SM_ENV_Building_01_Cottage.glb
+SM_ENV_Building_02_Smithy,environment,Building,2,석재 굴뚝 대장간,936,1452,Exports/Environment/SM_ENV_Building_02_Smithy.glb
+SM_ENV_Building_03_Market,environment,Building,3,천막과 진열대가 있는 시장 가판대,380,596,Exports/Environment/SM_ENV_Building_03_Market.glb
+SM_ENV_Building_04_RuinedChapel,environment,Building,4,촛불이 남은 폐허 예배당,428,764,Exports/Environment/SM_ENV_Building_04_RuinedChapel.glb
+SM_ENV_Building_05_BellTower,environment,Building,5,낡은 마을 종탑,109,178,Exports/Environment/SM_ENV_Building_05_BellTower.glb
+SM_ENV_Building_06_TimberHouse,environment,Building,6,목골 주택,880,1360,Exports/Environment/SM_ENV_Building_06_TimberHouse.glb

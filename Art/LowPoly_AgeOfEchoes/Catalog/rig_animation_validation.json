@@ -133,5 +133,7 @@
   "turn_contact_audit": "PASS",
   "turn_ankle_error_max_m": 0.006515,
   "quadruped_rig_revision": 2,
-  "quadruped_revision_validation": "Catalog/quadruped_hind_revision.json"
+  "quadruped_revision_validation": "Catalog/quadruped_hind_revision.json",
+  "character_quality_revision": 3,
+  "latest_verification": "character_quality_revision.json"
 }

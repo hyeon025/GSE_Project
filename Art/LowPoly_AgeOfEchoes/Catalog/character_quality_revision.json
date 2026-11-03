@@ -1,0 +1,525 @@
+{
+  "revision": 3,
+  "scope": "character geometry, arm deformation and arm keyframes; no runtime changes",
+  "changed_meshes": {
+    "SKM_NPC_Arms_01_Cloth": {
+      "vertices_before": 88,
+      "vertices_after": 508,
+      "triangles": 960
+    },
+    "SKM_NPC_Arms_02_Armor": {
+      "vertices_before": 112,
+      "vertices_after": 460,
+      "triangles": 872
+    },
+    "SKM_NPC_Arms_03_Leather": {
+      "vertices_before": 88,
+      "vertices_after": 508,
+      "triangles": 960
+    },
+    "SKM_NPC_Arms_04_Robe": {
+      "vertices_before": 88,
+      "vertices_after": 364,
+      "triangles": 696
+    },
+    "SKM_NPC_Head_01_Masculine": {
+      "vertices_before": 174,
+      "vertices_after": 450,
+      "triangles": 824
+    },
+    "SKM_NPC_Head_02_Feminine": {
+      "vertices_before": 174,
+      "vertices_after": 450,
+      "triangles": 824
+    },
+    "SKM_NPC_Hair_01_Crop": {
+      "vertices_before": 36,
+      "vertices_after": 61,
+      "triangles": 83
+    },
+    "SKM_NPC_Hair_02_Bob": {
+      "vertices_before": 92,
+      "vertices_after": 117,
+      "triangles": 183
+    },
+    "SKM_NPC_Hair_03_Long": {
+      "vertices_before": 92,
+      "vertices_after": 117,
+      "triangles": 183
+    },
+    "SKM_NPC_Hair_04_Braid": {
+      "vertices_before": 116,
+      "vertices_after": 131,
+      "triangles": 209
+    },
+    "SKM_NPC_Hair_05_Swept": {
+      "vertices_before": 36,
+      "vertices_after": 61,
+      "triangles": 83
+    },
+    "SKM_NPC_Torso_01_Tunic": {
+      "vertices_before": 32,
+      "vertices_after": 98,
+      "triangles": 166
+    },
+    "SKM_NPC_Torso_02_Armor": {
+      "vertices_before": 104,
+      "vertices_after": 160,
+      "triangles": 272
+    },
+    "SKM_NPC_Torso_03_Archer": {
+      "vertices_before": 80,
+      "vertices_after": 296,
+      "triangles": 536
+    },
+    "SKM_NPC_Torso_04_Robe": {
+      "vertices_before": 64,
+      "vertices_after": 106,
+      "triangles": 192
+    },
+    "SKM_NPC_Torso_05_Merchant": {
+      "vertices_before": 88,
+      "vertices_after": 304,
+      "triangles": 548
+    },
+    "SKM_NPC_Torso_06_Healer": {
+      "vertices_before": 80,
+      "vertices_after": 128,
+      "triangles": 228
+    },
+    "SKM_MOB_01_Wolf": {
+      "vertices_before": 464,
+      "vertices_after": 1120,
+      "triangles": 2028
+    },
+    "SKM_MOB_02_Boar": {
+      "vertices_before": 548,
+      "vertices_after": 1108,
+      "triangles": 1988
+    },
+    "SKM_MOB_03_Bear": {
+      "vertices_before": 606,
+      "vertices_after": 1764,
+      "triangles": 3204
+    },
+    "SKM_MOB_04_Stag": {
+      "vertices_before": 576,
+      "vertices_after": 1116,
+      "triangles": 2004
+    },
+    "SKM_MOB_05_Goat": {
+      "vertices_before": 544,
+      "vertices_after": 1084,
+      "triangles": 1956
+    },
+    "SKM_MOB_06_Hare": {
+      "vertices_before": 504,
+      "vertices_after": 1110,
+      "triangles": 2004
+    }
+  },
+  "arm_actions": {
+    "RIG_NPC_Humanoid_v1/Idle": {
+      "frames": 61,
+      "forward_flex_degrees": [
+        14.650137730513867,
+        14.650137730513867
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Walk": {
+      "frames": 31,
+      "forward_flex_degrees": [
+        11.03286862779036,
+        22.96713137220964
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Run": {
+      "frames": 21,
+      "forward_flex_degrees": [
+        56.0,
+        80.0
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Turn_L45": {
+      "frames": 25,
+      "forward_flex_degrees": [
+        14.650133034758813,
+        14.650142426268921
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Turn_R45": {
+      "frames": 25,
+      "forward_flex_degrees": [
+        14.650133034758813,
+        14.650142426268921
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Turn_L90": {
+      "frames": 37,
+      "forward_flex_degrees": [
+        14.650133034758813,
+        14.650142426268921
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Turn_R90": {
+      "frames": 37,
+      "forward_flex_degrees": [
+        14.650128339003757,
+        14.650142426268921
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/WalkTurn_L45": {
+      "frames": 31,
+      "forward_flex_degrees": [
+        11.03286862779036,
+        22.96713137220964
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/WalkTurn_R45": {
+      "frames": 31,
+      "forward_flex_degrees": [
+        11.03286862779036,
+        22.96713137220964
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/RunTurn_L45": {
+      "frames": 21,
+      "forward_flex_degrees": [
+        56.0,
+        80.0
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/RunTurn_R45": {
+      "frames": 21,
+      "forward_flex_degrees": [
+        56.0,
+        80.0
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Jump": {
+      "frames": 41,
+      "forward_flex_degrees": [
+        28.600439077707804,
+        28.600791686223705
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/JumpStart": {
+      "frames": 11,
+      "forward_flex_degrees": [
+        28.600495426768457,
+        28.600754973956917
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/JumpLoop": {
+      "frames": 21,
+      "forward_flex_degrees": [
+        28.600439077707804,
+        28.600439077707804
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/JumpLand": {
+      "frames": 11,
+      "forward_flex_degrees": [
+        28.60051335601503,
+        28.600754973956917
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Attack": {
+      "frames": 25,
+      "forward_flex_degrees": [
+        18.0,
+        28.600569705075678
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Hit": {
+      "frames": 13,
+      "forward_flex_degrees": [
+        14.650128339003757,
+        14.650184047734175
+      ]
+    },
+    "RIG_NPC_Humanoid_v1/Death": {
+      "frames": 37,
+      "forward_flex_degrees": [
+        12.000000000000002,
+        12.000000000000002
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Idle": {
+      "frames": 61,
+      "forward_flex_degrees": [
+        23.650114465182007,
+        23.650114465182007
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Walk": {
+      "frames": 43,
+      "forward_flex_degrees": [
+        20.016777216912917,
+        31.98322278308708
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Run": {
+      "frames": 27,
+      "forward_flex_degrees": [
+        65.08749351082335,
+        88.91250648917665
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Turn_L45": {
+      "frames": 25,
+      "forward_flex_degrees": [
+        23.65010976942695,
+        23.65011916093706
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Turn_R45": {
+      "frames": 25,
+      "forward_flex_degrees": [
+        23.65010976942695,
+        23.65011916093706
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Turn_L90": {
+      "frames": 37,
+      "forward_flex_degrees": [
+        23.65010976942695,
+        23.65011916093706
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Turn_R90": {
+      "frames": 37,
+      "forward_flex_degrees": [
+        23.65010976942695,
+        23.65011916093706
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/WalkTurn_L45": {
+      "frames": 43,
+      "forward_flex_degrees": [
+        20.016777216912917,
+        31.98322278308708
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/WalkTurn_R45": {
+      "frames": 43,
+      "forward_flex_degrees": [
+        20.016777216912917,
+        31.98322278308708
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/RunTurn_L45": {
+      "frames": 27,
+      "forward_flex_degrees": [
+        65.08749351082335,
+        88.91250648917665
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/RunTurn_R45": {
+      "frames": 27,
+      "forward_flex_degrees": [
+        65.08749351082335,
+        88.91250648917665
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Jump": {
+      "frames": 41,
+      "forward_flex_degrees": [
+        37.60042114846123,
+        37.600810469243925
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/JumpStart": {
+      "frames": 11,
+      "forward_flex_degrees": [
+        37.600532139035245,
+        37.600810469243925
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/JumpLoop": {
+      "frames": 21,
+      "forward_flex_degrees": [
+        37.600439077707804,
+        37.600439077707804
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/JumpLand": {
+      "frames": 11,
+      "forward_flex_degrees": [
+        37.600532139035245,
+        37.600810469243925
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Attack": {
+      "frames": 25,
+      "forward_flex_degrees": [
+        27.0,
+        37.60055092205546
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Hit": {
+      "frames": 13,
+      "forward_flex_degrees": [
+        23.650128339003757,
+        23.650184047734175
+      ]
+    },
+    "RIG_MOB_07_AshenRevenant/Death": {
+      "frames": 37,
+      "forward_flex_degrees": [
+        21.0,
+        21.0
+      ]
+    }
+  },
+  "non_arm_animation_max_matrix_change": 0,
+  "rigs": [
+    {
+      "rig_id": "RIG_NPC_Humanoid_v1",
+      "bone_count": 21,
+      "meshes": 37,
+      "max_weight_error": 2.9802322387695312e-08,
+      "max_influences": 2,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": 11.032852100941883,
+      "max_arm_joint_gap_m": 3.335331273913293e-07
+    },
+    {
+      "rig_id": "RIG_MOB_01_Wolf",
+      "bone_count": 21,
+      "meshes": 1,
+      "max_weight_error": 0,
+      "max_influences": 1,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": null,
+      "max_arm_joint_gap_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_02_Boar",
+      "bone_count": 21,
+      "meshes": 1,
+      "max_weight_error": 0,
+      "max_influences": 1,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": null,
+      "max_arm_joint_gap_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_03_Bear",
+      "bone_count": 21,
+      "meshes": 1,
+      "max_weight_error": 0,
+      "max_influences": 1,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": null,
+      "max_arm_joint_gap_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_04_Stag",
+      "bone_count": 21,
+      "meshes": 1,
+      "max_weight_error": 0,
+      "max_influences": 1,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": null,
+      "max_arm_joint_gap_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_05_Goat",
+      "bone_count": 21,
+      "meshes": 1,
+      "max_weight_error": 0,
+      "max_influences": 1,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": null,
+      "max_arm_joint_gap_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_06_Hare",
+      "bone_count": 21,
+      "meshes": 1,
+      "max_weight_error": 0,
+      "max_influences": 1,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": null,
+      "max_arm_joint_gap_m": 0
+    },
+    {
+      "rig_id": "RIG_MOB_07_AshenRevenant",
+      "bone_count": 21,
+      "meshes": 7,
+      "max_weight_error": 2.2351741790771484e-08,
+      "max_influences": 2,
+      "loop_error": 0,
+      "min_forward_elbow_degrees": 20.01674931990516,
+      "max_arm_joint_gap_m": 3.701371654383606e-07
+    }
+  ],
+  "errors": [],
+  "status": "PASS",
+  "exports": [
+    {
+      "file": "Exports/Rigged/NPC_Modular_Rigged.glb",
+      "bytes": 1513648,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 37
+    },
+    {
+      "file": "Exports/Rigged/NPC_Resident_Animated.glb",
+      "bytes": 650620,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 8
+    },
+    {
+      "file": "Exports/Rigged/MOB_01_Wolf.glb",
+      "bytes": 606732,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 1
+    },
+    {
+      "file": "Exports/Rigged/MOB_02_Boar.glb",
+      "bytes": 612412,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 1
+    },
+    {
+      "file": "Exports/Rigged/MOB_03_Bear.glb",
+      "bytes": 745420,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 1
+    },
+    {
+      "file": "Exports/Rigged/MOB_04_Stag.glb",
+      "bytes": 612956,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 1
+    },
+    {
+      "file": "Exports/Rigged/MOB_05_Goat.glb",
+      "bytes": 600512,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 1
+    },
+    {
+      "file": "Exports/Rigged/MOB_06_Hare.glb",
+      "bytes": 599648,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 1
+    },
+    {
+      "file": "Exports/Rigged/MOB_07_AshenRevenant.glb",
+      "bytes": 663664,
+      "animations": 18,
+      "skin_joints": 21,
+      "mesh_nodes": 7
+    }
+  ]
+}

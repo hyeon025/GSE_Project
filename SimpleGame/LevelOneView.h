@@ -92,6 +92,8 @@ public:
             return;
         }
         Art::DrawRequest imported;
+        imported.deferAnimation = true;
+        imported.preciseDepth = true;
         imported.assets = {
             enemy.kind == LevelOne::Boss     ? "MOB_Bear"
             : enemy.kind == LevelOne::Runner ? "MOB_Wolf"

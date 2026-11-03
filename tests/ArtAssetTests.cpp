@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include "../SimpleGame/ArtAsset.h"
 #include "../SimpleGame/Dependencies/json.hpp"
 
@@ -31,6 +32,30 @@ int main()
     assert(source == library.Load(*part));
     auto bind = source->Sample(part->mesh, "", 0);
     Finite(bind);
+    // Shared head morphs change only facial features and remain valid under skinning.
+    std::set<std::uint64_t> expressions;
+    for(unsigned expression=0;expression<Art::Styles::ExpressionCount;++expression)
+    {
+        auto face=source->Sample(part->mesh,"Run",.23,true,expression);
+        Finite(face);assert(face.size()==bind.size());
+        std::uint64_t hash=14695981039346656037ull;
+        for(const auto& t:face)for(const auto& p:t.points)
+        {
+            const auto* bytes=reinterpret_cast<const unsigned char*>(&p);
+            for(size_t i=0;i<sizeof(p);++i)hash=(hash^bytes[i])*1099511628211ull;
+        }
+        assert(expressions.insert(hash).second);
+    }
+    auto hair=library.Part("Hair",1);
+    auto defaultHair=source->Sample(hair->mesh,"Run",.23);
+    auto expressiveHair=source->Sample(hair->mesh,"Run",.23,true,3);
+    assert(defaultHair.size()==expressiveHair.size());
+    for(size_t i=0;i<defaultHair.size();++i)for(int k=0;k<3;++k)
+    {
+        const auto& a=defaultHair[i].points[k];const auto& b=expressiveHair[i].points[k];
+        assert(a.x==b.x && a.y==b.y && a.z==b.z);
+    }
+    assert(!library.PlayerRecipe().empty() && library.PlayerRecipe()!=library.Recipe(0));
     if (!source->Clips().empty())
     {
         for (const auto& clip : source->Clips())
@@ -88,6 +113,36 @@ int main()
     {
         rejected = true;
     }
+    assert(rejected);
+    // A whole modular actor must match separate part sampling, including order/materials.
+    std::vector<std::string> meshes;
+    for (const auto& id : parts)
+    {
+        const auto* asset = library.Find(id);
+        assert(library.Load(*asset) == source);
+        meshes.push_back(asset->mesh);
+    }
+    for (const std::string clip : {std::string(), std::string("Run"), std::string("Turn_L90")})
+    {
+        auto combined = source->SampleMeshes(meshes, clip, .37, false);
+        size_t index = 0;
+        for (const auto& mesh : meshes)
+            for (const auto& face : source->Sample(mesh, clip, .37, false))
+            {
+                const auto& actual = combined.at(index++);
+                assert(actual.color == face.color && actual.doubleSided == face.doubleSided);
+                for (int k = 0; k < 3; ++k)
+                {
+                    assert(actual.points[k].x == face.points[k].x);
+                    assert(actual.points[k].y == face.points[k].y);
+                    assert(actual.points[k].z == face.points[k].z);
+                }
+            }
+        assert(index == combined.size());
+    }
+    rejected = false;
+    try { source->SampleMeshes({part->mesh, "missing_mesh"}, "Run", .1); }
+    catch (const std::exception&) { rejected = true; }
     assert(rejected);
     std::cout << "Art asset regression checks passed\n";
 }

@@ -2728,5 +2728,7 @@
         "SKM_MOB_07_AshenRevenant__Belt"
       ]
     }
-  ]
+  ],
+  "character_quality_revision": 3,
+  "arm_animation_revision": 3
 }

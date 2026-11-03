@@ -1,0 +1,105 @@
+{
+  "revision": 2,
+  "status": "PASS",
+  "runtime_units_per_meter": 20,
+  "npc_units_per_meter": 30,
+  "npc_height_world": 54,
+  "door_clearance_world": 60,
+  "foundation_world": [
+    66,
+    56
+  ],
+  "housing_grid_spacing": 112,
+  "source_buildings": [
+    {
+      "asset_id": "SM_ENV_Building_01_Cottage",
+      "vertices": 912,
+      "triangles": 1416,
+      "bounds_m": [
+        [
+          -2.1912,
+          -1.8504,
+          0.0
+        ],
+        [
+          2.1912,
+          1.8504,
+          5.18
+        ]
+      ]
+    },
+    {
+      "asset_id": "SM_ENV_Building_02_Smithy",
+      "vertices": 936,
+      "triangles": 1452,
+      "bounds_m": [
+        [
+          -2.1912,
+          -2.1091,
+          0.0
+        ],
+        [
+          2.1912,
+          1.8504,
+          5.18
+        ]
+      ]
+    },
+    {
+      "asset_id": "SM_ENV_Building_03_Market",
+      "vertices": 380,
+      "triangles": 596,
+      "bounds_m": [
+        [
+          -1.38,
+          -1.2425,
+          0.0
+        ],
+        [
+          1.38,
+          1.2,
+          3.8
+        ]
+      ]
+    },
+    {
+      "asset_id": "SM_ENV_Building_06_TimberHouse",
+      "vertices": 880,
+      "triangles": 1360,
+      "bounds_m": [
+        [
+          -2.1912,
+          -1.8504,
+          0.0
+        ],
+        [
+          2.1912,
+          1.8504,
+          4.92
+        ]
+      ]
+    }
+  ],
+  "previous_runtime_units_per_meter": 8,
+  "previous_cottage_height_world": 26.4,
+  "new_cottage_height_world": 103.59999656677246,
+  "market_foundation_world": [
+    50,
+    46
+  ],
+  "house_foundation_world": [
+    66,
+    56
+  ],
+  "housing_assets": [
+    "SM_ENV_Building_01_Cottage",
+    "SM_ENV_Building_06_TimberHouse"
+  ],
+  "checks": [
+    "geometry_and_GLTF_PASS",
+    "ArtAssetTests_PASS",
+    "WorldSimulationTests_PASS",
+    "ProjectedDepthOrderTests_PASS",
+    "Release_and_Debug_build_PASS"
+  ]
+}

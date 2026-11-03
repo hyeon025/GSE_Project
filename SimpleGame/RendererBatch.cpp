@@ -9,9 +9,15 @@
 void Renderer::InitializeBatch()
 {
     m_InstancedProgram = Program("Instanced.vs", "Instanced.fs");
+    m_InstanceViewport = glGetUniformLocation(m_InstancedProgram, "u_Viewport");
+    m_InstanceLinearOutput = glGetUniformLocation(m_InstancedProgram, "u_LinearOutput");
+    m_InstanceTexture = glGetUniformLocation(m_InstancedProgram, "u_Texture");
+    m_InstanceMeshes = glGetUniformLocation(m_InstancedProgram, "u_Meshes");
     GLint texels = 0;
     glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &texels);
-    m_MeshCapacity = std::min<size_t>(262144, (size_t)std::max(0, texels) / 2);
+    // 128 MiB ceiling fits full cycles of the modular cast, bounded by the device limit.
+    m_MeshCapacity = std::min<size_t>(4194304, (size_t)std::max(0, texels) / 2);
+    m_MeshArena.Reset(m_MeshCapacity);
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTextureSize);
     m_TextPageSize = std::min(2048, m_MaxTextureSize);
     glGenBuffers(1, &m_MeshBuffer);
@@ -24,13 +30,13 @@ void Renderer::InitializeBatch()
     glGenBuffers(1, &m_InstanceBuffer);
     glBindVertexArray(m_InstanceArray);
     glBindBuffer(GL_ARRAY_BUFFER, m_InstanceBuffer);
-    static_assert(sizeof(Instance) == 112, "Update instance attribute layout.");
+    static_assert(sizeof(Instance) == 176, "Update instance attribute layout.");
     static_assert(
         offsetof(Instance, placement) == 16 && offsetof(Instance, colors) == 32 && offsetof(Instance, options) == 80 &&
-            offsetof(Instance, uv) == 96,
+            offsetof(Instance, uv) == 96 && offsetof(Instance, palette) == 112,
         "Instance attribute offsets changed."
     );
-    for (GLuint i = 0; i < 7; ++i)
+    for (GLuint i = 0; i < 11; ++i)
     {
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(
@@ -58,6 +64,8 @@ void Renderer::ReleaseBatch()
 void Renderer::ReleaseMeshes()
 {
     m_Meshes.clear();
+    m_MeshRecent.clear();
+    m_MeshArena.Reset(m_MeshCapacity);
     m_MeshUsed = 0;
 }
 
@@ -68,6 +76,7 @@ Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void
     auto found = m_Meshes.find(key);
     if (found != m_Meshes.end())
     {
+        m_MeshRecent.splice(m_MeshRecent.end(), m_MeshRecent, found->second.recent);
         m_Stats.Add(RenderCounter::MeshHits);
         return found->second;
     }
@@ -105,23 +114,31 @@ Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void
     {
         throw std::runtime_error("Mesh exceeds texture buffer capacity.");
     }
-    if (m_Meshes.size() >= MeshCacheCapacity || m_MeshUsed + vertices.size() > m_MeshCapacity)
+    size_t offset = 0;
+    while (m_Meshes.size() >= MeshCacheCapacity ||
+           !m_MeshArena.Allocate(vertices.size(), offset))
     {
+        // Submit all queued references BEFORE recycling any of their vertex ranges.
+        // OpenGL orders the subsequent buffer update after those draws.
         FlushBatch(BatchBreak::Cache);
-        m_Stats.Add(RenderCounter::MeshEvictions, m_Meshes.size());
-        CacheEvent("arena_reset", key, m_MeshUsed);
-        ReleaseMeshes();
-        // Orphan only after queued references have been submitted.
-        glBindBuffer(GL_TEXTURE_BUFFER, m_MeshBuffer);
-        glBufferData(GL_TEXTURE_BUFFER, m_MeshCapacity * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
+        if (m_MeshRecent.empty()) throw std::runtime_error("GPU mesh arena exhausted");
+        auto victim = m_Meshes.find(m_MeshRecent.front());
+        m_MeshArena.Release((size_t)victim->second.offset, (size_t)victim->second.count);
+        m_MeshUsed -= victim->second.count;
+        m_Stats.Add(RenderCounter::MeshEvictions);
+        CacheEvent("mesh_evict", victim->first, victim->second.count);
+        m_Meshes.erase(victim);
+        m_MeshRecent.pop_front();
     }
     Mesh mesh;
-    mesh.offset = (GLint)m_MeshUsed;
+    mesh.offset = (GLint)offset;
     mesh.count = (GLsizei)vertices.size();
     glBindBuffer(GL_TEXTURE_BUFFER, m_MeshBuffer);
-    glBufferSubData(GL_TEXTURE_BUFFER, m_MeshUsed * sizeof(Vertex), vertices.size() * sizeof(Vertex), vertices.data());
+    glBufferSubData(GL_TEXTURE_BUFFER, offset * sizeof(Vertex), vertices.size() * sizeof(Vertex), vertices.data());
     m_Stats.Add(RenderCounter::UploadBytes, vertices.size() * sizeof(Vertex));
     m_MeshUsed += vertices.size();
+    m_MeshRecent.push_back(key);
+    mesh.recent = std::prev(m_MeshRecent.end());
     return m_Meshes.emplace(key, mesh).first->second;
 }
 
@@ -169,14 +186,14 @@ void Renderer::FlushBatch(BatchBreak reason)
     };
     m_Stats.Add(reasons[(size_t)reason]);
     glUseProgram(m_InstancedProgram);
-    glUniform2f(glGetUniformLocation(m_InstancedProgram, "u_Viewport"), (float)m_Width, (float)m_Height);
-    glUniform1i(glGetUniformLocation(m_InstancedProgram, "u_LinearOutput"), m_RenderingHdr ? 1 : 0);
+    glUniform2f(m_InstanceViewport, (float)m_Width, (float)m_Height);
+    glUniform1i(m_InstanceLinearOutput, m_RenderingHdr ? 1 : 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_BatchTexture);
-    glUniform1i(glGetUniformLocation(m_InstancedProgram, "u_Texture"), 0);
+    glUniform1i(m_InstanceTexture, 0);
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_BUFFER, m_MeshTexture);
-    glUniform1i(glGetUniformLocation(m_InstancedProgram, "u_Meshes"), 3);
+    glUniform1i(m_InstanceMeshes, 3);
     glBindVertexArray(m_InstanceArray);
     glBindBuffer(GL_ARRAY_BUFFER, m_InstanceBuffer);
     size_t bytes = m_Instances.size() * sizeof(Instance);
@@ -199,6 +216,14 @@ void Renderer::Flush()
     FlushBatch(BatchBreak::Explicit);
 }
 
+bool Renderer::TryCachedMesh(MeshKind kind, std::uint64_t variant,
+                             float x, float y, float scale, float opacity, const std::array<Color,4>* palette)
+{
+    if (m_Meshes.find(MeshKey(kind, variant)) == m_Meshes.end()) return false;
+    CachedMesh(kind, variant, x, y, scale, opacity, [] {}, true, palette);
+    return true;
+}
+
 void Renderer::CachedMesh(
     MeshKind kind,
     std::uint64_t variant,
@@ -207,7 +232,8 @@ void Renderer::CachedMesh(
     float scale,
     float opacity,
     const std::function<void()>& build,
-    bool persistent
+    bool persistent,
+    const std::array<Color,4>* palette
 )
 {
     if (m_Capture)
@@ -220,6 +246,7 @@ void Renderer::CachedMesh(
     instance.placement[0] = x;
     instance.placement[1] = y;
     instance.options[1] = opacity;
+    if(palette) { instance.palette=*palette; instance.options[3]=1; }
     if (kind == MeshKind::Character)
     {
         instance.options[2] = 1.f;

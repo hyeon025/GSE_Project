@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "CharacterStyle.h"
 
 namespace Art
 {
@@ -18,6 +19,7 @@ namespace Art
         std::array<float, 4> color = {{1, 1, 1, 1}};
         Vec3 emission;
         bool doubleSided = false;
+        PaletteRole paletteRole = PaletteRole::None;
     };
 
     struct Clip
@@ -43,7 +45,10 @@ namespace Art
         std::uint64_t Fingerprint() const;
         bool HasMesh(const std::string& name) const;
         std::vector<Triangle>
-        Sample(const std::string& mesh, const std::string& clip, double seconds, bool loop = true) const;
+        Sample(const std::string& mesh, const std::string& clip, double seconds, bool loop = true, unsigned expression = 0) const;
+        // Assemble selected meshes in caller order, sharing one skeleton evaluation.
+        std::vector<Triangle> SampleMeshes(
+            const std::vector<std::string>& meshes, const std::string& clip, double seconds, bool loop = true, unsigned expression = 0) const;
         Matrix Socket(const std::string& node, const std::string& clip, double seconds, bool loop = true) const;
 
     private:
@@ -69,6 +74,7 @@ namespace Art
         const Asset* Part(const std::string& slot, int index) const;
         std::shared_ptr<Model> Load(const Asset& asset);
         std::vector<std::string> Recipe(unsigned identity) const;
+        std::vector<std::string> PlayerRecipe() const;
         const std::wstring& Root() const;
         const std::string& Error() const;
 

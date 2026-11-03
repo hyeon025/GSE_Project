@@ -1,14 +1,14 @@
 {
   "status": "PASS",
   "scope": "asset geometry, shared datablocks, appearance references and GLB container/metadata checks; no game build or execution",
-  "unique_meshes": 63,
+  "unique_meshes": 64,
   "npc_meshes": 37,
-  "environment_meshes": 26,
-  "individual_glbs_checked": 63,
+  "environment_meshes": 27,
+  "individual_glbs_checked": 64,
   "library_glbs_checked": 2,
   "example_appearances_checked": 40,
-  "npc_triangles_min": 1112,
-  "npc_triangles_max": 1644,
+  "npc_triangles_min": 3552,
+  "npc_triangles_max": 4956,
   "errors": [],
   "warnings": [],
   "meshes": [
@@ -16,379 +16,391 @@
       "asset_id": "SM_NPC_Head_01_Masculine",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 14
+      "shared_instances": 15
     },
     {
       "asset_id": "SM_NPC_Head_02_Feminine",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 11
+      "shared_instances": 12
     },
     {
       "asset_id": "SM_NPC_Hair_01_Crop",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_NPC_Hair_02_Bob",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 6
+      "shared_instances": 7
     },
     {
       "asset_id": "SM_NPC_Hair_03_Long",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_NPC_Hair_04_Braid",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_NPC_Hair_05_Swept",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Torso_01_Tunic",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 12
+      "shared_instances": 13
     },
     {
       "asset_id": "SM_NPC_Torso_02_Armor",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Torso_03_Archer",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 5
+      "shared_instances": 6
     },
     {
       "asset_id": "SM_NPC_Torso_04_Robe",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Torso_05_Merchant",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Torso_06_Healer",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Arms_01_Cloth",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 16
+      "shared_instances": 17
     },
     {
       "asset_id": "SM_NPC_Arms_02_Armor",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Arms_03_Leather",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 5
+      "shared_instances": 6
     },
     {
       "asset_id": "SM_NPC_Arms_04_Robe",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Legs_01_Trousers",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 7
+      "shared_instances": 8
     },
     {
       "asset_id": "SM_NPC_Legs_02_Patched",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 16
+      "shared_instances": 17
     },
     {
       "asset_id": "SM_NPC_Legs_03_Armored",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Feet_01_Boots",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 9
+      "shared_instances": 10
     },
     {
       "asset_id": "SM_NPC_Feet_02_Wrapped",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 16
+      "shared_instances": 17
     },
     {
       "asset_id": "SM_NPC_FacialHair_01_Stubble",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 3
+      "shared_instances": 4
     },
     {
       "asset_id": "SM_NPC_FacialHair_02_Beard",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 0
+      "shared_instances": 1
     },
     {
       "asset_id": "SM_NPC_Headgear_01_Hood",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_NPC_Headgear_02_Helmet",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Headgear_03_Cap",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Back_01_Cape",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 3
+      "shared_instances": 4
     },
     {
       "asset_id": "SM_NPC_Back_02_Quiver",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_NPC_Back_03_Pack",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 5
+      "shared_instances": 6
     },
     {
       "asset_id": "SM_NPC_Belt_01_Plain",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 16
+      "shared_instances": 17
     },
     {
       "asset_id": "SM_NPC_Belt_02_Pouches",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 9
+      "shared_instances": 10
     },
     {
       "asset_id": "SM_NPC_Mainhand_01_Sword",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 3
+      "shared_instances": 4
     },
     {
       "asset_id": "SM_NPC_Mainhand_02_Bow",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_NPC_Mainhand_03_Staff",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Offhand_01_Shield",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_NPC_Offhand_02_Lantern",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 3
+      "shared_instances": 4
     },
     {
       "asset_id": "SM_ENV_Grass_01_Meadow",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 6
+      "shared_instances": 7
     },
     {
       "asset_id": "SM_ENV_Grass_02_Dense",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 9
+      "shared_instances": 10
     },
     {
       "asset_id": "SM_ENV_Grass_03_Dry",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 6
+      "shared_instances": 7
     },
     {
       "asset_id": "SM_ENV_Rock_01_Small",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_ENV_Rock_02_Medium",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 5
+      "shared_instances": 6
     },
     {
       "asset_id": "SM_ENV_Rock_03_Boulder",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_ENV_Shrub_01_Moss",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 5
+      "shared_instances": 6
     },
     {
       "asset_id": "SM_ENV_Shrub_02_Berry",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_ENV_Tree_01_Oak",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_ENV_Tree_02_Pine",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 3
+      "shared_instances": 4
     },
     {
       "asset_id": "SM_ENV_Tree_03_Dead",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_ENV_Tree_04_Young",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_ENV_Wood_01_Stump",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_ENV_Wood_02_FallenLog",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_ENV_Ruin_01_WallTall",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_ENV_Ruin_02_WallBroken",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 1
+      "shared_instances": 2
     },
     {
       "asset_id": "SM_ENV_Ground_01_PathStones",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 7
+      "shared_instances": 8
     },
     {
       "asset_id": "SM_ENV_Village_01_Fence",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 5
+      "shared_instances": 6
     },
     {
       "asset_id": "SM_ENV_Village_02_Crate",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_ENV_Village_03_Barrel",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 4
+      "shared_instances": 5
     },
     {
       "asset_id": "SM_ENV_Village_04_Well",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_ENV_Building_01_Cottage",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 5,
+      "building_revision": 2
     },
     {
       "asset_id": "SM_ENV_Building_02_Smithy",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 5,
+      "building_revision": 2
     },
     {
       "asset_id": "SM_ENV_Building_03_Market",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 5,
+      "building_revision": 2
     },
     {
       "asset_id": "SM_ENV_Building_04_RuinedChapel",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
     },
     {
       "asset_id": "SM_ENV_Building_05_BellTower",
       "closed_components": true,
       "zero_area_faces": 0,
-      "shared_instances": 2
+      "shared_instances": 3
+    },
+    {
+      "asset_id": "SM_ENV_Building_06_TimberHouse",
+      "closed_components": true,
+      "zero_area_faces": 0,
+      "shared_instances": 3,
+      "building_revision": 2
     }
-  ]
+  ],
+  "character_quality_revision": 4,
+  "building_revision": 2
 }

@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
+#include "MeshArena.h"
 #include <cstdint>
 #include <functional>
 #include <chrono>
@@ -67,9 +69,19 @@ public:
         return m_Terrain != 0 && m_InstancedProgram != 0;
     }
 
+    bool VisibleRect(float left, float top, float right, float bottom) const
+    {
+        return right >= 0 && bottom >= 0 && left <= m_Width && top <= m_Height;
+    }
+
     void Resize(int width, int height);
     void BeginFrame();
     void EndFrame();
+    void SetGameFrameTiming(double updateMs, double previousSwapMs)
+    {
+        m_GameUpdateMs = updateMs;
+        m_PreviousSwapMs = previousSwapMs;
+    }
 
     std::uint64_t GetFrameDrawCalls() const
     {
@@ -89,6 +101,10 @@ public:
 
     void SetPostProcessing(const PostProcessingSettings& settings);
     void Flush();
+    // Queue an already resident mesh without requiring a CPU pose-cache entry.
+    bool TryCachedMesh(MeshKind kind, std::uint64_t variant,
+                       float x, float y, float scale, float opacity,
+                       const std::array<Color,4>* palette = nullptr);
     // Queue in painter order; Flush submits compatible instances together.
     // Build local-space geometry only on a memory and disk cache miss.
     void CachedMesh(
@@ -99,7 +115,8 @@ public:
         float scale,
         float opacity,
         const std::function<void()>& build,
-        bool persistent = true
+        bool persistent = true,
+        const std::array<Color,4>* palette = nullptr
     );
     void Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c);
     void Rect(float x, float y, float width, float height, Color color);
@@ -132,6 +149,7 @@ private:
     {
         GLint offset = 0;
         GLsizei count = 0;
+        std::list<MeshKey>::iterator recent;
     };
 
     struct Instance
@@ -141,6 +159,7 @@ private:
         Color colors[3] = {Color(1, 1, 1), Color(1, 1, 1), Color(1, 1, 1)};
         float options[4] = {0, 1, 0, 0};
         float uv[4] = {0, 0, 1, 1};
+        std::array<Color,4> palette = {{Color(1,1,1),Color(1,1,1),Color(1,1,1),Color(1,1,1)}};
     };
     enum class Pass
     {
@@ -187,7 +206,11 @@ private:
     PostProcessingSettings m_PostSettings;
     std::vector<Vertex>* m_Capture = nullptr;
     std::map<MeshKey, Mesh> m_Meshes;
+    std::list<MeshKey> m_MeshRecent;
+    MeshArena m_MeshArena;
     GLuint m_InstancedProgram = 0, m_InstanceArray = 0, m_InstanceBuffer = 0;
+    GLint m_InstanceViewport = -1, m_InstanceLinearOutput = -1;
+    GLint m_InstanceTexture = -1, m_InstanceMeshes = -1;
     GLuint m_MeshBuffer = 0, m_MeshTexture = 0, m_BatchTexture = 0;
     size_t m_MeshCapacity = 0, m_MeshUsed = 0;
     static constexpr size_t MeshCacheCapacity = 2048;
@@ -209,6 +232,7 @@ private:
     std::chrono::steady_clock::time_point m_SessionStart, m_PreviousFrameStart;
     double m_FrameElapsedMs = 0, m_FrameIntervalMs = 0;
     double m_PreviousLogMs = 0;
+    double m_GameUpdateMs = 0, m_PreviousSwapMs = 0;
     bool m_ProfileCombat = false;
     float m_ProfileCameraX = 0, m_ProfileCameraY = 0, m_ProfileZoom = 1, m_ProfileSeed = 0;
     std::uint64_t m_FrameNumber = 0, m_FrameDrawCalls = 0;

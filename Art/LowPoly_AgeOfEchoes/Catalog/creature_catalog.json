@@ -13,9 +13,10 @@
       "mesh_ids": [
         "SKM_MOB_01_Wolf"
       ],
-      "mesh_triangles": 788,
+      "mesh_triangles": 2028,
       "rig_revision": 2,
-      "hind_chain": "upper / lower / hock / foot"
+      "hind_chain": "upper / lower / hock / foot",
+      "quality_revision": 3
     },
     {
       "species_index": 2,
@@ -29,9 +30,10 @@
       "mesh_ids": [
         "SKM_MOB_02_Boar"
       ],
-      "mesh_triangles": 924,
+      "mesh_triangles": 1988,
       "rig_revision": 2,
-      "hind_chain": "upper / lower / hock / foot"
+      "hind_chain": "upper / lower / hock / foot",
+      "quality_revision": 3
     },
     {
       "species_index": 3,
@@ -45,9 +47,10 @@
       "mesh_ids": [
         "SKM_MOB_03_Bear"
       ],
-      "mesh_triangles": 1024,
+      "mesh_triangles": 3204,
       "rig_revision": 2,
-      "hind_chain": "upper / lower / hock / foot"
+      "hind_chain": "upper / lower / hock / foot",
+      "quality_revision": 3
     },
     {
       "species_index": 4,
@@ -61,9 +64,10 @@
       "mesh_ids": [
         "SKM_MOB_04_Stag"
       ],
-      "mesh_triangles": 972,
+      "mesh_triangles": 2004,
       "rig_revision": 2,
-      "hind_chain": "upper / lower / hock / foot"
+      "hind_chain": "upper / lower / hock / foot",
+      "quality_revision": 3
     },
     {
       "species_index": 5,
@@ -77,9 +81,10 @@
       "mesh_ids": [
         "SKM_MOB_05_Goat"
       ],
-      "mesh_triangles": 924,
+      "mesh_triangles": 1956,
       "rig_revision": 2,
-      "hind_chain": "upper / lower / hock / foot"
+      "hind_chain": "upper / lower / hock / foot",
+      "quality_revision": 3
     },
     {
       "species_index": 6,
@@ -93,9 +98,10 @@
       "mesh_ids": [
         "SKM_MOB_06_Hare"
       ],
-      "mesh_triangles": 856,
+      "mesh_triangles": 2004,
       "rig_revision": 2,
-      "hind_chain": "upper / lower / hock / foot"
+      "hind_chain": "upper / lower / hock / foot",
+      "quality_revision": 3
     },
     {
       "species_index": 7,
@@ -115,7 +121,8 @@
         "SKM_MOB_07_AshenRevenant__Feet",
         "SKM_MOB_07_AshenRevenant__Belt"
       ],
-      "mesh_triangles": 1112
+      "mesh_triangles": 3552,
+      "quality_revision": 4
     }
   ]
 }

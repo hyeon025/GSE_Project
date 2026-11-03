@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "file": "NPC_Resident_Animated.glb",
+      "run_frame": 5,
+      "max_source_to_reimport_vertex_distance_m": 7.105838903953554e-07,
+      "imported_clips": 18,
+      "status": "PASS"
+    },
+    {
+      "file": "MOB_04_Stag.glb",
+      "run_frame": 5,
+      "max_source_to_reimport_vertex_distance_m": 7.647649908903986e-07,
+      "imported_clips": 18,
+      "status": "PASS"
+    }
+  ]
+}
