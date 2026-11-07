@@ -74,7 +74,7 @@ namespace Art
         const Asset* Part(const std::string& slot, int index) const;
         std::shared_ptr<Model> Load(const Asset& asset);
         std::vector<std::string> Recipe(unsigned identity) const;
-        std::vector<std::string> PlayerRecipe() const;
+        std::vector<std::string> PlayerRecipe(unsigned hairShape = 3, unsigned outfit = 1) const;
         const std::wstring& Root() const;
         const std::string& Error() const;
 

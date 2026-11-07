@@ -58,6 +58,28 @@
         <div class="legend"><span class="legend-village">■ 마을</span><span class="legend-npc">● 주민</span><span class="legend-fight">● 교전</span><span class="legend-player">◆ 플레이어</span><span id="off-map"></span></div>
       </section>
     </div>
+    <section class="affinity-section" aria-labelledby="affinity-title">
+      <div class="section-title"><h2 id="affinity-title">플레이어 호감도 순위</h2><span id="affinity-summary">데이터 대기 중</span></div>
+      <p class="muted">NPC가 플레이어에게 느끼는 호감도 · −100 ~ +100 · 동점은 ID 순 · 기본 순위는 생존 NPC 기준</p>
+      <div class="filters">
+        <label class="search">NPC 검색<input id="affinity-search" type="search" placeholder="이름 또는 ID" autocomplete="off"></label>
+        <label>소속 마을<select id="affinity-village"><option value="all">모든 마을</option></select></label>
+        <label>관계 단계<select id="affinity-tier"><option value="all">모든 관계</option><option>깊은 유대</option><option>친밀</option><option>우호</option><option>중립</option><option>경계</option><option>적대</option></select></label>
+        <label>대상<select id="affinity-scope"><option value="alive">모든 생존 NPC</option><option value="met">대화한 생존 NPC</option><option value="all">사망 기록 포함</option></select></label>
+        <label>정렬<select id="affinity-sort"><option value="desc">높은 순</option><option value="asc">낮은 순</option></select></label>
+      </div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>순서</th><th>NPC / 마을</th><th>호감도</th><th>관계 단계</th><th>최근 변화</th><th>대화 보상 대기</th></tr></thead>
+        <tbody id="affinity-ranking"><tr><td colspan="6" class="empty">호감도 데이터 없음</td></tr></tbody>
+      </table></div>
+      <div class="pagination"><span id="affinity-page">0 / 0</span><button id="affinity-prev" class="icon" aria-label="호감도 이전 페이지">←</button><button id="affinity-next" class="icon" aria-label="호감도 다음 페이지">→</button></div>
+      <div class="section-title"><h2>호감도 변화 내역</h2><label><input type="checkbox" id="affinity-selected-only">선택한 NPC만</label></div>
+      <p id="affinity-history-info" class="muted">최근 128건 · 시뮬레이션 시간 기준 · 저장 후 재실행해도 유지</p>
+      <div class="table-scroll event-scroll"><table>
+        <thead><tr><th>시각 / 경과</th><th>NPC</th><th>이유</th><th>변화량</th><th>이전 → 현재</th></tr></thead>
+        <tbody id="affinity-history"><tr><td colspan="5" class="empty">기록된 변화 없음</td></tr></tbody>
+      </table></div>
+    </section>
     <section class="npc-section">
       <div class="section-title"><h2>NPC 상태</h2><span id="result-count">0명</span></div>
       <div class="filters">
@@ -65,7 +87,7 @@
         <label>소속 마을<select id="village-filter"><option value="all">모든 마을</option></select></label>
         <label>직업<select id="job-filter"><option value="all">모든 직업</option></select></label>
         <label>생존<select id="life-filter"><option value="alive">생존</option><option value="all">전체</option><option value="dead">사망</option></select></label>
-        <label>정렬<select id="sort"><option value="id">ID 순</option><option value="health">체력 낮은 순</option><option value="gold">은화 많은 순</option><option value="insight">깨달음 높은 순</option></select></label>
+        <label>정렬<select id="sort"><option value="id">ID 순</option><option value="health">체력 낮은 순</option><option value="gold">은화 많은 순</option><option value="insight">깨달음 높은 순</option><option value="relationship">호감도 높은 순</option></select></label>
       </div>
       <div class="npc-layout">
         <div class="npc-list">

@@ -16,6 +16,8 @@ namespace Art
         float yaw = 0;
         bool deferAnimation = false;
         bool preciseDepth = false;
+        bool normalizedTime = false;       // seconds is a [0,1) locomotion cycle when enabled.
+        std::uint64_t animationStream = 0; // Per-actor fallback history; excluded from the shared mesh key.
         CharacterStyle style;
     };
 

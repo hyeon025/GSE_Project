@@ -77,6 +77,11 @@ h3 { margin: 0 0 13px; font-size: 15px; overflow-wrap: anywhere; }
 dl { margin: 0; display: grid; grid-template-columns: 88px minmax(0, 1fr); font-size: 12px; gap: 12px 8px; }
 dt { color: #66736d; } dd { margin: 0; overflow-wrap: anywhere; }
 .muted { color: #718078; }
+.affinity-section { border-bottom: 1px solid #cbd2cf; padding-bottom: 24px; }
+.affinity-positive { color: #12694b; font-weight: 600; }
+.affinity-negative { color: #ad3839; font-weight: 600; }
+.affinity-section meter { display: block; width: 110px; height: 8px; margin-top: 5px; }
+.affinity-section > p { font-size: 12px; }
 .events-section { border-top: 1px solid #cbd2cf; padding-bottom: 25px; }
 .event-scroll { max-height: 235px; }
 footer { padding: 16px 28px; display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #cbd2cf; color: #718078; font-size: 11px; overflow-wrap: anywhere; }

@@ -1,5 +1,17 @@
 # GSE_Project
 
+## NPC Affinity
+
+월드에서 **H** 또는 **호감도 H** 버튼으로 NPC 호감도 순위를 확인한다.
+대화·선물·치료·거래·수련·위협·공격에 따른 수치와 이력을 저장하며,
+웹 모니터에서도 순위와 변화 이유를 확인할 수 있다. [사용법](docs/AffinitySystem.md).
+
+## Avatar Customization
+
+Open **꾸미기** in the world or combat HUD to edit the player name, motto, hair,
+skin, expression and clothing with a live model preview. Gender is fixed to female.
+Apply saves the profile; Cancel discards edits. See [usage and save compatibility](docs/AvatarCustomization.md).
+
 ## Actor and Scene Graph
 
 - `SimpleGame/Actor.h`: common identity, local transform, visibility, activation,

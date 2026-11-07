@@ -33,7 +33,7 @@ namespace Art
         size_t poseBytes = 0;
         std::uint64_t poseBuilds = 0, poseEvictions = 0;
         constexpr size_t PoseBudget = 192 * 1024 * 1024;
-        constexpr unsigned PresentationRevision = 1;
+        constexpr unsigned PresentationRevision = 2;
         std::set<std::string> failures;
 
         void Hash(std::uint64_t& hash, const void* data, size_t count)
@@ -165,7 +165,7 @@ namespace Art
                     return a.depth < b.depth;
                 }
             );
-            if (r.preciseDepth)
+            if (r.preciseDepth || r.style.enabled)
             {
                 std::vector<ProjectedDepthOrder::Triangle> triangles;
                 for (const auto& face : faces)
@@ -234,7 +234,7 @@ namespace Art
         {
             auto last = previous.find(family);
             if (last != previous.end() && last->second.serial > serial) return;
-            if (previous.size() >= 2048 && !previous.count(family)) previous.clear();
+            if (previous.size() >= 2048 && !previous.count(family)) previous.erase(previous.begin());
             previous[family] = Previous{key, vertices, serial};
         }
 
@@ -306,7 +306,12 @@ namespace Art
             Hash(key, &r.unitsPerMeter, sizeof(float));
             Hash(key, &r.yaw, sizeof(float));
             Hash(key, &r.loop, sizeof(r.loop));
-            if (r.preciseDepth) { const unsigned depthRevision=1; HashString(key,"precise_depth");Hash(key,&depthRevision,sizeof(depthRevision)); }
+            if (r.preciseDepth || r.style.enabled)
+            {
+                const unsigned depthRevision = 1;
+                HashString(key, "precise_depth");
+                Hash(key, &depthRevision, sizeof(depthRevision));
+            }
             if(r.style.enabled)
             {
                 HashString(key,"character_style");
@@ -315,8 +320,9 @@ namespace Art
                 // Colors belong to the draw instance, never the pose cache key.
             }
             std::uint64_t family = key;
+            Hash(family, &r.animationStream, sizeof(r.animationStream));
             bool animated = false;
-            // A finite shared pose atlas: at most 120 samples per clip, not one mesh per NPC/frame.
+            // Shared pose atlas: locomotion at source 30 Hz, other clips at 15 Hz, at most 120 samples.
             double sampleTime = 0;
             for (const auto& id : r.assets)
             {
@@ -345,14 +351,17 @@ namespace Art
                     {
                         throw std::runtime_error("Missing clip: " + clip);
                     }
-                    double time = std::max(0.0, r.seconds);
+                    double time = std::max(0.0, r.seconds) * (r.normalizedTime ? found->duration : 1);
                     time = r.loop && found->duration > 0 ? std::fmod(time, found->duration)
                                                          : std::min(time, found->duration);
-                    unsigned samples = (unsigned)std::max(1.0, std::min(120.0, std::ceil(found->duration * 15)));
+                    const double fps = r.normalizedTime ? 30 : 15;
+                    unsigned samples =
+                        static_cast<unsigned>(std::max(1.0, std::min(120.0, std::ceil(found->duration * fps))));
                     unsigned frame = found->duration > 0 ? (unsigned)std::floor(time / found->duration * samples) : 0;
                     sampleTime = found->duration * frame / samples;
                     HashString(key, clip);
                     HashString(family, clip);
+                    Hash(key, &samples, sizeof(samples));
                     Hash(key, &frame, sizeof(frame));
                     animated = true;
                 }

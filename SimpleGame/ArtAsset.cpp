@@ -902,13 +902,29 @@ namespace Art
         return impl->recipes.empty() ? std::vector<std::string>{} : impl->recipes[identity % impl->recipes.size()];
     }
 
-    std::vector<std::string> Library::PlayerRecipe() const
+    std::vector<std::string> Library::PlayerRecipe(unsigned hairShape, unsigned outfit) const
     {
         std::vector<std::string> result;
-        for(const auto& slot:std::vector<std::pair<std::string,int>>{{"Head",1},{"Hair",5},{"Torso",1},{"Arms",1},{"Legs",1},{"Feet",1},{"Back",1},{"Belt",2}})
+        if (hairShape < 1 || hairShape > 5 || outfit < 1 || outfit > 6)
         {
-            auto part=Part(slot.first,slot.second);
-            if(!part)return {};
+            return {};
+        }
+        int arms = outfit == 2 ? 2 : outfit == 4 ? 4 : outfit == 3 ? 3 : 1;
+        for (const auto& slot : std::vector<std::pair<std::string, int>>{
+                 {"Head", 2},
+                 {"Hair", (int)hairShape},
+                 {"Torso", (int)outfit},
+                 {"Arms", arms},
+                 {"Legs", outfit == 2 ? 3 : 1},
+                 {"Feet", 1},
+                 {"Belt", 2}
+             })
+        {
+            auto part = Part(slot.first, slot.second);
+            if (!part)
+            {
+                return {};
+            }
             result.push_back(part->id);
         }
         return result;

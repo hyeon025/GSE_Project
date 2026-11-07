@@ -26,6 +26,7 @@
     </ClInclude>
     <ClInclude Include="ArtAsset.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="CharacterStyle.h"><Filter>헤더 파일</Filter></ClInclude>
+    <ClInclude Include="PlayerProfile.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="ArtPresentation.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="PoseWorker.h"><Filter>헤더 파일</Filter></ClInclude>
     <ClInclude Include="ProjectedDepthOrder.h"><Filter>헤더 파일</Filter></ClInclude>
@@ -54,6 +55,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="GameWorld.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Affinity.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SocietyState.h">

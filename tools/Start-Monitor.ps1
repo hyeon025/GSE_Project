@@ -1,6 +1,7 @@
 param(
     [ValidateRange(1024, 65535)][int]$Port = 8765,
     [string]$Snapshot = (Join-Path $env:LOCALAPPDATA 'GSE_Project/Monitor/snapshot.json'),
+    [string]$PythonPath,
     [switch]$Background
 )
 
@@ -33,7 +34,14 @@ for ($candidate = $Port; $candidate -le $lastPort; $candidate++) {
 }
 
 $python = $null
+if ($PythonPath) {
+    if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) { throw 'PythonPath must point to an existing Python executable.' }
+    $executable = & $PythonPath -c 'import sys; assert sys.version_info >= (3, 9); print(sys.executable)'
+    if ($LASTEXITCODE -ne 0) { throw 'PythonPath must provide Python 3.9 or newer.' }
+    $python = "$executable"
+}
 foreach ($name in @('py', 'python', 'python3')) {
+    if ($python) { break }
     $command = Get-Command $name -ErrorAction SilentlyContinue
     if (-not $command) { continue }
     try {
@@ -45,6 +53,17 @@ foreach ($name in @('py', 'python', 'python3')) {
             break
         }
     } catch { }
+}
+# Modeling workstations may have Blender's bundled Python but only an empty py launcher.
+# Reuse that installed runtime; the bridge requires only the standard library.
+if (-not $python) {
+    $bundledPattern = Join-Path $env:ProgramFiles 'Blender Foundation\Blender *\*\python\bin\python.exe'
+    foreach ($runtime in (Get-ChildItem -Path $bundledPattern -File -ErrorAction SilentlyContinue | Sort-Object FullName -Descending)) {
+        try {
+            $executable = & $runtime.FullName -c 'import sys; assert sys.version_info >= (3, 9); print(sys.executable)' 2>$null
+            if ($LASTEXITCODE -eq 0 -and $executable) { $python = "$executable"; break }
+        } catch { }
+    }
 }
 if (-not $python) { throw 'Python 3.9+ is required. No working Python runtime was found.' }
 

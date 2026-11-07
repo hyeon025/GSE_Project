@@ -14,6 +14,8 @@
 #include "StoryState.h"
 #include "SocietyState.h"
 #include "CharacterMotion.h"
+#include "PlayerProfile.h"
+#include "Affinity.h"
 
 namespace Game
 {
@@ -114,6 +116,7 @@ namespace Game
 
     struct Npc
     {
+        Affinity::Memory affinity;
         unsigned artCatalogVersion = 0;
         std::vector<std::string> artParts;
         std::array<int, 3> artPalettes = {{0, 0, 0}};
@@ -134,6 +137,7 @@ namespace Game
 
     struct Player
     {
+        PlayerProfile profile;
         Vec p, checkpoint;
         float health = 100, stamina = 100;
         int bread = 3, herbs = 1, wood = 0, fragments = 0;
@@ -150,6 +154,7 @@ namespace Game
         LevelOne::Session storyBattle;
         Story::State story;
         Society::State society;
+        Affinity::State affinity;
         int deaths = 0;
         double time = 0;
         std::map<Key, SiteState> states;
@@ -626,9 +631,9 @@ namespace Game
         return root + L"\\world_v1.txt";
     }
 
-    inline bool Save(World& w)
+    inline bool Save(World& w, const std::wstring& destinationPath = L"")
     {
-        std::wstring path = SavePath();
+        std::wstring path = destinationPath.empty() ? SavePath() : destinationPath;
         if (path.empty())
         {
             return false;
@@ -640,7 +645,7 @@ namespace Game
             return false;
         }
         const Player& p = w.player;
-        f << std::setprecision(17) << "GSE_WORLD 6\n" << w.time << ' ' << w.deaths << '\n';
+        f << std::setprecision(17) << "GSE_WORLD 8\n" << w.time << ' ' << w.deaths << '\n';
         f << p.p.x << ' ' << p.p.y << ' ' << p.checkpoint.x << ' ' << p.checkpoint.y << ' ' << p.health << ' '
           << p.stamina << ' ' << p.bread << ' ' << p.herbs << ' ' << p.wood << ' ' << p.fragments << ' '
           << (int)p.ability << ' ' << p.exploration << '\n';
@@ -695,6 +700,8 @@ namespace Game
         Story::Write(f, w.story);
         LevelOne::Write(f, w.storyBattle, true);
         Society::Write(f, w.society);
+        WriteProfile(f, p.profile);
+        Affinity::Write(f, w);
         f.flush();
         bool ok = f.good();
         f.close();
@@ -731,7 +738,7 @@ namespace Game
         Player& p = result.player;
         std::string magic;
         int version = 0, ability = 0;
-        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 6)
+        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 8)
         {
             return false;
         }
@@ -927,6 +934,16 @@ namespace Game
                 return false;
             }
         }
+        if (version >= 7 && !ReadProfile(f, p.profile))
+        {
+            return false;
+        }
+        if (version >= 8 && !Affinity::Read(f, result))
+        {
+            return false;
+        }
+        // Older saves preserve the actual relationship; derived training trust must agree with it.
+        for (auto& n : result.npcs) n.trust = std::min(3, std::max(0, n.relationship / 25));
         w = result;
         damaged = false;
         return true;

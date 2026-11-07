@@ -73,8 +73,36 @@ void CheckCachedPoses()
     assert(RenderMeshCache::Checksum(first) != RenderMeshCache::Checksum(back));
 }
 
+void CheckLocomotionPhase()
+{
+    CharacterMotion whole, divided;
+    whole.Update(1, 0, 17, 0);
+    for (int i = 0; i < 10; ++i)
+    {
+        divided.Update(1, 0, 1.7, 0);
+    }
+    assert(std::abs(whole.phase - divided.phase) < 1e-9);
+    assert(std::abs(whole.ClipPhase() - .2) < 1e-9);
+    double held = whole.phase;
+    whole.Update(1, 0, 0, 0);
+    assert(!whole.moving && whole.phase == held && whole.stepPhase == 0);
+    assert(whole.deltaX == 0 && whole.deltaY == 0);
+    whole.Update(1, 0, 9.2, 0, true);
+    assert(whole.sprinting && std::abs(whole.ClipPhase() - .3) < 1e-9);
+    // Interpolating a wrapped cycle must take the short forward path.
+    whole.phase = CharacterMotion::Cycle * .95;
+    whole.Update(1, 0, 8.5, 0);
+    assert(std::abs(whole.Interpolated(0).ClipPhase() - .95) < 1e-9);
+    assert(std::abs(whole.Interpolated(.75).ClipPhase() - .025) < 1e-9);
+    assert(std::abs(whole.Interpolated(1).ClipPhase() - .05) < 1e-9);
+    assert(!whole.sprinting);
+    whole.Stop();
+    assert(whole.phase == 0 && whole.stepPhase == 0 && whole.deltaX == 0 && whole.deltaY == 0);
+}
+
 int main()
 {
     CheckDirections();
     CheckCachedPoses();
+    CheckLocomotionPhase();
 }

@@ -581,7 +581,7 @@ namespace Society
                     l.target = target.id;
                 }
             }
-            if (!l.target && playerPresent && l.job != Guardian && l.raidWeight > .6f && l.playerRetry <= 0 &&
+            if (!l.target && playerPresent && l.job != Guardian && l.raidWeight > .6f && n.relationship < 25 && l.playerRetry <= 0 &&
                 w.society.playerRaidGrace <= 0 && Game::VillageAt(w.player.p) < 0 && Game::VillageAt(n.p) < 0 &&
                 w.society.gold >= 15 && Game::Distance(n.p, w.player.p) < 85 &&
                 Game::Distance(n.p, n.home) < VillageRadius + 280 && ClearSegment(n.p, w.player.p) &&
@@ -1140,6 +1140,7 @@ namespace Society
         }
         ++w.society.trades;
         Record(w, buy ? GoodsBought : GoodsSold, 0, n.id, 1);
+        Affinity::Apply(w, n, Affinity::Trade);
         return true;
     }
 
@@ -1152,7 +1153,7 @@ namespace Society
             return false;
         }
         w.society.playerCooldown = .65;
-        n->relationship = std::max(-100, n->relationship - 15);
+        Affinity::Apply(w, *n, Affinity::Attack);
         n->life.target = -1;
         n->life.playerProvoked = 12;
         n->life.playerChase = 0;

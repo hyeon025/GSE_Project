@@ -56,6 +56,18 @@ int main()
         assert(a.x==b.x && a.y==b.y && a.z==b.z);
     }
     assert(!library.PlayerRecipe().empty() && library.PlayerRecipe()!=library.Recipe(0));
+    for (unsigned hair = 1; hair <= 5; ++hair)
+    {
+        for (unsigned outfit = 1; outfit <= 6; ++outfit)
+        {
+            auto playerParts = library.PlayerRecipe(hair, outfit);
+            assert(playerParts.size() == 7);
+            assert(playerParts[0] == library.Part("Head", 2)->id);
+            assert(playerParts[1] == library.Part("Hair", hair)->id);
+            assert(playerParts[2] == library.Part("Torso", outfit)->id);
+        }
+    }
+    assert(library.PlayerRecipe(0, 1).empty() && library.PlayerRecipe(1, 7).empty());
     if (!source->Clips().empty())
     {
         for (const auto& clip : source->Clips())

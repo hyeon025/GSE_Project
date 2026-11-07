@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameWorld.h" />
+    <ClInclude Include="Affinity.h" />
     <ClInclude Include="SocietyState.h" />
     <ClInclude Include="WorldSimulation.h" />
     <ClInclude Include="MonitorSnapshot.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="CharacterMotion.h" />
     <ClInclude Include="CharacterStyle.h" />
+    <ClInclude Include="PlayerProfile.h" />
     <ClInclude Include="CharacterMesh.h" />
     <ClInclude Include="ArtAsset.h" />
     <ClInclude Include="ArtPresentation.h" />

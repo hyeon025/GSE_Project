@@ -277,7 +277,18 @@ namespace Monitoring
             out << ",\"houseLot\":" << l.houseLot << ",\"homeX\":" << n.home.x << ",\"homeY\":" << n.home.y
                 << ",\"movingTo\":" << l.movingTo << ",\"carriedRumor\":" << l.carriedRumor
                 << ",\"target\":" << l.target << ",\"ability\":" << n.ability << ",\"power\":" << n.power
-                << ",\"relationship\":" << n.relationship << ",\"origin\":" << n.origin
+                << ",\"relationship\":" << n.relationship << ",\"met\":" << n.met << ",\"trust\":" << n.trust
+                << ",\"affinity\":{\"tier\":";
+            String(out, Affinity::Tier(n.relationship));
+            out << ",\"lastChange\":";
+            if (n.affinity.lastChange < 0) out << "null"; else Number(out, n.affinity.lastChange);
+            out << ",\"lastDelta\":" << n.affinity.lastDelta << ",\"lastReason\":";
+            if (n.affinity.lastReason < 0) out << "null"; else String(out, Affinity::ReasonName(n.affinity.lastReason));
+            out << ",\"talkCooldown\":";
+            Number(out, Affinity::Remaining(w.society.elapsed, n.affinity.lastTalk, Affinity::TalkCooldown));
+            out << ",\"tradeCooldown\":";
+            Number(out, Affinity::Remaining(w.society.elapsed, n.affinity.lastTrade, Affinity::TradeCooldown));
+            out << "},\"origin\":" << n.origin
                 << ",\"originDeathId\":" << n.originDeathId << ",\"parentId\":" << l.parentId
                 << ",\"successorId\":" << l.successorId << ",\"x\":";
             Number(out, n.p.x);
@@ -335,7 +346,21 @@ namespace Monitoring
                 << ",\"rumorId\":" << letter.rumorId << ",\"arrival\":" << letter.arrival
                 << ",\"remaining\":" << std::max(0.0, letter.arrival - w.society.elapsed) << '}';
         }
-        out << "]}";
+        out << "],\"affinity\":{\"min\":-100,\"max\":100,\"historyLimit\":" << Affinity::HistoryLimit
+            << ",\"events\":[";
+        first = true;
+        for (const auto& e : w.affinity.events)
+        {
+            if (!first) out << ',';
+            first = false;
+            out << "{\"id\":" << e.id << ",\"npcId\":" << e.npcId << ",\"reason\":";
+            String(out, Affinity::ReasonName(e.reason));
+            out << ",\"reasonId\":" << e.reason << ",\"before\":" << e.before << ",\"after\":" << e.after
+                << ",\"delta\":" << e.after - e.before << ",\"time\":";
+            Number(out, e.time);
+            out << '}';
+        }
+        out << "]}}";
         return out.str();
     }
 }

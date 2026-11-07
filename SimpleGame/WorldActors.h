@@ -23,9 +23,9 @@ protected:
         float x = (float)movement.x, y = (float)movement.y;
         Game::Vec previous = p.p;
         float len = std::sqrt(x * x + y * y);
+        bool sprint = len > 0 && sprinting && p.stamina > 2;
         if (len > 0)
         {
-            bool sprint = sprinting && p.stamina > 2;
             float speed = sprint ? 138.f : (float)Society::WalkingSpeed;
             Game::Vec before = p.p, next = p.p;
             next.x += x / len * speed * dt;
@@ -55,8 +55,7 @@ protected:
                 world.dirty = true;
             }
         }
-        motion.Update(x, y, p.p.x - previous.x, p.p.y - previous.y);
-        motion.sprinting = sprinting && motion.moving && p.stamina > 2;
+        motion.Update(x, y, p.p.x - previous.x, p.p.y - previous.y, sprint);
         p.stamina = std::min(100.f, p.stamina + dt * 6);
 
         data = p;
@@ -82,8 +81,7 @@ public:
 
     size_t modelIndex = 0;
 
-protected:
-    void OnUpdate(float dt) override
+    void Synchronize()
     {
         // The index is rebound during synchronization; never retain vector element pointers.
         if (modelIndex >= world.npcs.size() || world.npcs[modelIndex].id != data.id)
@@ -94,10 +92,21 @@ protected:
         // Simulation runs independently of visibility. This actor only synchronizes presentation.
         visible = n.life.alive;
         data = n;
+        // Society advances at 10 Hz. Interpolate presentation only; gameplay/save positions stay authoritative.
+        double alpha = std::max(0.0, std::min(1.0, world.society.accumulator / .1));
+        data.p.x -= n.motion.deltaX * (1 - alpha);
+        data.p.y -= n.motion.deltaY * (1 - alpha);
+        data.motion = n.motion.Interpolated(alpha);
         auto pose = LocalTransform();
-        pose.x = n.p.x;
-        pose.y = n.p.y;
+        pose.x = data.p.x;
+        pose.y = data.p.y;
         SetLocalTransform(pose);
+    }
+
+protected:
+    void OnUpdate(float dt) override
+    {
+        Synchronize();
     }
 
 private:

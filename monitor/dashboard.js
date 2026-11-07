@@ -14,6 +14,8 @@ const names = {
 let snapshot = null;
 let selected = null;
 let page = 0;
+let affinityPage = 0;
+const AFFINITY_PAGE_SIZE = 10;
 let timer = null;
 let polling = false;
 let mapPoints = [];
@@ -28,6 +30,74 @@ const actor = (id) => id === 0 || id === -1 ? "플레이어" : `${npcById.get(id
 const villageName = (id) => snapshot?.villages.find((v) => v.id === id)?.name ?? label(names.villages, id);
 const target = (id) => id === 0 ? "없음" : actor(id);
 const healthRatio = (n) => n.maxHealth > 0 && Number.isFinite(n.health) ? Math.max(0, Math.min(1, n.health / n.maxHealth)) : 0;
+const signed = (v) => Number.isFinite(v) ? Math.abs(v) < .05 ? "0" : `${v > 0 ? "+" : ""}${number(v)}` : "—";
+const affinityClass = (v) => v < 0 ? "affinity-negative" : v > 0 ? "affinity-positive" : "muted";
+const affinityTier = (n) => !Number.isFinite(n.relationship) ? "미수신" : n.relationship >= 75 ? "깊은 유대" :
+  n.relationship >= 50 ? "친밀" : n.relationship >= 25 ? "우호" : n.relationship >= 0 ? "중립" : n.relationship > -50 ? "경계" : "적대";
+
+function renderAffinity() {
+  if (!snapshot) return;
+  const known = snapshot.npcs.filter((n) => Number.isFinite(n.relationship));
+  const alive = known.filter((n) => n.alive);
+  const mean = alive.length ? alive.reduce((s, n) => s + n.relationship, 0) / alive.length : null;
+  $("affinity-summary").textContent = `생존 평균 ${signed(mean)} · 우호 이상 ${alive.filter(n => n.relationship >= 25).length}명 · 경계/적대 ${alive.filter(n => n.relationship < 0).length}명`;
+  const query = $("affinity-search").value.trim().toLowerCase();
+  const village = $("affinity-village").value, tier = $("affinity-tier").value, scope = $("affinity-scope").value;
+  const direction = $("affinity-sort").value === "asc" ? 1 : -1;
+  const filtered = known.filter((n) => (scope === "all" || n.alive) && (scope !== "met" || n.met === true) &&
+    (village === "all" || n.village === Number(village)) && (tier === "all" || affinityTier(n) === tier) &&
+    `${n.name ?? "NPC"} #${n.id}`.toLowerCase().includes(query));
+  filtered.sort((a, b) => direction * (a.relationship - b.relationship) || a.id - b.id);
+  const pages = Math.ceil(filtered.length / AFFINITY_PAGE_SIZE);
+  affinityPage = Math.max(0, Math.min(affinityPage, pages - 1));
+  $("affinity-page").textContent = `${filtered.length}명 · ${pages ? affinityPage + 1 : 0} / ${pages}`;
+  $("affinity-prev").disabled = affinityPage === 0;
+  $("affinity-next").disabled = affinityPage + 1 >= pages;
+  const rows = document.createDocumentFragment();
+  const start = affinityPage * AFFINITY_PAGE_SIZE;
+  for (const [index, n] of filtered.slice(start, start + AFFINITY_PAGE_SIZE).entries()) {
+    const row = node("tr", undefined, n.id === selected ? "selected" : "");
+    cell(row, start + index + 1);
+    const who = cell(row);
+    const button = node("button", actor(n.id), "npc-link");
+    button.addEventListener("click", () => selectNpc(n.id));
+    who.append(button, node("small", `${villageName(n.village)} · ${n.alive ? label(names.jobs, n.job) : "사망"}`));
+    const score = cell(row, signed(n.relationship));
+    score.className = affinityClass(n.relationship);
+    const bar = node("meter");
+    bar.min = -100; bar.max = 100; bar.low = 0; bar.high = 25; bar.optimum = 100; bar.value = n.relationship;
+    bar.setAttribute("aria-label", `호감도 ${n.relationship}`);
+    score.append(bar);
+    cell(row, affinityTier(n));
+    const memory = n.affinity;
+    cell(row, memory?.lastReason ? `${memory.lastReason} ${signed(memory.lastDelta)}` : "기록 없음",
+      Number.isFinite(memory?.lastChange) ? `${number(Math.max(0, snapshot.simulationTime - memory.lastChange))}초 전` : "");
+    cell(row, !Number.isFinite(memory?.talkCooldown) ? "미수신" : memory.talkCooldown > .001 ? `${Math.ceil(memory.talkCooldown)}초` : n.relationship >= 100 ? "최대 호감도" : "+5 가능");
+    rows.append(row);
+  }
+  if (filtered.length) $("affinity-ranking").replaceChildren(rows);
+  else emptyRow($("affinity-ranking"), 6, known.length ? "조건에 맞는 NPC 없음" : "호감도 데이터 미수신");
+
+  const history = snapshot.affinity?.events;
+  const onlySelected = $("affinity-selected-only").checked;
+  const entries = (Array.isArray(history) ? history : []).filter((e) => !onlySelected || e.npcId === selected).slice(-128).reverse();
+  $("affinity-history-info").textContent = !Array.isArray(history) ? "변화 내역 미수신 · 새 게임 실행 파일이 필요합니다." :
+    `최근 128건 중 ${entries.length}건 · ${onlySelected ? selected === null ? "NPC를 선택하세요" : actor(selected) : "모든 NPC"} · 시뮬레이션 시간 기준`;
+  const events = document.createDocumentFragment();
+  for (const e of entries) {
+    const row = node("tr");
+    cell(row, `${number(e.time)}s`, `${number(Math.max(0, snapshot.simulationTime - e.time))}초 전`);
+    const button = node("button", actor(e.npcId), "npc-link");
+    button.addEventListener("click", () => selectNpc(e.npcId));
+    cell(row).append(button);
+    cell(row, e.reason);
+    cell(row, signed(e.delta)).className = affinityClass(e.delta);
+    cell(row, `${signed(e.before)} → ${signed(e.after)}`);
+    events.append(row);
+  }
+  if (entries.length) $("affinity-history").replaceChildren(events);
+  else emptyRow($("affinity-history"), 5, onlySelected && selected === null ? "순위에서 NPC를 선택하세요" : "기록된 호감도 변화 없음");
+}
 
 function node(tag, text, className) {
   const value = document.createElement(tag);
@@ -160,7 +230,7 @@ function renderVillages() {
   const key = JSON.stringify(snapshot.villages.map((v) => [v.id, villageName(v.id)]));
   if (key !== villageOptionsKey) {
     villageOptionsKey = key;
-    for (const id of ["village-filter", "rumor-village"]) {
+    for (const id of ["village-filter", "rumor-village", "affinity-village"]) {
       const select = $(id);
       const selectedValue = select.value;
       const all = node("option", "모든 마을");
@@ -202,6 +272,7 @@ function selectNpc(id) {
   selected = id;
   renderNpcs();
   renderMap();
+  renderAffinity();
 }
 
 function renderNpcs() {
@@ -217,7 +288,7 @@ function renderNpcs() {
     (`npc #${n.id} ${n.name ?? ""} ${villageName(n.village)} ${label(names.jobs, n.job)} ${label(names.activities, n.activity)}`).toLowerCase().includes(search));
   filtered.sort((a, b) => {
     if (sort === "health") return healthRatio(a) - healthRatio(b) || a.id - b.id;
-    if (sort === "gold" || sort === "insight") return b[sort] - a[sort] || a.id - b.id;
+    if (sort === "gold" || sort === "insight" || sort === "relationship") return (b[sort] ?? 0) - (a[sort] ?? 0) || a.id - b.id;
     return a.id - b.id;
   });
   const pages = Math.ceil(filtered.length / PAGE_SIZE);
@@ -261,7 +332,10 @@ function renderDetail() {
     ["주택 필지", n.houseLot >= 0 ? `${villageName(n.village)} ${n.houseLot + 1}번지` : "배정 대기"],
     ["이주 목적지", n.movingTo >= 0 ? villageName(n.movingTo) : "없음"],
     ["집 입구", Number.isFinite(n.homeX) ? `${n.homeX.toFixed(0)}, ${n.homeY.toFixed(0)}` : "미수신"],
-    ["전투력", number(n.power)], ["관계", number(n.relationship)], ["약탈 가중치", number(n.raidWeight)],
+    ["전투력", number(n.power)], ["플레이어 호감도", `${signed(n.relationship)} · ${affinityTier(n)}`],
+    ["신뢰 / 만남", `${number(n.trust)} / ${n.met === undefined ? "미수신" : n.met ? "대화한 사이" : "대화 전"}`],
+    ["최근 호감도 변화", n.affinity?.lastReason ? `${n.affinity.lastReason} ${signed(n.affinity.lastDelta)}` : "기록 없음"],
+    ["약탈 가중치", number(n.raidWeight)],
     ["좌표", `${number(n.x)}, ${number(n.y)}`], ["대상", target(n.target)],
     ["기원", label(["플레이어 계승", "NPC 계승", "일반 주민"], n.origin)],
     ["죽음 기록", n.originDeathId ? `#${n.originDeathId}` : "없음"],
@@ -400,10 +474,11 @@ async function poll() {
       if (s && (!snapshot || s.session !== snapshot.session || s.sequence > snapshot.sequence)) {
         simulationRate = snapshot && s.session === snapshot.session && s.timestampMs > snapshot.timestampMs && s.tick >= snapshot.tick
           ? (s.tick - snapshot.tick) * 1000 / (s.timestampMs - snapshot.timestampMs) : null;
-        if (snapshot && s.session !== snapshot.session) { selected = null; page = 0; }
+        if (snapshot && s.session !== snapshot.session) { selected = null; page = 0; affinityPage = 0; }
         snapshot = s;
         npcById = new Map(s.npcs.map((n) => [n.id, n]));
         renderSummary(); renderVillages(); renderNpcs(); renderEvents(); renderRumors(); renderMap(); renderOperations();
+        renderAffinity();
       }
       if (latestStatus === "live") $("simulation-rate").textContent = simulationRate === null ? "계산 중" : `${number(simulationRate)} tick/s`;
     }
@@ -428,6 +503,12 @@ for (const id of ["village-filter", "job-filter", "life-filter", "sort", "search
   $(id).addEventListener(id === "search" ? "input" : "change", () => { page = 0; renderNpcs(); });
 }
 $("previous").addEventListener("click", () => { page--; renderNpcs(); });
+for (const id of ["affinity-search", "affinity-village", "affinity-tier", "affinity-scope", "affinity-sort"]) {
+  $(id).addEventListener(id === "affinity-search" ? "input" : "change", () => { affinityPage = 0; renderAffinity(); });
+}
+$("affinity-prev").addEventListener("click", () => { affinityPage--; renderAffinity(); });
+$("affinity-next").addEventListener("click", () => { affinityPage++; renderAffinity(); });
+$("affinity-selected-only").addEventListener("change", renderAffinity);
 $("event-kind").addEventListener("change", () => { if (snapshot) renderEvents(); });
 for (const id of ["rumor-village", "rumor-active"]) $(id).addEventListener("change", renderRumors);
 $("next").addEventListener("click", () => { page++; renderNpcs(); });

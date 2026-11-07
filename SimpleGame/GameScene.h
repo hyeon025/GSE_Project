@@ -311,10 +311,7 @@ public:
             npc.data = n;
             npc.visible = true;
             npc.modelIndex = i;
-            pose = npc.LocalTransform();
-            pose.x = n.p.x;
-            pose.y = n.p.y;
-            npc.SetLocalTransform(pose);
+            npc.Synchronize();
             npc.streamed = true;
         }
         return player;
@@ -784,10 +781,12 @@ public:
         appearance.armed = !player && archetype == 0;
         float x = (float)screen.x, y = (float)screen.y;
         Art::DrawRequest imported;
-        imported.assets = (!cameraOverride && id > 0 && id <= (int)world.npcs.size())
-                              ? world.npcs[id - 1].artParts
-                              : (player ? Art::Assets().PlayerRecipe() : Art::Assets().Recipe((unsigned)id));
-        imported.style=player ? Art::Styles::Player() : Art::Styles::Npc((unsigned)id);
+        imported.assets =
+            (!cameraOverride && id > 0 && id <= (int)world.npcs.size())
+                ? world.npcs[id - 1].artParts
+                : (player ? Art::Assets().PlayerRecipe(world.player.profile.hairShape, world.player.profile.outfit)
+                          : Art::Assets().Recipe((unsigned)id));
+        imported.style = player ? world.player.profile.style : Art::Styles::Npc((unsigned)id);
         if(!player && !cameraOverride && id>0 && id<=(int)world.npcs.size())
         {
             const auto& palettes=world.npcs[id-1].artPalettes;
@@ -800,7 +799,10 @@ public:
         bool moving = player ? playerMotion.moving : (motion && motion->moving);
         bool sprinting = player ? playerMotion.sprinting : (motion && motion->sprinting);
         imported.clip = moving ? (sprinting ? "Run" : "Walk") : "Idle";
-        imported.seconds = world.time;
+        imported.normalizedTime = moving;
+        imported.seconds = moving ? (player ? playerMotion.ClipPhase() : motion->ClipPhase()) : world.time;
+        // Cache geometry by pose, but retain asynchronous fallback poses per actor.
+        imported.animationStream = player ? 1 : 2 + (std::uint64_t)(unsigned)id;
         imported.deferAnimation = true;
         imported.preciseDepth = true;
         if (Art::Draw(r, imported))

@@ -33,6 +33,16 @@ GLFWwindow* g_Window = nullptr;
 double g_UpdateMs = 0, g_PreviousSwapMs = 0;
 int g_TargetKind = -1, g_TargetIndex = -1, g_Panel = 0;
 int g_JournalOffset = 0;
+int g_AffinityPage = 0, g_AffinityVillage = -1, g_AffinitySelected = 0;
+bool g_AffinityMetOnly = false, g_AffinityDescending = true;
+double g_AffinityRefresh = -1;
+uint64_t g_AffinityRevision = 0;
+size_t g_AffinityPopulation = 0;
+std::vector<size_t> g_AffinityRanking;
+PlayerProfile g_ProfileDraft;
+int g_ProfileField = 0;
+bool g_ProfileSelected = false;
+CharacterFacing g_ProfileFacing = CharacterFacing::Front;
 Ability g_Secondary = Matter;
 int g_MouseX = 0, g_MouseY = 0;
 bool g_Dialog = false, g_DeathConfirm = false, g_SaveBlocked = false, g_Focused = true;
@@ -102,10 +112,45 @@ enum Action
     NpcSocial,
     BuyFood,
     SellHerb,
-    AttackNpc
+    AttackNpc,
+    AvatarOpen = 100,
+    AvatarApply,
+    AvatarCancel,
+    AvatarName,
+    AvatarMotto,
+    AvatarTurn,
+    AffinityOpen = 120,
+    AffinityPrevious,
+    AffinityNext,
+    AffinitySort,
+    AffinityVillage,
+    AffinityMet,
+    AvatarHairColor = 200,
+    AvatarSkin = 220,
+    AvatarHairShape = 240,
+    AvatarExpression = 260,
+    AvatarOutfit = 280,
+    AvatarCloth = 300,
+    AffinitySelect = 1000
 };
 
 void AbilityUse(bool secondary);
+
+void InputProfileCharacter(unsigned code)
+{
+    if (g_Panel != 4 || !g_ProfileField || code < 32 || code == 127 || code > 0x10ffff ||
+        (code >= 0xd800 && code <= 0xdfff))
+    {
+        return;
+    }
+    auto& text = g_ProfileField == 1 ? g_ProfileDraft.name : g_ProfileDraft.motto;
+    if (g_ProfileSelected)
+    {
+        text.clear();
+        g_ProfileSelected = false;
+    }
+    AppendProfileCharacter(text, code, g_ProfileField == 1 ? PlayerProfile::NameLimit : PlayerProfile::MottoLimit);
+}
 
 bool InCombat()
 {
@@ -359,7 +404,10 @@ std::vector<Choice> Choices()
             return c;
         }
         c.push_back({L"\uac70\ub798 / \uc804\ud22c", NpcEconomy, true});
-        c.push_back({L"\uc0b4\uc544\uc628 \uc774\uc57c\uae30\ub97c \ub4e3\ub294\ub2e4", Talk, true});
+        double talkWait = Affinity::Remaining(g_World.society.elapsed, n.affinity.lastTalk, Affinity::TalkCooldown);
+        std::wstring talkReward = n.relationship >= 100 ? L"\ucd5c\ub300 \ud638\uac10\ub3c4" : talkWait > 1e-8
+            ? L"\ubcf4\uc0c1\uae4c\uc9c0 " + std::to_wstring((int)std::ceil(talkWait)) + L"\ucd08" : L"\ud638\uac10\ub3c4 +5";
+        c.push_back({L"\uc0b4\uc544\uc628 \uc774\uc57c\uae30\ub97c \ub4e3\ub294\ub2e4  \u00b7  " + talkReward, Talk, true});
         c.push_back({L"\ube75\uc744 \ub098\ub208\ub2e4  \u00b7  \ube75 1", Share, p.bread > 0 && n.relationship < 100});
         bool related = Adjacent(p.ability, n.ability);
         c.push_back(
@@ -524,6 +572,118 @@ std::wstring Description()
 
 void Act(int action)
 {
+    if (action == AffinityOpen && !InCombat() && g_Panel != 4)
+    {
+        g_Panel = g_Panel == 5 ? 0 : 5;
+        g_Dialog = g_DeathConfirm = false;
+        g_AffinityRefresh = -1;
+        g_Buttons.clear();
+        std::fill(std::begin(g_Keys), std::end(g_Keys), false);
+        return;
+    }
+    if (g_Panel == 5)
+    {
+        if (action >= AffinitySelect)
+        {
+            g_AffinitySelected = action - AffinitySelect;
+            return;
+        }
+        if (action >= AffinityPrevious && action <= AffinityMet)
+        {
+            if (action == AffinityPrevious) g_AffinityPage = std::max(0, g_AffinityPage - 1);
+            if (action == AffinityNext) ++g_AffinityPage;
+            if (action == AffinitySort) g_AffinityDescending = !g_AffinityDescending;
+            if (action == AffinityVillage) g_AffinityVillage = (g_AffinityVillage + 2) % (Society::VillageCount + 1) - 1;
+            if (action == AffinityMet) g_AffinityMetOnly = !g_AffinityMetOnly;
+            if (action >= AffinitySort) g_AffinityPage = 0;
+            g_AffinityRefresh = -1;
+            return;
+        }
+    }
+    if (action == AvatarOpen)
+    {
+        g_ProfileDraft = g_World.player.profile;
+        g_ProfileField = 0;
+        g_ProfileSelected = false;
+        g_ProfileFacing = CharacterFacing::Front;
+        g_ToastTime = 0;
+        g_Panel = 4;
+        g_Dialog = g_DeathConfirm = false;
+        std::fill(std::begin(g_Keys), std::end(g_Keys), false);
+        return;
+    }
+    if (g_Panel == 4)
+    {
+        if (action == AvatarCancel || action == Close)
+        {
+            g_Panel = 0;
+            g_ProfileField = 0;
+            return;
+        }
+        if (action == AvatarApply)
+        {
+            if (!ProfileValid(g_ProfileDraft))
+            {
+                Notify(L"\uc774\ub984\uc744 \uc785\ub825\ud574 \uc8fc\uc138\uc694.");
+                return;
+            }
+            auto previous = g_World.player.profile;
+            g_World.player.profile = g_ProfileDraft;
+            g_World.dirty = true;
+            if (!Persist())
+            {
+                g_World.player.profile = previous;
+                return;
+            }
+            g_Panel = 0;
+            g_ProfileField = 0;
+            Notify(L"\ud504\ub85c\ud544\uc744 \uc800\uc7a5\ud588\uc2b5\ub2c8\ub2e4.");
+            return;
+        }
+        if (action == AvatarName)
+        {
+            g_ProfileField = 1;
+            g_ProfileSelected = true;
+        }
+        else if (action == AvatarMotto)
+        {
+            g_ProfileField = 2;
+            g_ProfileSelected = true;
+        }
+        else if (action == AvatarTurn)
+        {
+            g_ProfileFacing = (CharacterFacing)(((unsigned)g_ProfileFacing + 1) % 4);
+        }
+        else
+        {
+            g_ProfileField = 0;
+            if (action >= AvatarHairColor && action < AvatarHairColor + Art::Styles::HairCount)
+            {
+                g_ProfileDraft.style.hair = action - AvatarHairColor;
+            }
+            if (action >= AvatarSkin && action < AvatarSkin + Art::Styles::SkinCount)
+            {
+                g_ProfileDraft.style.skin = action - AvatarSkin;
+            }
+            if (action >= AvatarHairShape && action < AvatarHairShape + 5)
+            {
+                g_ProfileDraft.hairShape = 1 + action - AvatarHairShape;
+            }
+            if (action >= AvatarExpression && action < AvatarExpression + Art::Styles::ExpressionCount)
+            {
+                g_ProfileDraft.style.expression = action - AvatarExpression;
+            }
+            if (action >= AvatarOutfit && action < AvatarOutfit + 6)
+            {
+                g_ProfileDraft.outfit = 1 + action - AvatarOutfit;
+            }
+            if (action >= AvatarCloth && action <= AvatarCloth + Art::Styles::NpcClothCount)
+            {
+                g_ProfileDraft.style.cloth = action - AvatarCloth;
+            }
+        }
+        return;
+    }
     if (action == StoryOpen && !InCombat())
     {
         g_Panel = g_Panel == 3 ? 0 : 3;
@@ -676,8 +836,7 @@ void Act(int action)
         {
             --p.bread;
             n.life.health = std::min(n.life.maxHealth, n.life.health + 12);
-            n.relationship = std::min(100, n.relationship + 25);
-            n.trust = std::min(3, std::max(0, n.relationship / 25));
+            Affinity::Apply(g_World, n, Affinity::Bread);
             p.echo[1] += 5;
             p.echo[6] += 2;
             g_World.Record(Befriended);
@@ -685,6 +844,7 @@ void Act(int action)
         }
         if (action == TrainNpc)
         {
+            Affinity::Apply(g_World, n, Affinity::Training);
             p.training[n.ability] = 1;
             g_Secondary = n.ability;
             p.stamina -= 25;
@@ -696,7 +856,7 @@ void Act(int action)
             --p.herbs;
             n.saved = true;
             n.life.health = n.life.maxHealth;
-            n.relationship = std::min(100, n.relationship + 35);
+            Affinity::Apply(g_World, n, Affinity::Rescue);
             n.power = std::min(100, n.power + 10);
             p.echo[1] += 10;
             p.echo[4] += 6;
@@ -712,7 +872,7 @@ void Act(int action)
             n.life.raidWeight = 0;
             n.life.target = 0;
             n.archetype = (n.archetype + 3) % 7;
-            n.relationship = std::min(100, n.relationship + 15);
+            Affinity::Apply(g_World, n, Affinity::Support);
             n.power = std::min(100, n.power + 30);
             p.echo[6] += 12;
             Notify(
@@ -721,14 +881,13 @@ void Act(int action)
         }
         if (action == ThreatenNpc)
         {
-            n.relationship = std::max(-100, n.relationship - 40);
+            Affinity::Apply(g_World, n, Affinity::Threat);
             p.echo[0] += 8;
             p.echo[5] += 4;
             Notify(
                 L"\uadf8\ub294 \uace0\uac1c\ub97c \uc219\uc600\uc9c0\ub9cc, \ub2f9\uc2e0\uc744 \ud5a5\ud55c \uc801\uc758\ub294 \ub0a8\uc558\ub2e4."
             );
         }
-        n.trust = std::min(3, std::max(0, n.relationship / 25));
     }
     else
     {
@@ -1284,8 +1443,244 @@ void StoryPanel()
     Line(x + w - 22, y + 22, x + w - 34, y + 34, 1.4f, g_Muted);
 }
 
+void AvatarPanel()
+{
+    g_UiScale = std::min(1.f, std::min(g_Width / 960.f, g_Height / 640.f));
+    g_Buttons.clear();
+    float w = 900, h = 580, x = (UiWidth() - w) * .5f, y = (UiHeight() - h) * .5f;
+    Box(0, 0, UiWidth(), UiHeight(), Color(.015f, .025f, .025f, .88f));
+    Box(x, y, w, h, Color(.085f, .11f, .105f, .99f));
+    Text(x + 24, y + 18, L"\ud504\ub85c\ud544 \u00b7 \uc544\ubc14\ud0c0", g_Ink, 21);
+    Line(x + 270, y + 64, x + 270, y + h - 76, 1, Color(.26f, .31f, .28f));
+    Art::DrawRequest preview;
+    preview.assets = Art::Assets().PlayerRecipe(g_ProfileDraft.hairShape, g_ProfileDraft.outfit);
+    preview.style = g_ProfileDraft.style;
+    preview.clip = "Idle";
+    preview.seconds = glfwGetTime();
+    preview.yaw = Art::FacingYaw(g_ProfileFacing);
+    preview.x = (x + 142) * g_UiScale;
+    preview.y = (y + 335) * g_UiScale;
+    preview.scale = 3 * g_UiScale;
+    preview.deferAnimation = true;
+    preview.preciseDepth = true;
+    preview.animationStream = std::uint64_t(1) << 63;
+    g_Renderer->Ellipse(
+        preview.x,
+        preview.y + 6 * g_UiScale,
+        74 * g_UiScale,
+        15 * g_UiScale,
+        Color(.02f, .03f, .025f, .8f),
+        Color(.02f, .03f, .025f, 0)
+    );
+    if (!Art::Draw(*g_Renderer, preview))
+    {
+        Text(x + 36, y + 250, L"\ubaa8\ub378 \ub85c\ub529 \ub300\uae30", g_Muted, 15);
+    }
+    AddButton(x + 89, y + 361, 106, 36, L"\ud68c\uc804", AvatarTurn);
+    Wrap(x + 28, y + 417, 220, g_ProfileDraft.name, g_Ink, 13);
+    Wrap(x + 28, y + 451, 220, g_ProfileDraft.motto, g_Muted, 13);
+    float cx = x + 294, cw = 578;
+    auto field = [&](float top, const wchar_t* title, const std::wstring& text, int action, int active, float height)
+    {
+        Text(cx, top, title, g_Muted, 13);
+        Box(cx, top + 20, cw, height, Color(.045f, .065f, .06f));
+        if (active == g_ProfileField && g_ProfileSelected)
+        {
+            Box(cx + 6, top + 24, cw - 12, height - 8, Color(.20f, .31f, .29f));
+        }
+        Line(
+            cx,
+            top + 20 + height,
+            cx + cw,
+            top + 20 + height,
+            active == g_ProfileField ? 2.f : 1.f,
+            active == g_ProfileField ? g_Accent : g_Muted
+        );
+        Wrap(cx + 10, top + 25, cw - 20, text + (active == g_ProfileField ? L"|" : L""), g_Ink, 15);
+        g_Buttons.push_back({cx, top + 20, cw, height, action, true, title});
+    };
+    field(y + 62, L"\uc774\ub984", g_ProfileDraft.name, AvatarName, 1, 32);
+    field(y + 122, L"\ud55c\ub9c8\ub514", g_ProfileDraft.motto, AvatarMotto, 2, 36);
+    Text(cx, y + 189, std::wstring(L"\uc131\ubcc4  ") + PlayerProfile::Gender() + L"  (\uace0\uc815)", g_Muted, 14);
+    auto swatches = [&](float top, const wchar_t* title, unsigned count, int base, unsigned selected, int role)
+    {
+        Text(cx, top + 6, title, g_Muted, 13);
+        for (unsigned i = 0; i < count; ++i)
+        {
+            auto style = g_ProfileDraft.style;
+            if (role == 0)
+            {
+                style.skin = i;
+            }
+            if (role == 1)
+            {
+                style.hair = i;
+            }
+            if (role == 2)
+            {
+                style.cloth = i;
+            }
+            const auto rgb = Art::Styles::Palette(style)[role];
+            float sx = cx + 96 + i * 34.f;
+            Box(sx,
+                top,
+                26,
+                26,
+                Color(std::pow(rgb[0], 1 / 2.2f), std::pow(rgb[1], 1 / 2.2f), std::pow(rgb[2], 1 / 2.2f)));
+            if (i == selected)
+            {
+                Line(sx - 2, top - 2, sx + 28, top - 2, 2, g_Accent);
+                Line(sx - 2, top + 28, sx + 28, top + 28, 2, g_Accent);
+                Line(sx - 2, top - 2, sx - 2, top + 28, 2, g_Accent);
+                Line(sx + 28, top - 2, sx + 28, top + 28, 2, g_Accent);
+            }
+            g_Buttons.push_back({sx, top, 26, 26, base + (int)i, true, L""});
+        }
+    };
+    swatches(y + 224, L"\uba38\ub9ac\uc0c9", Art::Styles::HairCount, AvatarHairColor, g_ProfileDraft.style.hair, 1);
+    swatches(y + 265, L"\ud53c\ubd80\uc0c9", Art::Styles::SkinCount, AvatarSkin, g_ProfileDraft.style.skin, 0);
+    auto options =
+        [&](float top, const wchar_t* title, const std::vector<std::wstring>& labels, int base, unsigned selected)
+    {
+        Text(cx, top, title, g_Muted, 13);
+        float width = (cw - (labels.size() - 1) * 6) / labels.size();
+        for (size_t i = 0; i < labels.size(); ++i)
+        {
+            float left = cx + i * (width + 6);
+            AddButton(left, top + 20, width, 32, labels[i], base + (int)i);
+            if (i == selected)
+            {
+                Line(left, top + 52, left + width, top + 52, 2, g_Accent);
+            }
+        }
+    };
+    options(
+        y + 309,
+        L"\ud5e4\uc5b4",
+        {L"\uc20f\ucef7", L"\ub2e8\ubc1c", L"\uae34 \uba38\ub9ac", L"\ub54b\uae30", L"\ub118\uae40"},
+        AvatarHairShape,
+        g_ProfileDraft.hairShape - 1
+    );
+    options(
+        y + 370,
+        L"\ud45c\uc815",
+        {L"\uc628\ud654", L"\ud3c9\uc628", L"\uacb0\uc758", L"\uac71\uc815", L"\uc878\ub9bc", L"\ubbf8\uc18c"},
+        AvatarExpression,
+        g_ProfileDraft.style.expression
+    );
+    options(
+        y + 431,
+        L"\uc758\uc0c1",
+        {L"\ud29c\ub2c9", L"\ud310\uae08", L"\uad81\uc218", L"\ub85c\ube0c", L"\uc0c1\uc778", L"\uce58\uc720\uc0ac"},
+        AvatarOutfit,
+        g_ProfileDraft.outfit - 1
+    );
+    swatches(y + 491, L"\uc637 \uc0c9", Art::Styles::NpcClothCount + 1, AvatarCloth, g_ProfileDraft.style.cloth, 2);
+    AddButton(x + w - 232, y + h - 46, 100, 32, L"\ucde8\uc18c", AvatarCancel);
+    AddButton(x + w - 122, y + h - 46, 100, 32, L"\uc801\uc6a9", AvatarApply, ProfileValid(g_ProfileDraft));
+    if (g_ToastTime > 0)
+    {
+        Wrap(x + 24, y + h - 46, 620, g_Toast, g_Accent, 13);
+    }
+}
+
+Color AffinityColor(int score)
+{
+    return score < 0 ? Color(.93f, .53f, .49f) : score >= 25 ? Color(.49f, .82f, .67f) : g_Muted;
+}
+
+void AffinityPanel()
+{
+    const float w = 900, h = std::min(720.f, UiHeight() - 64);
+    const float x = (UiWidth() - w) * .5f, y = (UiHeight() - h) * .5f;
+    const int pageSize = std::max(1, (int)((h - 212) / 48));
+    if (glfwGetTime() >= g_AffinityRefresh || g_AffinityRevision != g_World.affinity.revision ||
+        g_AffinityPopulation != g_World.npcs.size())
+    {
+        g_AffinityRanking = Affinity::Ranking(g_World, g_AffinityVillage, g_AffinityMetOnly, g_AffinityDescending);
+        g_AffinityRefresh = glfwGetTime() + 1;
+        g_AffinityRevision = g_World.affinity.revision;
+        g_AffinityPopulation = g_World.npcs.size();
+    }
+    int pages = ((int)g_AffinityRanking.size() + pageSize - 1) / pageSize;
+    g_AffinityPage = std::max(0, std::min(g_AffinityPage, pages - 1));
+    const Npc* selected = nullptr;
+    for (auto i : g_AffinityRanking)
+        if (g_World.npcs[i].id == g_AffinitySelected) { selected = &g_World.npcs[i]; break; }
+    if (!selected && !g_AffinityRanking.empty())
+    {
+        selected = &g_World.npcs[g_AffinityRanking[g_AffinityPage * pageSize]];
+        g_AffinitySelected = selected->id;
+    }
+
+    g_Buttons.clear();
+    Box(0, 0, UiWidth(), UiHeight(), Color(.01f, .025f, .02f, .78f));
+    Box(x, y, w, h, Color(.065f, .09f, .085f, .99f));
+    Line(x, y, x + w, y, 2, g_Accent);
+    Text(x + 24, y + 20, L"\ud638\uac10\ub3c4 \uc21c\uc704", g_Ink, 24);
+    Text(x + 24, y + 56, L"\uc8fc\ubbfc\uc774 " + g_World.player.profile.name + L"\uc5d0\uac8c \ub290\ub07c\ub294 \ub9c8\uc74c  \u00b7  -100 ~ +100", g_Muted, 14);
+    AddButton(x + w - 110, y + 18, 86, 32, L"\ub2eb\uae30  Esc", Close);
+    AddButton(x + 24, y + 90, 146, 32, g_AffinityDescending ? L"\ub192\uc740 \uc21c \u2193" : L"\ub0ae\uc740 \uc21c \u2191", AffinitySort);
+    AddButton(x + 180, y + 90, 190, 32,
+              g_AffinityVillage < 0 ? L"\ubaa8\ub4e0 \ub9c8\uc744" : Society::VillageName(g_AffinityVillage), AffinityVillage);
+    AddButton(x + 380, y + 90, 148, 32, g_AffinityMetOnly ? L"\ub300\ud654\ud55c NPC" : L"\ubaa8\ub4e0 \uc0dd\uc874 NPC", AffinityMet);
+    Text(x + 24, y + 134, L"\uc21c\uc11c   \uc774\ub984 / \ub9c8\uc744", g_Muted, 12);
+    Text(x + 330, y + 134, L"\ud638\uac10\ub3c4 / \uad00\uacc4 \ub2e8\uacc4", g_Muted, 12);
+    for (int row = 0; row < pageSize; ++row)
+    {
+        int index = g_AffinityPage * pageSize + row;
+        if (index >= (int)g_AffinityRanking.size()) break;
+        const auto& n = g_World.npcs[g_AffinityRanking[index]];
+        float ry = y + 158 + row * 48.f;
+        Box(x + 18, ry, 516, 44, n.id == g_AffinitySelected ? Color(.14f, .23f, .20f) : Color(.09f, .13f, .12f));
+        Text(x + 28, ry + 10, std::to_wstring(index + 1), g_Accent, 16);
+        Text(x + 68, ry + 3, n.Name() + L"  #" + std::to_wstring(n.id), g_Ink, 15);
+        Text(x + 68, ry + 24, std::wstring(Society::VillageName(n.life.village)) + L" \u00b7 " + Society::JobName(n.life.job), g_Muted, 11);
+        Text(x + 330, ry + 4, Affinity::Signed(n.relationship) + L"  " + Affinity::Tier(n.relationship), AffinityColor(n.relationship), 14);
+        Box(x + 330, ry + 31, 176, 4, Color(.19f, .24f, .22f));
+        float fill = n.relationship * .88f;
+        Box(x + 418 + std::min(0.f, fill), ry + 31, std::abs(fill), 4, AffinityColor(n.relationship));
+        Line(x + 418, ry + 29, x + 418, ry + 37, 1, g_Muted);
+        g_Buttons.push_back({x + 18, ry, 516, 44, AffinitySelect + n.id, true, n.Name()});
+    }
+    if (g_AffinityRanking.empty()) Text(x + 40, y + 200, L"\uc870\uac74\uc5d0 \ub9de\ub294 \uc0dd\uc874 NPC\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.", g_Muted, 16);
+    Text(x + 24, y + h - 36, std::to_wstring(g_AffinityRanking.size()) + L"\uba85 \u00b7 \ub3d9\uc810\uc740 ID \uc21c", g_Muted, 12);
+    Text(x + 285, y + h - 36, std::to_wstring(pages ? g_AffinityPage + 1 : 0) + L" / " + std::to_wstring(pages), g_Ink, 14);
+    AddButton(x + 374, y + h - 46, 72, 30, L"\uc774\uc804", AffinityPrevious, g_AffinityPage > 0);
+    AddButton(x + 456, y + h - 46, 72, 30, L"\ub2e4\uc74c", AffinityNext, g_AffinityPage + 1 < pages);
+    Line(x + 550, y + 90, x + 550, y + h - 22, 1, Color(.24f, .30f, .27f));
+    float dx = x + 574;
+    if (selected)
+    {
+        const auto& n = *selected;
+        Text(dx, y + 96, n.Name() + L"  #" + std::to_wstring(n.id), g_Ink, 20);
+        Text(dx, y + 130, Affinity::Signed(n.relationship) + L"  " + Affinity::Tier(n.relationship), AffinityColor(n.relationship), 24);
+        Text(dx, y + 169, L"\uc2e0\ub8b0 " + std::to_wstring(n.trust) + L" / 3  \u00b7  " + (n.met ? L"\ub300\ud654\ud55c \uc0ac\uc774" : L"\uc544\uc9c1 \ub300\ud654 \uc804"), g_Muted, 13);
+        double wait = Affinity::Remaining(g_World.society.elapsed, n.affinity.lastTalk, Affinity::TalkCooldown);
+        Text(dx, y + 194, n.relationship >= 100 ? L"\ucd5c\ub300 \ud638\uac10\ub3c4" : wait > 1e-8 ? L"\ub300\ud654 \ubcf4\uc0c1\uae4c\uc9c0 " + std::to_wstring((int)std::ceil(wait)) + L"\ucd08" : L"\ub300\ud654 \ud638\uac10\ub3c4 +5 \uac00\ub2a5", g_Accent, 13);
+        Text(dx, y + 230, L"\ucd5c\uadfc \ubcc0\ud654", g_Ink, 16);
+        int row = 0, limit = std::max(1, std::min(5, (int)((h - 360) / 42)));
+        for (auto it = g_World.affinity.events.rbegin(); it != g_World.affinity.events.rend() && row < limit; ++it)
+        {
+            if (it->npcId != n.id) continue;
+            float ry = y + 262 + row++ * 42.f;
+            Text(dx, ry, std::wstring(Affinity::ReasonName(it->reason)) + L"  " + Affinity::Signed(it->after - it->before),
+                 AffinityColor(it->after - it->before), 14);
+            Text(dx, ry + 20, std::to_wstring((int)std::max(0.0, g_World.society.elapsed - it->time)) + L"\ucd08 \uc804  \u00b7  " +
+                 Affinity::Signed(it->before) + L" \u2192 " + Affinity::Signed(it->after), g_Muted, 11);
+        }
+        if (!row) Text(dx, y + 264, L"\uae30\ub85d\ub41c \ubcc0\ud654\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.", g_Muted, 14);
+    }
+    Wrap(dx, y + h - 82, 298, L"\ub300\ud654 +5 \u00b7 \ube75 +25 \u00b7 \uce58\ub8cc +35\n\uac70\ub798 +2 \u00b7 \uc218\ub828 +5\n\uc704\ud611 -40 \u00b7 \uacf5\uaca9 -15", g_Muted, 12);
+}
+
 void RenderUI()
 {
+    if (g_Panel == 4)
+    {
+        AvatarPanel();
+        return;
+    }
     g_UiScale = std::min(1.f, std::min(g_Width / 960.f, g_Height / 640.f));
     g_Buttons.clear();
     auto& p = g_World.player;
@@ -1322,7 +1717,7 @@ void RenderUI()
     }
     Box(0, 0, w, 88, Color(.055f, .08f, .075f, .93f));
     Line(0, 88, w, 88, 1, Color(.34f, .39f, .33f, .7f));
-    Text(24, 14, L"\uc794\ud5a5\uc758 \uc2dc\ub300", g_Ink, 19);
+    Text(24, 14, p.profile.name, g_Ink, 16);
     Text(24, 46, L"\uc0dd\uba85", g_Muted, 13);
     Bar(66, 55, 162, p.health, Color(.63f, .31f, .28f));
     Text(237, 45, std::to_wstring((int)p.health), g_Ink, 14);
@@ -1369,6 +1764,11 @@ void RenderUI()
     IconButton(w - 160, h - 58, Journal, L"\uae30\ub85d");
     IconButton(w - 112, h - 58, Abilities, L"\ub2a5\ub825");
     IconButton(w - 64, h - 58, SaveNow, L"\uc800\uc7a5");
+    if (!g_Dialog && !g_Panel)
+    {
+        AddButton(300, 14, 112, 28, L"\uafb8\ubbf8\uae30", AvatarOpen);
+        AddButton(424, 14, 116, 28, L"\ud638\uac10\ub3c4  H", AffinityOpen);
+    }
     AddButton(w - 446, h - 58, 124, 40, L"\uc9d5\uc870 \uc77d\uae30", CastInnate, p.stamina >= 25);
     AddButton(
         w - 312,
@@ -1393,7 +1793,11 @@ void RenderUI()
     }
     if (g_Panel)
     {
-        if (g_Panel == 3)
+        if (g_Panel == 5)
+        {
+            AffinityPanel();
+        }
+        else if (g_Panel == 3)
         {
             StoryPanel();
         }
@@ -1413,6 +1817,15 @@ void RenderUI()
         Line(x, y, x + dw, y, 2, g_Accent);
         Text(x + 26, y + 22, g_DeathConfirm ? L"\uacc4\uc2b9\uc758 \ubc95\uce59" : TargetName(), g_Ink, 22);
         Wrap(x + 26, y + 67, dw - 52, Description(), g_Muted, 16);
+        if (g_TargetKind == 2 && !g_DeathConfirm)
+        {
+            const auto& n = g_World.npcs[g_TargetIndex];
+            Text(x + 26, y + 144, L"\ud638\uac10\ub3c4 " + Affinity::Signed(n.relationship) + L"  " + Affinity::Tier(n.relationship) +
+                 L"  \u00b7  \uc2e0\ub8b0 " + std::to_wstring(n.trust) + L"/3", AffinityColor(n.relationship), 14);
+            if (n.affinity.lastChange >= 0)
+                Text(x + 300, y + 144, std::wstring(Affinity::ReasonName(n.affinity.lastReason)) + L" " +
+                     Affinity::Signed(n.affinity.lastDelta), g_Accent, 13);
+        }
         float by = y + 178;
         for (const auto& c : choices)
         {
@@ -1464,9 +1877,16 @@ void Display()
     g_Scene->DrawOverlay(
         []
         {
-            if (InCombat())
+            if (g_Panel == 4)
             {
+                AvatarPanel();
+            }
+            else if (InCombat())
+            {
+                g_UiScale = std::min(1.f, std::min(g_Width / 960.f, g_Height / 640.f));
+                g_Buttons.clear();
                 g_LevelView->DrawHud(g_MouseX, g_MouseY);
+                AddButton(UiWidth() - 186, 286, 160, 32, L"\uafb8\ubbf8\uae30", AvatarOpen);
             }
             else
             {
@@ -1487,6 +1907,11 @@ IsometricView::Point MovementInput()
 
 void Update(float dt)
 {
+    if (g_Panel == 4)
+    {
+        g_Scene->playerMotion.Stop();
+        return;
+    }
     if (InCombat())
     {
         if (!g_Focused || g_LevelView->paused || CurrentLevel().judgementPending)
@@ -1502,8 +1927,13 @@ void Update(float dt)
         auto input = MovementInput();
         LevelOne::Point movement(input.x, input.y);
         g_LevelView->Update(dt, movement, g_Keys[' ']);
-        g_Scene->playerMotion.Update(movement.x, movement.y, level.p.x - previous.x, level.p.y - previous.y);
-        g_Scene->playerMotion.sprinting = g_Keys[' '] && g_Scene->playerMotion.moving && level.stamina > 2;
+        g_Scene->playerMotion.Update(
+            movement.x,
+            movement.y,
+            level.p.x - previous.x,
+            level.p.y - previous.y,
+            g_Keys[' '] && level.stamina > 2
+        );
         g_World.player.echo[0] += (level.kills - kills) * 3;
         g_World.player.echo[3] += level.souls - souls;
         if (phase == LevelOne::Fighting)
@@ -1575,7 +2005,8 @@ void Idle()
     Update(dt);
     if (g_Monitor)
     {
-        bool paused = !g_Focused || (InCombat() && (g_LevelView->paused || CurrentLevel().judgementPending));
+        bool paused =
+            !g_Focused || g_Panel == 4 || (InCombat() && (g_LevelView->paused || CurrentLevel().judgementPending));
         g_Monitor->Publish(g_World, paused);
     }
     g_Autosave += dt;
@@ -1665,6 +2096,10 @@ void KeyDown(unsigned char key, int, int)
     {
         Act(Journal);
     }
+    if (key == 'h')
+    {
+        Act(AffinityOpen);
+    }
     if (key == 'm')
     {
         Act(StoryOpen);
@@ -1722,8 +2157,21 @@ void Mouse(int button, int state, int x, int y)
     {
         return;
     }
-    if (InCombat())
+    if (g_Panel == 4 || InCombat())
     {
+        for (auto i = g_Buttons.rbegin(); i != g_Buttons.rend(); ++i)
+        {
+            if (i->enabled && Hover(i->x, i->y, i->w, i->h))
+            {
+                Act(i->action);
+                return;
+            }
+        }
+        if (g_Panel == 4)
+        {
+            g_ProfileField = 0;
+            return;
+        }
         LevelCommand(g_LevelView->Hit(x, y));
         return;
     }
@@ -1746,6 +2194,10 @@ void Motion(int x, int y)
 
 void Wheel(int, int direction, int, int)
 {
+    if (g_Panel == 4)
+    {
+        return;
+    }
     if (InCombat())
     {
         if (!g_LevelView->paused && CurrentLevel().phase == LevelOne::Fighting)
@@ -1754,7 +2206,11 @@ void Wheel(int, int direction, int, int)
         }
         return;
     }
-    if (g_Panel == 1)
+    if (g_Panel == 5)
+    {
+        Act(direction > 0 ? AffinityPrevious : AffinityNext);
+    }
+    else if (g_Panel == 1)
     {
         g_JournalOffset =
             std::max(0, std::min(std::max(0, (int)g_World.events.size() - 1), g_JournalOffset - direction * 2));
@@ -1935,8 +2391,71 @@ int main(int argc, char** argv)
     );
     glfwSetKeyCallback(
         g_Window,
-        [](GLFWwindow*, int key, int, int action, int)
+        [](GLFWwindow* window, int key, int, int action, int mods)
         {
+            if (g_Panel == 4)
+            {
+                if (action == GLFW_RELEASE)
+                {
+                    return;
+                }
+                if (g_ProfileField && (mods & GLFW_MOD_CONTROL))
+                {
+                    if (key == GLFW_KEY_A)
+                    {
+                        g_ProfileSelected = true;
+                        return;
+                    }
+                    if (key == GLFW_KEY_V)
+                    {
+                        const char* clipboard = glfwGetClipboardString(window);
+                        wchar_t paste[512] = {};
+                        int count = clipboard
+                                        ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, clipboard, -1, paste, 512)
+                                        : 0;
+                        for (int i = 0; i < count - 1; ++i)
+                        {
+                            unsigned code = paste[i];
+                            if (code >= 0xd800 && code <= 0xdbff && i + 1 < count - 1 && paste[i + 1] >= 0xdc00 &&
+                                paste[i + 1] <= 0xdfff)
+                            {
+                                code = 0x10000 + ((code - 0xd800) << 10) + (paste[++i] - 0xdc00);
+                            }
+                            InputProfileCharacter(code);
+                        }
+                        return;
+                    }
+                }
+                if (key == GLFW_KEY_ESCAPE)
+                {
+                    Act(AvatarCancel);
+                    return;
+                }
+                if (key == GLFW_KEY_TAB)
+                {
+                    Act(g_ProfileField == 1 ? AvatarMotto : AvatarName);
+                    return;
+                }
+                if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER)
+                {
+                    g_ProfileField = 0;
+                    return;
+                }
+                if (key == GLFW_KEY_BACKSPACE && g_ProfileField)
+                {
+                    auto& text = g_ProfileField == 1 ? g_ProfileDraft.name : g_ProfileDraft.motto;
+                    if (g_ProfileSelected)
+                    {
+                        text.clear();
+                    }
+                    else
+                    {
+                        EraseProfileCharacter(text);
+                    }
+                    g_ProfileSelected = false;
+                }
+                return;
+            }
             if (action == GLFW_REPEAT)
             {
                 return;
@@ -1978,6 +2497,13 @@ int main(int argc, char** argv)
             {
                 KeyUp((unsigned char)mapped, 0, 0);
             }
+        }
+    );
+    glfwSetCharCallback(
+        g_Window,
+        [](GLFWwindow*, unsigned int code)
+        {
+            InputProfileCharacter(code);
         }
     );
     glfwSetCursorPosCallback(
