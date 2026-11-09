@@ -38,4 +38,25 @@ int main()
     assert(!actor.visible);
     world.npcs.clear();
     actor.Synchronize(); // A stale presentation node must not read outside the model vector.
+
+    // The player's movement update runs independently of the NPC/scenery graph.
+    // Holding an input must advance every stride and continue across cycle wraps.
+    CharacterMotion motion;
+    WorldPlayerActor player(world, motion, [](const Game::Player&, const ActorTransform&) {});
+    player.movement = {1, 0};
+    unsigned poses = 0;
+    for (int frame = 0; frame < 60; ++frame)
+    {
+        const auto before = world.player.p;
+        player.AdvanceMovement(1.f / 60);
+        assert(motion.moving && world.player.p.x > before.x);
+        poses |= 1u << motion.Pose();
+    }
+    assert(poses == 255 && motion.ClipPhase() < .01);
+    player.movement = {-1, 0};
+    for (int frame = 0; frame < 60; ++frame) player.AdvanceMovement(1.f / 60);
+    assert(motion.moving && motion.ClipPhase() < .01);
+    player.movement = {};
+    player.AdvanceMovement(1.f / 60);
+    assert(!motion.moving && motion.Pose() == CharacterMotion::IdlePose);
 }

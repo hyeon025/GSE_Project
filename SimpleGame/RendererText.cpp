@@ -23,6 +23,18 @@ void Renderer::ReleaseText()
     m_TextPages.clear();
 }
 
+void Renderer::ReleaseTextResources()
+{
+    ReleaseText();
+    if (m_TextDc)
+    {
+        DeleteDC(static_cast<HDC>(m_TextDc));
+        m_TextDc = nullptr;
+    }
+    for (const auto& item : m_TextFonts) DeleteObject(static_cast<HFONT>(item.second));
+    m_TextFonts.clear();
+}
+
 bool Renderer::UploadText(TextTexture& text, const void* pixels)
 {
     if (text.width > m_MaxTextureSize || text.height > m_MaxTextureSize)
@@ -117,35 +129,69 @@ void Renderer::Text(float x, float y, const std::wstring& text, Color color, int
             ReleaseText();
             CacheEvent("text_entry_reset", {MeshKind::UnitQuad, 0});
         }
-        HDC dc = CreateCompatibleDC(nullptr);
+        if (!m_TextDc) m_TextDc = CreateCompatibleDC(nullptr);
+        HDC dc = static_cast<HDC>(m_TextDc);
         if (!dc)
         {
             return;
         }
-        HFONT font = CreateFontW(
-            -size,
-            0,
-            0,
-            0,
-            FW_NORMAL,
-            FALSE,
-            FALSE,
-            FALSE,
-            DEFAULT_CHARSET,
-            OUT_DEFAULT_PRECIS,
-            CLIP_DEFAULT_PRECIS,
-            ANTIALIASED_QUALITY,
-            DEFAULT_PITCH,
-            L"Malgun Gothic"
-        );
+        auto cachedFont = m_TextFonts.find(size);
+        if (cachedFont == m_TextFonts.end())
+        {
+            // A renderer uses only a handful of HUD sizes. Keep a hard bound for
+            // arbitrary callers without throwing away fonts on text-atlas resets.
+            if (m_TextFonts.size() >= 32)
+            {
+                auto victim = m_TextFonts.begin();
+                DeleteObject(static_cast<HFONT>(victim->second));
+                m_TextFonts.erase(victim);
+            }
+            cachedFont = m_TextFonts.emplace(size, nullptr).first;
+            cachedFont->second = CreateFontW(
+                -size,
+                0,
+                0,
+                0,
+                FW_NORMAL,
+                FALSE,
+                FALSE,
+                FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                ANTIALIASED_QUALITY,
+                DEFAULT_PITCH,
+                L"Malgun Gothic"
+            );
+            if (!cachedFont->second)
+            {
+                m_TextFonts.erase(cachedFont);
+                return;
+            }
+        }
+        HFONT font = static_cast<HFONT>(cachedFont->second);
         if (!font)
         {
-            DeleteDC(dc);
             return;
         }
         HGDIOBJ oldFont = SelectObject(dc, font);
+        if (!oldFont || oldFont == HGDI_ERROR) return;
+        // Restore both selections on every exit, including upload/allocation
+        // failures, so cached fonts can always be evicted or destroyed safely.
+        struct RasterSelection
+        {
+            HDC dc;
+            HGDIOBJ oldFont, oldBitmap;
+            HBITMAP bitmap;
+            ~RasterSelection()
+            {
+                if (oldBitmap) SelectObject(dc, oldBitmap);
+                SelectObject(dc, oldFont);
+                if (bitmap) DeleteObject(bitmap);
+            }
+        } selection{dc, oldFont, nullptr, nullptr};
         SIZE extent = {};
-        GetTextExtentPoint32W(dc, text.c_str(), (int)text.size(), &extent);
+        if (!GetTextExtentPoint32W(dc, text.c_str(), (int)text.size(), &extent)) return;
         int w = std::max(1L, extent.cx + 4), h = std::max((LONG)size + 6, extent.cy + 4);
         BITMAPINFO info = {};
         info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -154,15 +200,17 @@ void Renderer::Text(float x, float y, const std::wstring& text, Color color, int
         info.bmiHeader.biPlanes = 1;
         info.bmiHeader.biBitCount = 32;
         void* bits = nullptr;
-        HBITMAP bitmap = CreateDIBSection(dc, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
-        if (!bitmap)
+        selection.bitmap = CreateDIBSection(dc, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+        if (!selection.bitmap || !bits)
         {
-            SelectObject(dc, oldFont);
-            DeleteObject(font);
-            DeleteDC(dc);
             return;
         }
-        HGDIOBJ oldBitmap = SelectObject(dc, bitmap);
+        selection.oldBitmap = SelectObject(dc, selection.bitmap);
+        if (!selection.oldBitmap || selection.oldBitmap == HGDI_ERROR)
+        {
+            selection.oldBitmap = nullptr;
+            return;
+        }
         memset(bits, 0, (size_t)w * h * 4);
         SetBkColor(dc, RGB(0, 0, 0));
         SetTextColor(dc, RGB(255, 255, 255));
@@ -178,11 +226,6 @@ void Renderer::Text(float x, float y, const std::wstring& text, Color color, int
         t.width = w;
         t.height = h;
         bool uploaded = UploadText(t, bits);
-        SelectObject(dc, oldBitmap);
-        SelectObject(dc, oldFont);
-        DeleteObject(bitmap);
-        DeleteObject(font);
-        DeleteDC(dc);
         if (!uploaded)
         {
             return;

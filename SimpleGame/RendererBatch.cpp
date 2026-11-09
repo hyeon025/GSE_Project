@@ -30,13 +30,13 @@ void Renderer::InitializeBatch()
     glGenBuffers(1, &m_InstanceBuffer);
     glBindVertexArray(m_InstanceArray);
     glBindBuffer(GL_ARRAY_BUFFER, m_InstanceBuffer);
-    static_assert(sizeof(Instance) == 176, "Update instance attribute layout.");
+    static_assert(sizeof(Instance) == 192, "Update instance attribute layout.");
     static_assert(
         offsetof(Instance, placement) == 16 && offsetof(Instance, colors) == 32 && offsetof(Instance, options) == 80 &&
-            offsetof(Instance, uv) == 96 && offsetof(Instance, palette) == 112,
+            offsetof(Instance, uv) == 96 && offsetof(Instance, palette) == 112 && offsetof(Instance, depth) == 176,
         "Instance attribute offsets changed."
     );
-    for (GLuint i = 0; i < 11; ++i)
+    for (GLuint i = 0; i < 12; ++i)
     {
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(
@@ -144,6 +144,14 @@ Renderer::GetMesh(MeshKind kind, std::uint64_t variant, const std::function<void
 
 void Renderer::QueueInstance(const Mesh& mesh, Instance instance, GLuint texture)
 {
+    // Reciprocal bands retain useful floating point depth precision as the
+    // painter queue grows. Every later instance is entirely in front of earlier
+    // ones; within a solid actor, interpolated mesh depth resolves intersections.
+    const double layer = (double)++m_DepthLayer;
+    const double farEdge = 1.0 / (1.0 + layer * .001);
+    const double nearEdge = 1.0 / (1.0 + (layer + 1) * .001);
+    instance.depth[0] = (float)farEdge;
+    instance.depth[1] = (float)(farEdge - nearEdge);
     if (texture && m_BatchTexture && texture != m_BatchTexture)
     {
         FlushBatch(BatchBreak::Texture);
@@ -186,6 +194,9 @@ void Renderer::FlushBatch(BatchBreak reason)
     };
     m_Stats.Add(reasons[(size_t)reason]);
     glUseProgram(m_InstancedProgram);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
     glUniform2f(m_InstanceViewport, (float)m_Width, (float)m_Height);
     glUniform1i(m_InstanceLinearOutput, m_RenderingHdr ? 1 : 0);
     glActiveTexture(GL_TEXTURE0);
@@ -217,10 +228,10 @@ void Renderer::Flush()
 }
 
 bool Renderer::TryCachedMesh(MeshKind kind, std::uint64_t variant,
-                             float x, float y, float scale, float opacity, const std::array<Color,4>* palette)
+                             float x, float y, float scale, float opacity, const std::array<Color,4>* palette, bool pixelDepth)
 {
     if (m_Meshes.find(MeshKey(kind, variant)) == m_Meshes.end()) return false;
-    CachedMesh(kind, variant, x, y, scale, opacity, [] {}, true, palette);
+    CachedMesh(kind, variant, x, y, scale, opacity, [] {}, true, palette, pixelDepth);
     return true;
 }
 
@@ -233,7 +244,8 @@ void Renderer::CachedMesh(
     float opacity,
     const std::function<void()>& build,
     bool persistent,
-    const std::array<Color,4>* palette
+    const std::array<Color,4>* palette,
+    bool pixelDepth
 )
 {
     if (m_Capture)
@@ -247,6 +259,7 @@ void Renderer::CachedMesh(
     instance.placement[1] = y;
     instance.options[1] = opacity;
     if(palette) { instance.palette=*palette; instance.options[3]=1; }
+    instance.depth[2] = pixelDepth ? 1.f : 0.f;
     if (kind == MeshKind::Character)
     {
         instance.options[2] = 1.f;
@@ -260,6 +273,17 @@ void Renderer::CachedMesh(
         instance.options[2] = 2.f;
     }
     QueueInstance(mesh, instance);
+}
+
+void Renderer::CachedVertices(MeshKind kind, std::uint64_t variant,
+                              float x, float y, float scale, float opacity,
+                              const std::vector<RenderMeshCache::Vertex>& vertices, bool persistent,
+                              const std::array<Color,4>* palette, bool pixelDepth)
+{
+    CachedMesh(kind, variant, x, y, scale, opacity, [this, &vertices] {
+        if (!m_Capture) throw std::logic_error("Missing mesh capture");
+        *m_Capture = vertices;
+    }, persistent, palette, pixelDepth);
 }
 
 void Renderer::Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c)

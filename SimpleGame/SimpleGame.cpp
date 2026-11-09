@@ -1202,14 +1202,31 @@ void Map()
 {
     float x = UiWidth() - 216, y = 106, size = 192;
     Box(x, y, size, size, Color(.065f, .09f, .08f, .94f));
+    // The mask depends only on the exact map center. Keep every moving frame's
+    // samples unchanged, but avoid 2,304 road queries per idle frame.
+    static std::array<bool, 48 * 48> roads = {};
+    static Vec roadCenter;
+    static bool roadMaskReady = false;
+    if (!roadMaskReady || roadCenter.x != g_World.player.p.x || roadCenter.y != g_World.player.p.y)
+    {
+        for (int iy = 0; iy < 48; ++iy)
+        {
+            for (int ix = 0; ix < 48; ++ix)
+            {
+                double sx = (ix - 24) * 12.0, sy = (iy - 24) * 12.0;
+                auto ground = IsometricView::GroundFromScreen({sx, sy});
+                Vec p(g_World.player.p.x + ground.x, g_World.player.p.y + ground.y);
+                roads[iy * 48 + ix] = Road(p) < 33;
+            }
+        }
+        roadCenter = g_World.player.p;
+        roadMaskReady = true;
+    }
     for (int iy = 0; iy < 48; ++iy)
     {
         for (int ix = 0; ix < 48; ++ix)
         {
-            double sx = (ix - 24) * 12.0, sy = (iy - 24) * 12.0;
-            auto ground = IsometricView::GroundFromScreen({sx, sy});
-            Vec p(g_World.player.p.x + ground.x, g_World.player.p.y + ground.y);
-            Box(x + ix * 4, y + iy * 4, 4, 4, Road(p) < 33 ? Color(.39f, .40f, .33f) : Color(.16f, .21f, .18f));
+            Box(x + ix * 4, y + iy * 4, 4, 4, roads[iy * 48 + ix] ? Color(.39f, .40f, .33f) : Color(.16f, .21f, .18f));
         }
     }
     auto mark = [&](Vec p, Color c, float radius)

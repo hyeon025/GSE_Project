@@ -26,6 +26,7 @@ void main()
     {
         FragColor *= texture(u_Texture, v_Uv);
     }
+    if (FragColor.a <= .001) discard;
     if (v_Material > 0 && v_Textured == 0)
     {
         // Local coordinates keep surface detail attached to the cached mesh, not the screen.

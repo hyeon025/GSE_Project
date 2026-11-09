@@ -16,6 +16,8 @@ public:
     Game::Vec movement;
     bool sprinting = false;
 
+    void AdvanceMovement(float dt) { OnUpdate(dt); }
+
 protected:
     void OnUpdate(float dt) override
     {

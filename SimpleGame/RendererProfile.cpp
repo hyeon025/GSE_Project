@@ -100,6 +100,12 @@ void Renderer::WriteProfileFrame(double renderMs)
 
 void Renderer::BeginFrame()
 {
+    m_DepthLayer = 0;
+    // HUD and avatar previews render to the default target after HDR composition.
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDepthMask(GL_TRUE);
+    glClearDepth(1);
+    glClear(GL_DEPTH_BUFFER_BIT);
     m_FrameStart = std::chrono::steady_clock::now();
     if (m_FrameNumber == 0)
     {

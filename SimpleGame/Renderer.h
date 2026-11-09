@@ -104,7 +104,12 @@ public:
     // Queue an already resident mesh without requiring a CPU pose-cache entry.
     bool TryCachedMesh(MeshKind kind, std::uint64_t variant,
                        float x, float y, float scale, float opacity,
-                       const std::array<Color,4>* palette = nullptr);
+                       const std::array<Color,4>* palette = nullptr, bool pixelDepth = false);
+    // Preserve per-vertex depth (u) in imported solid meshes. Each queued actor
+    // occupies its own depth interval, retaining the existing world painter order.
+    void CachedVertices(MeshKind kind, std::uint64_t variant, float x, float y, float scale, float opacity,
+                        const std::vector<RenderMeshCache::Vertex>& vertices, bool persistent = true,
+                        const std::array<Color,4>* palette = nullptr, bool pixelDepth = false);
     // Queue in painter order; Flush submits compatible instances together.
     // Build local-space geometry only on a memory and disk cache miss.
     void CachedMesh(
@@ -116,7 +121,8 @@ public:
         float opacity,
         const std::function<void()>& build,
         bool persistent = true,
-        const std::array<Color,4>* palette = nullptr
+        const std::array<Color,4>* palette = nullptr,
+        bool pixelDepth = false
     );
     void Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c);
     void Rect(float x, float y, float width, float height, Color color);
@@ -160,6 +166,7 @@ private:
         float options[4] = {0, 1, 0, 0};
         float uv[4] = {0, 0, 1, 1};
         std::array<Color,4> palette = {{Color(1,1,1),Color(1,1,1),Color(1,1,1),Color(1,1,1)}};
+        float depth[4] = {}; // far edge, interval width, use mesh depth, reserved
     };
     enum class Pass
     {
@@ -181,6 +188,7 @@ private:
     void OpenProfileSegment();
     void WriteProfileFrame(double renderMs);
     void ReleaseText();
+    void ReleaseTextResources();
     bool UploadText(TextTexture& text, const void* pixels);
 
     struct RenderTarget
@@ -191,7 +199,7 @@ private:
     GLuint Program(const char* vertexPath, const char* fragmentPath);
     void ReleaseMeshes();
     void DrawArrays(GLenum mode, GLint first, GLsizei count);
-    bool CreateTarget(RenderTarget& target, int width, int height);
+    bool CreateTarget(RenderTarget& target, int width, int height, bool depth = false);
     void ReleaseTargets();
     void RecreateTargets();
     void Fullscreen(GLuint program, GLuint destination, int width, int height, GLuint source);
@@ -199,7 +207,7 @@ private:
     int m_Width, m_Height;
     GLuint m_Terrain = 0, m_Array = 0;
     GLuint m_Downsample = 0, m_Blur = 0, m_Composite = 0;
-    GLuint m_MsaaFbo = 0, m_MsaaColor = 0;
+    GLuint m_MsaaFbo = 0, m_MsaaColor = 0, m_MsaaDepth = 0, m_SceneDepth = 0;
     RenderTarget m_Scene, m_Bloom[2], m_SoftScene[2];
     int m_FilterWidth = 1, m_FilterHeight = 1;
     bool m_TargetsReady = false, m_RenderingHdr = false;
@@ -217,7 +225,10 @@ private:
     std::vector<Instance> m_Instances;
     GLsizei m_BatchMaxVertices = 0;
     std::uint64_t m_BatchUsefulVertices = 0;
+    std::uint64_t m_DepthLayer = 0;
     std::map<std::pair<std::wstring, int>, TextTexture> m_Text;
+    void* m_TextDc = nullptr;
+    std::map<int, void*> m_TextFonts;
     std::vector<TextPage> m_TextPages;
     int m_TextPageSize = 2048, m_MaxTextureSize = 2048;
     RenderFrameStats m_Stats;

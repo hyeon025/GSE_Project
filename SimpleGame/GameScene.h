@@ -195,6 +195,24 @@ public:
         r.Flush();
     }
 
+    WorldPlayerActor& SyncPlayer()
+    {
+        auto root = graph.Group({Root}).Id();
+        auto parent = graph.Group({Characters}, root).Id();
+        auto& player = graph.GetOrCreate<WorldPlayerActor>(
+            {PlayerNode}, parent, world, playerMotion,
+            [this](const Game::Player& p, const ActorTransform& transform)
+            {
+                DrawAt(transform, [&] { Person({}, p.ability, true); });
+            });
+        player.data = world.player;
+        auto pose = player.LocalTransform();
+        pose.x = world.player.p.x;
+        pose.y = world.player.p.y;
+        player.SetLocalTransform(pose);
+        return player;
+    }
+
     WorldPlayerActor& SyncCharacters()
     {
         for (auto& npc : world.npcs)
@@ -222,29 +240,8 @@ public:
                 m_InspectedNpc = n.id;
             }
         }
-        auto root = graph.Group({Root}).Id();
-        auto parent = graph.Group({Characters}, root).Id();
-        auto& player = graph.GetOrCreate<WorldPlayerActor>(
-            {PlayerNode},
-            parent,
-            world,
-            playerMotion,
-            [this](const Game::Player& p, const ActorTransform& transform)
-            {
-                DrawAt(
-                    transform,
-                    [&]
-                    {
-                        Person({}, p.ability, true);
-                    }
-                );
-            }
-        );
-        player.data = world.player;
-        auto pose = player.LocalTransform();
-        pose.x = world.player.p.x;
-        pose.y = world.player.p.y;
-        player.SetLocalTransform(pose);
+        auto& player = SyncPlayer();
+        auto parent = player.Parent();
         for (size_t i = 0; i < world.npcs.size(); ++i)
         {
             const auto& n = world.npcs[i];
@@ -308,7 +305,7 @@ public:
                     );
                 }
             );
-            npc.data = n;
+            npc.data.id = n.id;
             npc.visible = true;
             npc.modelIndex = i;
             npc.Synchronize();
@@ -319,10 +316,12 @@ public:
 
     void Update(float dt, Game::Vec movement, bool sprinting)
     {
-        auto& player = SyncCharacters();
+        auto& player = SyncPlayer();
         player.movement = movement;
         player.sprinting = sprinting;
-        graph.Update(dt);
+        // Only player movement is a presentation actor update. NPC simulation
+        // runs separately; copy/interpolate visible NPCs once in Render().
+        player.AdvanceMovement(dt);
     }
 
     void DrawVillageBuilding(int kind, bool residence = false)
@@ -804,6 +803,8 @@ public:
         // Cache geometry by pose, but retain asynchronous fallback poses per actor.
         imported.animationStream = player ? 1 : 2 + (std::uint64_t)(unsigned)id;
         imported.deferAnimation = true;
+        imported.priorityAnimation = player;
+        imported.pixelDepth = true;
         imported.preciseDepth = true;
         if (Art::Draw(r, imported))
         {

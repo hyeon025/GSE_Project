@@ -15,7 +15,9 @@ namespace Art
         float unitsPerMeter = 30;
         float yaw = 0;
         bool deferAnimation = false;
+        bool priorityAnimation = false; // Reserve prompt pose updates for the controlled player.
         bool preciseDepth = false;
+        bool pixelDepth = false; // Per-pixel self-occlusion; enabled automatically for styled characters.
         bool normalizedTime = false;       // seconds is a [0,1) locomotion cycle when enabled.
         std::uint64_t animationStream = 0; // Per-actor fallback history; excluded from the shared mesh key.
         CharacterStyle style;

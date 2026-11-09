@@ -322,10 +322,34 @@ namespace Game
 
     inline double SettlementRoad(Vec p)
     {
+        // Settlement centers and their road links never move. Build adjacency once;
+        // Road() is also sampled for every minimap pixel on a moving frame.
+        struct Connections
+        {
+            Vec center;
+            std::vector<Vec> neighbors;
+        };
+        static const auto connections = []
+        {
+            std::array<Connections, Society::VillageCount> result;
+            for (int v = 0; v < Society::VillageCount; ++v)
+            {
+                auto& road = result[v];
+                road.center = VillageCenter(v);
+                for (int other = v + 1; other < Society::VillageCount; ++other)
+                {
+                    Vec destination = VillageCenter(other);
+                    if (Distance(road.center, destination) <= Society::VillageSpacing * 1.01)
+                        road.neighbors.push_back(destination);
+                }
+            }
+            return result;
+        }();
         double distance = 1e10;
         for (int v = 0; v < Society::VillageCount; ++v)
         {
-            Vec c = VillageCenter(v);
+            const auto& road = connections[v];
+            Vec c = road.center;
             if (Distance(p, c) < Society::VillageRadius)
             {
                 distance = std::min(distance, std::min(std::abs(p.x - c.x), std::abs(p.y - c.y)));
@@ -334,12 +358,9 @@ namespace Game
                     std::min(std::abs(std::remainder(p.x - c.x, 112.0)), std::abs(std::remainder(p.y - c.y, 112.0)))
                 );
             }
-            for (int other = v + 1; other < Society::VillageCount; ++other)
+            for (const auto& destination : road.neighbors)
             {
-                if (Distance(c, VillageCenter(other)) <= Society::VillageSpacing * 1.01)
-                {
-                    distance = std::min(distance, SegmentDistance(p, c, VillageCenter(other)));
-                }
+                distance = std::min(distance, SegmentDistance(p, c, destination));
             }
         }
         return distance;

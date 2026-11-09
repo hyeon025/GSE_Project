@@ -10,6 +10,7 @@ layout(location = 7) in vec4 a_Skin;
 layout(location = 8) in vec4 a_Hair;
 layout(location = 9) in vec4 a_Cloth;
 layout(location = 10) in vec4 a_Trim;
+layout(location = 11) in vec4 a_Depth;
 uniform samplerBuffer u_Meshes;
 uniform vec2 u_Viewport;
 out vec4 v_Color;
@@ -39,8 +40,10 @@ void main()
     vec2 position = vec2(
         first.x * a_Matrix.x + first.y * a_Matrix.z,
         first.x * a_Matrix.y + first.y * a_Matrix.w) + a_Placement.xy;
+    float localDepth = a_Depth.z > .5 ? clamp(second.z, 0.0, 1.0) : .5;
+    float depth = a_Depth.x - a_Depth.y * (.1 + .8 * localDepth);
     gl_Position = vec4(position.x / u_Viewport.x * 2.0 - 1.0,
-        1.0 - position.y / u_Viewport.y * 2.0, 0, 1);
+        1.0 - position.y / u_Viewport.y * 2.0, depth * 2.0 - 1.0, 1);
     v_Color = a_Options.x < 0.5 ? color :
         color.r * a_ColorA + color.g * a_ColorB + color.b * a_ColorC;
     if(a_Options.w > .5 && color.r < -.5)

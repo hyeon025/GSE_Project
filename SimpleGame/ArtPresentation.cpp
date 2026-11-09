@@ -33,7 +33,7 @@ namespace Art
         size_t poseBytes = 0;
         std::uint64_t poseBuilds = 0, poseEvictions = 0;
         constexpr size_t PoseBudget = 192 * 1024 * 1024;
-        constexpr unsigned PresentationRevision = 2;
+        constexpr unsigned PresentationRevision = 3;
         std::set<std::string> failures;
 
         void Hash(std::uint64_t& hash, const void* data, size_t count)
@@ -156,8 +156,22 @@ namespace Art
                     faces.push_back(face);
                 }
             }
-            // Painter order within one assembled actor includes all slots and materials together.
-            std::stable_sort(
+            const bool pixelDepth = r.pixelDepth || r.style.enabled;
+            // Characters keep interpolated depth at every vertex. The GPU resolves intersecting
+            // skin/hair faces correctly without sorting thousands of overlapping triangle pairs.
+            if (pixelDepth)
+            {
+                double minimum = 1e30, maximum = -1e30;
+                for (const auto& face : faces) for (double depth : face.vertexDepth)
+                {
+                    minimum = std::min(minimum, depth);
+                    maximum = std::max(maximum, depth);
+                }
+                const double extent = std::max(1e-6, maximum - minimum);
+                for (auto& face : faces) for (int i = 0; i < 3; ++i)
+                    face.vertices[i].u = (float)((face.vertexDepth[i] - minimum) / extent);
+            }
+            else std::stable_sort(
                 faces.begin(),
                 faces.end(),
                 [](const Face& a, const Face& b)
@@ -165,7 +179,7 @@ namespace Art
                     return a.depth < b.depth;
                 }
             );
-            if (r.preciseDepth || r.style.enabled)
+            if (!pixelDepth && r.preciseDepth)
             {
                 std::vector<ProjectedDepthOrder::Triangle> triangles;
                 for (const auto& face : faces)
@@ -189,7 +203,7 @@ namespace Art
             }
             return vertices;
         }
-        struct Prepared { Vertices vertices; std::string error; std::uint64_t serial = 0; };
+        struct Prepared { Vertices vertices; std::string error; };
         std::unique_ptr<PoseWorker<Prepared>> worker;
         struct Previous {
             std::uint64_t key;
@@ -222,13 +236,8 @@ namespace Art
         void DrawPose(Renderer& renderer, std::uint64_t key, const DrawRequest& r, Vertices vertices, bool persistent)
         {
             auto colors=PaletteColors(r.style);
-            renderer.CachedMesh(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,
-                [&renderer, vertices] {
-                    for (size_t i=0; i<vertices->size(); i+=3) {
-                        const auto& a=(*vertices)[i]; const auto& b=(*vertices)[i+1]; const auto& c=(*vertices)[i+2];
-                        renderer.Triangle(a.x,a.y,b.x,b.y,c.x,c.y,{a.r,a.g,a.b,a.a},{b.r,b.g,b.b,b.a},{c.r,c.g,c.b,c.a});
-                    }
-                }, persistent,r.style.enabled ? &colors : nullptr);
+            renderer.CachedVertices(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,
+                *vertices, persistent, r.style.enabled ? &colors : nullptr, r.pixelDepth || r.style.enabled);
         }
         void Remember(std::uint64_t family, std::uint64_t key, Vertices vertices, std::uint64_t serial)
         {
@@ -295,7 +304,7 @@ namespace Art
                 while (worker->Poll(result)) {
                     if (!result.value.error.empty()) { rejected.insert(result.key); continue; }
                     Store(result.key, result.value.vertices);
-                    Remember(result.family, result.key, poses.at(result.key).vertices, result.value.serial);
+                    Remember(result.family, result.key, poses.at(result.key).vertices, result.serial);
                 }
             }
             Sources sources;
@@ -306,7 +315,9 @@ namespace Art
             Hash(key, &r.unitsPerMeter, sizeof(float));
             Hash(key, &r.yaw, sizeof(float));
             Hash(key, &r.loop, sizeof(r.loop));
-            if (r.preciseDepth || r.style.enabled)
+            const bool depth = r.pixelDepth || r.style.enabled;
+            Hash(key, &depth, sizeof(depth));
+            if (!depth && r.preciseDepth)
             {
                 const unsigned depthRevision = 1;
                 HashString(key, "precise_depth");
@@ -375,7 +386,7 @@ namespace Art
             }
             auto colors=PaletteColors(r.style);
             auto palette=r.style.enabled ? &colors : nullptr;
-            if (renderer.TryCachedMesh(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,palette))
+            if (renderer.TryCachedMesh(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,palette,depth))
             {
                 // A later cache miss must reuse the pose actually displayed most recently.
                 auto cpu = poses.find(key);
@@ -390,18 +401,17 @@ namespace Art
                 {
                     auto vertices = last->second.vertices.lock();
                     bool resident = renderer.TryCachedMesh(Renderer::MeshKind::Imported, last->second.key,
-                                                           r.x,r.y,r.scale,r.opacity,palette);
+                                                           r.x,r.y,r.scale,r.opacity,palette,depth);
                     if (vertices || resident)
                     {
                         if (!worker) worker.reset(new PoseWorker<Prepared>());
                         auto request = r;
-                        worker->Submit(family,key,[sources,request,sampleTime,serial] {
+                        worker->Submit(family,key,[sources,request,sampleTime] {
                             Prepared result;
-                            result.serial = serial;
                             try { result.vertices = ProjectPose(sources,request,sampleTime); }
                             catch (const std::exception& e) { result.error = e.what(); }
                             return result;
-                        });
+                        }, r.priorityAnimation, serial);
                         if (!resident) DrawPose(renderer,last->second.key,r,vertices,false);
                         return true;
                     }

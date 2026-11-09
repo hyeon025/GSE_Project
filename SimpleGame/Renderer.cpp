@@ -39,7 +39,7 @@ Renderer::~Renderer()
     glDeleteProgram(m_Downsample);
     glDeleteProgram(m_Blur);
     glDeleteProgram(m_Composite);
-    ReleaseText();
+    ReleaseTextResources();
     ReleaseBatch();
     glDeleteVertexArrays(1, &m_Array);
     glDeleteProgram(m_Terrain);
@@ -131,7 +131,7 @@ void Renderer::Resize(int width, int height)
     glViewport(0, 0, m_Width, m_Height);
 }
 
-bool Renderer::CreateTarget(RenderTarget& target, int width, int height)
+bool Renderer::CreateTarget(RenderTarget& target, int width, int height, bool depth)
 {
     glGenTextures(1, &target.texture);
     glBindTexture(GL_TEXTURE_2D, target.texture);
@@ -143,6 +143,13 @@ bool Renderer::CreateTarget(RenderTarget& target, int width, int height)
     glGenFramebuffers(1, &target.fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, target.fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.texture, 0);
+    if (depth)
+    {
+        glGenRenderbuffers(1, &m_SceneDepth);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_SceneDepth);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_SceneDepth);
+    }
     return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
@@ -167,7 +174,9 @@ void Renderer::ReleaseTargets()
     }
     glDeleteFramebuffers(1, &m_MsaaFbo);
     glDeleteRenderbuffers(1, &m_MsaaColor);
-    m_MsaaFbo = m_MsaaColor = 0;
+    glDeleteRenderbuffers(1, &m_MsaaDepth);
+    glDeleteRenderbuffers(1, &m_SceneDepth);
+    m_MsaaFbo = m_MsaaColor = m_MsaaDepth = m_SceneDepth = 0;
     m_TargetsReady = m_RenderingHdr = false;
 }
 
@@ -182,7 +191,7 @@ void Renderer::RecreateTargets()
     glActiveTexture(GL_TEXTURE0);
     m_FilterWidth = std::max(1, (m_Width + 1) / 2);
     m_FilterHeight = std::max(1, (m_Height + 1) / 2);
-    bool complete = CreateTarget(m_Scene, m_Width, m_Height);
+    bool complete = CreateTarget(m_Scene, m_Width, m_Height, true);
     for (auto& target : m_Bloom)
     {
         complete = CreateTarget(target, m_FilterWidth, m_FilterHeight) && complete;
@@ -209,13 +218,18 @@ void Renderer::RecreateTargets()
         glBindRenderbuffer(GL_RENDERBUFFER, m_MsaaColor);
         glRenderbufferStorageMultisample(GL_RENDERBUFFER, std::min(4, maxSamples), GL_RGBA16F, m_Width, m_Height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_MsaaColor);
+        glGenRenderbuffers(1, &m_MsaaDepth);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_MsaaDepth);
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, std::min(4, maxSamples), GL_DEPTH_COMPONENT32F, m_Width, m_Height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_MsaaDepth);
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             // Some devices support float targets but not multisampled float targets.
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glDeleteFramebuffers(1, &m_MsaaFbo);
             glDeleteRenderbuffers(1, &m_MsaaColor);
-            m_MsaaFbo = m_MsaaColor = 0;
+            glDeleteRenderbuffers(1, &m_MsaaDepth);
+            m_MsaaFbo = m_MsaaColor = m_MsaaDepth = 0;
             std::cerr << "HDR multisampling unavailable; using a single-sample HDR target.\n";
         }
     }
@@ -257,11 +271,14 @@ void Renderer::BeginWorld()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glDepthMask(GL_TRUE);
+    glClearDepth(1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::Fullscreen(GLuint program, GLuint destination, int width, int height, GLuint source)
 {
+    glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, destination);
     glViewport(0, 0, width, height);
     glUseProgram(program);
@@ -355,6 +372,7 @@ void Renderer::EndWorld()
 void Renderer::Terrain(float cameraX, float cameraY, float zoom, bool farming, float seed)
 {
     FlushBatch(BatchBreak::Pass);
+    glDisable(GL_DEPTH_TEST);
     m_ProfileCombat = farming;
     m_ProfileCameraX = cameraX;
     m_ProfileCameraY = cameraY;
