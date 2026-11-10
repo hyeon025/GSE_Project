@@ -63,6 +63,18 @@
     <ClInclude Include="SocietyState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="NpcNavigationState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="NpcNavigation.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Wildlife.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldCombat.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="WorldSimulation.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

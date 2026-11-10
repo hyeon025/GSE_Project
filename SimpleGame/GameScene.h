@@ -6,6 +6,8 @@
 #include "WorldSimulation.h"
 #include "IsometricView.h"
 #include "ArtPresentation.h"
+#include "Wildlife.h"
+#include "WorldCombat.h"
 
 class GameScene
 {
@@ -45,7 +47,10 @@ public:
         BuildingNode,
         WorksiteNode,
         SimulationNode,
-        HouseNode
+        HouseNode,
+        AnimalNode,
+        PlayerRangeNode,
+        WorldShotNode
     };
 
     Game::Vec Project(Game::Vec p) const
@@ -551,6 +556,7 @@ public:
             Society::Update(world, step, playerPresent);
         };
         simulationGraph.Update(dt);
+        Wildlife::Update(world,dt,playerPresent);
     }
 
     Color Shade(Color c, float light, float alpha = 1)
@@ -800,6 +806,12 @@ public:
         imported.clip = moving ? (sprinting ? "Run" : "Walk") : "Idle";
         imported.normalizedTime = moving;
         imported.seconds = moving ? (player ? playerMotion.ClipPhase() : motion->ClipPhase()) : world.time;
+        if(player && !cameraOverride && world.worldAttackAnimation>0)
+        {
+            imported.clip="Attack";imported.loop=false;imported.normalizedTime=true;
+            imported.seconds=1-world.worldAttackAnimation/WorldCombat::AnimationDuration;
+            imported.yaw=Wildlife::Yaw(world.worldAttackAim);
+        }
         // Cache geometry by pose, but retain asynchronous fallback poses per actor.
         imported.animationStream = player ? 1 : 2 + (std::uint64_t)(unsigned)id;
         imported.deferAnimation = true;
@@ -1011,6 +1023,59 @@ public:
             r.Terrain((float)world.player.p.x, (float)world.player.p.y, zoom);
         };
         SyncCharacters();
+        Place(graph,{PlayerRangeNode},root,world.player.p,WorldCombat::Range(world),
+            [this](float radius)
+            {
+                auto previous=Project({radius,0});
+                for(int i=1;i<=64;++i)
+                {
+                    double angle=i*6.283185307179586/64;
+                    auto next=Project({std::cos(angle)*radius,std::sin(angle)*radius});
+                    r.Line((float)previous.x,(float)previous.y,(float)next.x,(float)next.y,1.2f,
+                           Color(.73f,.79f,.63f,.36f));
+                    previous=next;
+                }
+            },ActorLayer::Ground);
+        for(size_t i=0;i<world.worldShots.size();++i)
+        {
+            const auto& shot=world.worldShots[i];
+            Place(graph,{WorldShotNode,(std::int64_t)i},root,{shot.p.x,shot.p.y},shot,
+                [this](const LevelOne::Projectile& p)
+                {
+                    auto at=Project({});
+                    auto tail=Project({-p.direction.x*12,-p.direction.y*12});
+                    r.Line((float)tail.x,(float)tail.y-26*zoom,(float)at.x,(float)at.y-26*zoom,
+                           3*zoom,Color(1,.82f,.35f));
+                    r.Ellipse((float)at.x,(float)at.y-26*zoom,3*zoom,3*zoom,Color(1,.96f,.7f),Color(1,.7f,.2f,0));
+                },ActorLayer::Effects);
+        }
+        for(const auto& animal:world.wildlife)
+        {
+            if(animal.health<=0 || Game::Distance(animal.actor.p,world.player.p)>1200)continue;
+            auto& actor=Place(graph,{AnimalNode,animal.actor.id},root,animal.actor.p,animal,
+                [this](const Game::Animal& a)
+                {
+                    auto p=Project({});
+                    Art::DrawRequest request;
+                    request.assets={Wildlife::Asset(a.species)};
+                    request.clip=a.chasing?"Run":a.moving?"Walk":"Idle";
+                    request.normalizedTime=a.moving;
+                    request.seconds=a.moving?a.actor.motion.ClipPhase():world.time;
+                    request.x=(float)p.x;request.y=(float)p.y;request.scale=zoom;
+                    request.yaw=a.yaw;request.pixelDepth=true;request.deferAnimation=true;
+                    request.animationStream=1000000+a.actor.id;
+                    Art::Draw(r,request);
+                    if(a.hitFlash>0)
+                        r.Ellipse((float)p.x,(float)p.y-28*zoom,12*zoom,12*zoom,
+                                  Color(1,.9f,.45f,a.hitFlash*3),Color(1,.5f,.15f,0));
+                    if(a.chasing || a.health<60)
+                    {
+                        r.Rect((float)p.x-18*zoom,(float)p.y-52*zoom,36*zoom,3*zoom,Color(.12f,.12f,.12f));
+                        r.Rect((float)p.x-18*zoom,(float)p.y-52*zoom,36*zoom*a.health/60,3*zoom,Color(.8f,.3f,.25f));
+                    }
+                });
+            actor.streamed=true;
+        }
         SyncVillages(scenery);
         int radius = (int)((width * .5f + height) / zoom / 64) + 6;
         int tx = (int)std::floor(world.player.p.x / 32), ty = (int)std::floor(world.player.p.y / 32);

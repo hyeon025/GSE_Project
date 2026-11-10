@@ -158,6 +158,10 @@
     <ClInclude Include="GameWorld.h" />
     <ClInclude Include="Affinity.h" />
     <ClInclude Include="SocietyState.h" />
+    <ClInclude Include="NpcNavigationState.h" />
+    <ClInclude Include="NpcNavigation.h" />
+    <ClInclude Include="Wildlife.h" />
+    <ClInclude Include="WorldCombat.h" />
     <ClInclude Include="WorldSimulation.h" />
     <ClInclude Include="MonitorSnapshot.h" />
     <ClInclude Include="WorldMonitor.h" />

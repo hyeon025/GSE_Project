@@ -16,7 +16,7 @@ double ReferenceSettlementRoad(Game::Vec p)
         {
             distance = std::min(distance, std::min(std::abs(p.x - c.x), std::abs(p.y - c.y)));
             distance = std::min(distance,
-                std::min(std::abs(std::remainder(p.x - c.x, 112.0)), std::abs(std::remainder(p.y - c.y, 112.0))));
+                std::min(std::abs(std::remainder(p.x - c.x, Game::HouseSpacing)), std::abs(std::remainder(p.y - c.y, Game::HouseSpacing))));
         }
         for (int other = v + 1; other < Society::VillageCount; ++other)
             if (Game::Distance(c, Game::VillageCenter(other)) <= Society::VillageSpacing * 1.01)

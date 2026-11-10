@@ -106,9 +106,8 @@ public:
         imported.scale = scene.zoom * (enemy.kind == LevelOne::Boss ? 1.5f : 1.f);
         imported.clip = enemy.windup > 0 ? "Attack" : "Walk";
         imported.seconds = scene.world.time;
-        CharacterMotion heading;
-        heading.Update(level.p.x - enemy.p.x, level.p.y - enemy.p.y, 0, 0);
-        imported.yaw = Art::FacingYaw(heading.facing);
+        Game::Vec direction(level.p.x-enemy.p.x,level.p.y-enemy.p.y);
+        imported.yaw = Wildlife::Yaw(direction);
         bool loaded = Art::Draw(scene.r, imported);
         if (!loaded && enemy.kind == LevelOne::Boss)
         {

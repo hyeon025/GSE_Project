@@ -1,5 +1,6 @@
 #pragma once
 #include "GameWorld.h"
+#include "NpcNavigation.h"
 #include <iostream>
 
 namespace Society
@@ -28,7 +29,9 @@ namespace Society
             L"\uba85\uc0c1",
             L"\uc21c\ucc30",
             L"\uce58\ub8cc",
-            L"\ubc29\uc5b4"
+            L"\ubc29\uc5b4",
+            L"\ud734\uc2dd",
+            L"\uc0b0\ucc45"
         };
         return names[activity];
     }
@@ -195,6 +198,16 @@ namespace Society
             std::cout << "[World] villages=" << VillageCount << " settled=" << w.society.settledVillages
                       << " residentsPerVillage=" << ResidentsPerVillage << " npcRecords=" << w.npcs.size() << '\n';
         }
+        if(w.society.layoutVersion<2)
+        {
+            for(auto& n:w.npcs) if(n.life.houseLot>=0)
+            {
+                n.home=Game::HouseEntrance(n.life.village,n.life.houseLot);
+                if(n.life.alive)n.p=n.home;
+                n.life.navigation=Navigation();n.life.routine=Routine();
+            }
+            w.society.layoutVersion=2;w.dirty=true;
+        }
         // Build housing occupancy once, then preserve NPC order when assigning empty lots.
         std::array<std::array<bool, HousingCapacity>, VillageCount> occupied = {};
         for (auto& n : w.npcs)
@@ -227,9 +240,14 @@ namespace Society
                     }
                 }
             }
-            if (expanded && n.life.alive && !Game::Walkable(n.p))
+            if (n.life.alive && (expanded || !n.life.navigation.checked))
             {
-                n.p = n.home;
+                n.life.navigation.checked=true;
+                if(!Game::Walkable(n.p))
+                {
+                    n.p = Game::Walkable(n.home) ? n.home : Game::VillageCenter(n.life.village);
+                    w.dirty=true;
+                }
             }
         }
     }
@@ -355,153 +373,92 @@ namespace Society
         return true;
     }
 
-    inline bool Move(Game::Npc& n, Game::Vec goal, double dt)
+    inline bool Move(Game::Npc& n, Game::Vec goal, double dt, int* searchBudget = nullptr)
     {
-        double distance = Game::Distance(n.p, goal);
-        if (distance < 12)
+        if (!std::isfinite(dt) || dt <= 0 || !Game::FinitePosition(goal)) return false;
+        auto& nav = n.life.navigation;
+        nav.retry = std::max(0.0, nav.retry-dt);
+        if (Game::Distance(n.p,goal) < 12)
         {
-            n.life.routeVillage = -1;
+            nav.points.clear();nav.next=0;nav.routeVillage=-1;
             return true;
         }
-        int destinationVillage = Game::VillageAt(goal);
-        if (!n.life.target && destinationVillage >= 0)
+        if (!nav.valid || Game::Distance({nav.goalX,nav.goalY},goal)>4)
         {
-            if (n.life.routeTarget != destinationVillage)
+            nav.valid=true;nav.goalX=goal.x;nav.goalY=goal.y;
+            nav.points.clear();nav.next=0;nav.routeVillage=-1;nav.retry=0;nav.failures=0;
+        }
+        Game::Vec leg=goal;
+        const int destination=Game::VillageAt(goal);
+        if (!n.life.target && destination>=0)
+        {
+            if (nav.routeVillage>=0 && Game::Distance(n.p,Game::VillageCenter(nav.routeVillage))<18)
             {
-                n.life.routeVillage = -1;
-                n.life.routeTarget = destinationVillage;
+                nav.routeVillage=-1;nav.points.clear();nav.next=0;
             }
-            if (n.life.routeVillage >= 0 && Game::Distance(n.p, Game::VillageCenter(n.life.routeVillage)) < 12)
+            const int source=NearestVillage(n.p);
+            if (nav.routeVillage<0 && source!=destination)
             {
-                n.life.routeVillage = -1;
-            }
-            int source = NearestVillage(n.p);
-            if (n.life.routeVillage < 0 && source != destinationVillage)
-            {
-                if (Game::Distance(n.p, Game::VillageCenter(source)) > 20)
-                {
-                    n.life.routeVillage = source;
-                }
+                if (Game::Distance(n.p,Game::VillageCenter(source))>24) nav.routeVillage=source;
                 else
                 {
-                    std::array<int, VillageCount> parent;
-                    parent.fill(-1);
-                    std::queue<int> pending;
-                    pending.push(source);
-                    parent[source] = source;
-                    while (!pending.empty() && parent[destinationVillage] < 0)
+                    std::array<int,VillageCount> parent;parent.fill(-1);
+                    std::queue<int> pending;pending.push(source);parent[source]=source;
+                    while(!pending.empty() && parent[destination]<0)
                     {
-                        int from = pending.front();
-                        pending.pop();
-                        for (int to = 0; to < VillageCount; ++to)
-                        {
-                            if (parent[to] < 0 && Game::Distance(Game::VillageCenter(from), Game::VillageCenter(to)) <=
-                                                      VillageSpacing * 1.01)
-                            {
-                                parent[to] = from;
-                                pending.push(to);
-                            }
-                        }
+                        int from=pending.front();pending.pop();
+                        for(int to=0;to<VillageCount;++to)
+                            if(parent[to]<0 && Game::Distance(Game::VillageCenter(from),Game::VillageCenter(to))<=VillageSpacing*1.01)
+                            {parent[to]=from;pending.push(to);}
                     }
-                    int hop = destinationVillage;
-                    while (parent[hop] >= 0 && parent[hop] != source && parent[hop] != hop)
-                    {
-                        hop = parent[hop];
-                    }
-                    n.life.routeVillage = hop;
+                    int hop=destination;
+                    while(parent[hop]>=0 && parent[hop]!=source && parent[hop]!=hop) hop=parent[hop];
+                    nav.routeVillage=hop;
                 }
             }
-            if (n.life.routeVillage >= 0)
+            if(nav.routeVillage>=0)
             {
-                goal = Game::VillageCenter(n.life.routeVillage);
-            }
-            distance = Game::Distance(n.p, goal);
-            if (distance < .001)
-            {
-                return false;
+                leg=Game::VillageCenter(nav.routeVillage);
+                // Individual road lanes, still inside the generation-cleared corridor.
+                double lane=((int)(Game::Hash(n.id,17,631)%7)-3)*3.0;
+                Game::Vec delta(leg.x-n.p.x,leg.y-n.p.y);
+                if(std::abs(delta.x)>std::abs(delta.y)) leg.y+=lane; else leg.x+=lane;
             }
         }
-        // Residential travel first joins the street grid, then follows its junctions.
-        // Keep combat pursuit on the existing steering path.
-        n.life.pathBudget -= dt;
-        if (n.life.pathBudget <= 0 || goal.x != n.life.pathX || goal.y != n.life.pathY)
+        if (nav.next>=nav.points.size())
         {
-            n.life.pathX = goal.x;
-            n.life.pathY = goal.y;
-            n.life.pathClear = ClearSegment(n.p, goal);
-            n.life.pathBudget = .5;
-        }
-        if (!n.life.target && !n.life.pathClear)
-        {
-            if (n.life.streetActive && Game::Distance(n.p, {n.life.streetX, n.life.streetY}) < 10)
-            {
-                n.life.streetActive = false;
-            }
-            if (n.life.streetActive)
-            {
-                goal = Game::Vec(n.life.streetX, n.life.streetY);
-            }
+            nav.points.clear();nav.next=0;
+            if(nav.retry>0) return false;
+            if(NpcNavigation::Clear(n.p,leg)) nav.points.push_back({{leg.x,leg.y}});
             else
             {
-                int village = Game::VillageAt(n.p);
-                if (village >= 0)
+                if(searchBudget && *searchBudget<=0) return false;
+                if(searchBudget) --*searchBudget;
+                if(!NpcNavigation::Plan(n.p,leg,nav.points))
                 {
-                    auto center = Game::VillageCenter(village);
-                    Game::Vec junction(
-                        center.x + std::round((n.p.x - center.x) / 112) * 112,
-                        center.y + std::round((n.p.y - center.y) / 112) * 112
-                    );
-                    if (Game::Distance(n.p, junction) > 10 && ClearSegment(n.p, junction))
-                    {
-                        goal = junction;
-                    }
-                    else
-                    {
-                        Game::Vec destination = Game::VillageAt(goal) == village ? goal : center;
-                        Game::Vec next(destination.x, junction.y);
-                        if (Game::Distance(n.p, next) < 10)
-                        {
-                            next = Game::Vec(junction.x, destination.y);
-                        }
-                        if (ClearSegment(n.p, next))
-                        {
-                            goal = next;
-                        }
-                        else
-                        {
-                            goal = Game::Vec(junction.x, destination.y);
-                        }
-                    }
+                    ++nav.failures;nav.retry=1.0+(n.id%7)*.13;
+                    return false;
                 }
-                n.life.streetX = goal.x;
-                n.life.streetY = goal.y;
-                n.life.streetActive = true;
             }
-            distance = Game::Distance(n.p, goal);
-            if (distance < .001)
+        }
+        // Consume short waypoints with the unused part of this tick's movement.
+        double remaining=std::min(dt,.25)*(n.life.activity==Raiding?67:48);
+        while(remaining>1e-6 && nav.next<nav.points.size())
+        {
+            Game::Vec point(nav.points[nav.next][0],nav.points[nav.next][1]);
+            double distance=Game::Distance(n.p,point);
+            if(distance<.01) {++nav.next;continue;}
+            double step=std::min(distance,remaining);
+            Game::Vec next(n.p.x+(point.x-n.p.x)*step/distance,n.p.y+(point.y-n.p.y)*step/distance);
+            if(!NpcNavigation::Clear(n.p,next))
             {
+                nav.points.clear();nav.next=0;nav.retry=.3;++nav.failures;
                 return false;
             }
+            n.p=next;remaining-=step;
+            if(step>=distance-1e-6) ++nav.next;
         }
-        else
-        {
-            n.life.streetActive = false;
-        }
-        double x = (goal.x - n.p.x) / distance, y = (goal.y - n.p.y) / distance;
-        double step = std::min(distance, dt * (n.life.activity == Raiding ? 67 : 48));
-        // Corridors are cleared at generation; local steering handles buildings and travellers.
-        for (double angle : {0.0, .65, -.65, 1.2, -1.2, 1.57, -1.57})
-        {
-            double dx = x * std::cos(angle) - y * std::sin(angle);
-            double dy = x * std::sin(angle) + y * std::cos(angle);
-            Game::Vec next(n.p.x + dx * step, n.p.y + dy * step);
-            if (Game::Walkable(next))
-            {
-                n.p = next;
-                return false;
-            }
-        }
-        return false;
+        return Game::Distance(n.p,goal)<12;
     }
 
     inline void Attack(Game::World& w, Game::Npc& n, Game::Npc& victim)
@@ -626,6 +583,59 @@ namespace Society
         }
     }
 
+    inline Game::Vec NearbyPoint(const Game::Npc& n, Game::Vec center, double radius, unsigned sequence)
+    {
+        for (int attempt=0;attempt<16;++attempt)
+        {
+            unsigned h=Game::Hash(n.id,(int)sequence,701+attempt);
+            double angle=(h%65536)*(6.283185307179586/65536);
+            double distance=radius*(.3+((h>>16)%1000)/1428.0);
+            Game::Vec p(center.x+std::cos(angle)*distance,center.y+std::sin(angle)*distance);
+            if(Game::Walkable(p)) return p;
+        }
+        return Game::Walkable(center) ? center : n.home;
+    }
+
+    inline void BeginLeisure(Game::Npc& n)
+    {
+        auto& r=n.life.routine;
+        unsigned h=Game::Hash(n.id,(int)++r.sequence,719);
+        r.leisureRemaining=4+h%9;
+        r.workRemaining=12+(h/17)%25;
+        r.strolling=h%100>=40;
+        r.leisureX=n.p.x;r.leisureY=n.p.y;
+        if(r.strolling)
+        {
+            // Only pick reachable local walks. A break never abandons a long journey.
+            for(int attempt=0;attempt<12;++attempt)
+            {
+                auto p=NearbyPoint(n,n.p,70+(h/31)%90,r.sequence+attempt);
+                if(Game::Distance(n.p,p)>=24 && NpcNavigation::Clear(n.p,p))
+                {r.leisureX=p.x;r.leisureY=p.y;return;}
+            }
+            r.strolling=false;
+        }
+    }
+
+    inline Game::Vec TaskPoint(Game::Npc& n)
+    {
+        auto& l=n.life;auto& r=l.routine;
+        if(r.taskActivity!=l.activity || l.navigation.failures>=3)
+        {
+            Game::Vec center=n.home;
+            double radius=18;
+            if(l.activity==Hunting) {center=Game::HuntingGround(l.village);radius=44;}
+            if(l.activity==Studying) {center=Game::MeditationGround(l.village);radius=32;}
+            if(l.activity==Travelling) {center=Game::VillageCenter(l.destination);radius=26;}
+            if(l.activity==Patrolling) radius=160;
+            bool finishSavedWork=r.taskActivity<0 && l.work>0 && Game::Distance(n.p,center)<radius+12;
+            Game::Vec p=l.activity==Recovering ? n.home : finishSavedWork ? n.p : NearbyPoint(n,center,radius,++r.sequence);
+            r.taskX=p.x;r.taskY=p.y;r.taskActivity=l.activity;
+            l.navigation.failures=0;
+        }
+        return {r.taskX,r.taskY};
+    }
+
     inline void TickNpc(Game::World& w, Game::Npc& n, double dt, bool playerPresent)
     {
         InitializeNpc(n);
@@ -642,7 +652,7 @@ namespace Society
         {
             l.activity = Travelling;
             Game::Vec goal = Game::VillageCenter(l.movingTo), previous = n.p;
-            if (Move(n, goal, dt))
+            if (Move(n, goal, dt, &w.society.navigationBudget))
             {
                 std::array<bool, HousingCapacity> occupied = {};
                 for (const auto& other : w.npcs)
@@ -675,13 +685,19 @@ namespace Society
         Decide(w, n, playerPresent);
         Game::Vec previous = n.p;
         Game::Vec goal = n.home;
+        auto& routine=l.routine;
+        if(routine.workRemaining<0)
+        {
+            unsigned seed=Game::Hash(n.id,0,739);
+            routine.workRemaining=l.work>0 ? 12 : seed%4==0 ? 0 : 8+seed%29;
+        }
         if (l.target)
         {
             auto* victim = Find(w, l.target);
             goal = victim ? victim->p : w.player.p;
             if (Game::Distance(n.p, goal) > 25 || !ClearSegment(n.p, goal))
             {
-                Move(n, goal, dt);
+                Move(n, goal, dt, &w.society.navigationBudget);
             }
             else if (victim)
             {
@@ -711,24 +727,26 @@ namespace Society
         }
         else
         {
-            if (l.activity == Hunting)
+            goal=TaskPoint(n);
+            bool urgent=l.activity==Recovering;
+            bool journey=l.activity==Travelling && Game::Distance(n.p,goal)>80 && routine.leisureRemaining<=0;
+            if(!urgent && !journey)
             {
-                goal = Game::HuntingGround(l.village);
+                routine.workRemaining=std::max(0.0,routine.workRemaining-dt);
+                bool settled=Game::Distance(n.p,goal)<12 || Game::Distance(n.p,n.home)<12;
+                if(routine.leisureRemaining<=0 && routine.workRemaining<=0 && settled) BeginLeisure(n);
+                if(routine.leisureRemaining>0)
+                {
+                    routine.leisureRemaining=std::max(0.0,routine.leisureRemaining-dt);
+                    l.activity=routine.strolling ? Wandering : Resting;
+                    goal={routine.leisureX,routine.leisureY};
+                    if(routine.strolling && Move(n,goal,dt,&w.society.navigationBudget)) routine.strolling=false;
+                    l.work=0;
+                    n.motion.Update(goal.x-n.p.x,goal.y-n.p.y,n.p.x-previous.x,n.p.y-previous.y);
+                    return;
+                }
             }
-            else if (l.activity == Studying)
-            {
-                goal = Game::MeditationGround(l.village);
-            }
-            else if (l.activity == Travelling)
-            {
-                goal = Game::VillageCenter(l.destination);
-            }
-            else if (l.activity == Patrolling)
-            {
-                double side = std::sin(w.society.elapsed * .025 + n.id) > 0 ? 1 : -1;
-                goal = Game::Vec(n.home.x + side * 175, n.home.y + side * 175);
-            }
-            bool arrived = Move(n, goal, dt);
+            bool arrived = Move(n, goal, dt, &w.society.navigationBudget);
             if (arrived)
             {
                 l.work = l.activity == Recovering ? 0 : l.work + dt;
@@ -751,10 +769,12 @@ namespace Society
                         n.power = std::min(100, n.power + 1);
                         n.echo[0] = std::min(1000000, n.echo[0] + 1);
                         Record(w, HuntCompleted, n.id, 0, 2);
+                        routine.workRemaining=0;routine.taskActivity=-1;
                     }
                     else if (l.activity == Trading)
                     {
                         Sell(w, n, l.village);
+                        routine.workRemaining=0;
                     }
                     else if (l.activity == Travelling)
                     {
@@ -771,6 +791,7 @@ namespace Society
                             Record(w, GoodsBought, n.id, 0, quantity);
                         }
                         l.destination = (l.destination + 1) % VillageCount;
+                        routine.taskActivity=-1;
                     }
                     else if (l.activity == Studying)
                     {
@@ -781,6 +802,7 @@ namespace Society
                             n.power = std::min(100, n.power + 3);
                             Record(w, Enlightened, n.id, 0, l.insight);
                         }
+                        routine.workRemaining=0;routine.taskActivity=-1;
                     }
                     else if (l.activity == Healing)
                     {
@@ -797,7 +819,9 @@ namespace Society
                                 break;
                             }
                         }
+                        routine.workRemaining=0;
                     }
+                    else if(l.activity==Patrolling) {routine.workRemaining=0;routine.taskActivity=-1;}
                 }
             }
             else
@@ -1032,6 +1056,7 @@ namespace Society
             s.accumulator = std::max(0.0, s.accumulator - .1);
             s.elapsed += .1;
             ++s.ticks;
+            s.navigationBudget = 4;
             if (s.ticks % 10 == 0)
             {
                 ExchangeNews(w);
@@ -1078,7 +1103,7 @@ namespace Society
             size_t alive = 0;
             size_t playerPursuers = 0;
             long long gold = s.gold;
-            std::array<int, 9> activities = {};
+            std::array<int, ActivityCount> activities = {};
             for (const auto& n : w.npcs)
             {
                 gold += n.life.gold;

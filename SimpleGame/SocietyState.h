@@ -6,13 +6,14 @@
 #include <istream>
 #include <ostream>
 #include <string>
+#include "NpcNavigationState.h"
 
 namespace Society
 {
     constexpr int VillageCount = 7;
-    constexpr int ResidentsPerVillage = 50;
+    constexpr int ResidentsPerVillage = 24;
     constexpr int HousingCapacity = 60;
-    constexpr double VillageRadius = 640;
+    constexpr double VillageRadius = 850;
     constexpr double WalkingSpeed = 85;
     constexpr double VillageSpacing = WalkingSpeed * 20;
     constexpr double WorkInterval = 5;
@@ -111,7 +112,10 @@ namespace Society
         Studying,
         Patrolling,
         Healing,
-        Defending
+        Defending,
+        Resting,
+        Wandering,
+        ActivityCount
     };
 
     enum EventKind
@@ -157,11 +161,8 @@ namespace Society
         double cooldown = 0, work = 0, birthAt = 0;
         // Encounter timers are session-local, not part of the persistent life record.
         double playerChase = 0, playerRetry = 0, playerProvoked = 0;
-        int routeVillage = -1, routeTarget = -1;
-        bool streetActive = false;
-        double streetX = 0, streetY = 0;
-        double pathBudget = 0, pathX = 0, pathY = 0;
-        bool pathClear = false;
+        Navigation navigation;
+        Routine routine;
         int houseLot = -1, movingTo = -1, carriedRumor = 0;
         double migrationCooldown = 0;
         std::array<News, VillageCount> known;
@@ -210,6 +211,7 @@ namespace Society
         std::array<int, VillageCount> seeded = {};
         double nextNews = 0;
         std::deque<Letter> letters;
+        int navigationBudget = 4; // Bounded path searches per simulation tick.
     };
 
     inline void WriteLife(std::ostream& out, const Life& n, bool extended = false)
@@ -231,12 +233,14 @@ namespace Society
 
     inline bool ReadLife(std::istream& in, Life& n, int count, bool extended = false)
     {
+        n.navigation = Navigation();
+        n.routine = Routine();
         n.playerChase = n.playerRetry = n.playerProvoked = 0;
         in >> n.initialized >> n.alive >> n.job >> n.goal >> n.activity >> n.village >> n.destination >> n.gold >>
             n.goods >> n.insight >> n.target >> n.parentId >> n.successorId >> n.health >> n.maxHealth >>
             n.raidWeight >> n.cooldown >> n.work >> n.birthAt;
         bool valid = in && n.job >= 0 && n.job < JobCount && n.goal >= Vitality && n.goal <= Insight &&
-                     n.activity >= Recovering && n.activity <= Defending && n.village >= 0 &&
+                     n.activity >= Recovering && n.activity < ActivityCount && n.village >= 0 &&
                      n.village < VillageCount && n.destination >= 0 && n.destination < VillageCount && n.gold >= 0 &&
                      n.gold <= 1000000 && n.goods >= 0 && n.goods <= 1000 && n.insight >= 0 && n.insight <= 10000 &&
                      n.target >= -1 && n.target <= count && n.parentId >= 0 && n.parentId <= count &&
@@ -405,14 +409,14 @@ namespace Society
         s.letters.clear();
         if (version >= 4)
         {
-            if (!(in >> s.layoutVersion >> s.nextNews) || s.layoutVersion < 0 || s.layoutVersion > 1 ||
+            if (!(in >> s.layoutVersion >> s.nextNews) || s.layoutVersion < 0 || s.layoutVersion > 2 ||
                 !std::isfinite(s.nextNews) || s.nextNews < 0)
             {
                 return false;
             }
             for (int& seeded : s.seeded)
             {
-                if (!(in >> seeded) || seeded < 0 || seeded > ResidentsPerVillage)
+                if (!(in >> seeded) || seeded < 0 || seeded > HousingCapacity)
                 {
                     return false;
                 }

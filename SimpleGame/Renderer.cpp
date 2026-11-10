@@ -404,6 +404,7 @@ void Renderer::Terrain(float cameraX, float cameraY, float zoom, bool farming, f
     }
     glUniform2fv(glGetUniformLocation(m_Terrain, "u_Villages[0]"), Society::VillageCount, centers);
     glUniform1f(glGetUniformLocation(m_Terrain, "u_VillageRadius"), (float)Society::VillageRadius);
+    glUniform1f(glGetUniformLocation(m_Terrain, "u_HouseSpacing"), (float)Game::HouseSpacing);
     glBindVertexArray(m_Array);
     DrawArrays(GL_TRIANGLES, 0, 3);
 }

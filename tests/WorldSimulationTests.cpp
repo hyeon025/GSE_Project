@@ -149,22 +149,22 @@ void CheckSettlementMigration()
     assert(w.society.settledVillages == 3);
     w.player.p = Game::VillageBuilding(3, 0);
     Society::Initialize(w);
-    assert(w.npcs.size() == 350 && w.society.settledVillages == 7);
+    assert(w.npcs.size() == Society::VillageCount * Society::ResidentsPerVillage && w.society.settledVillages == 7);
     assert(Game::Walkable(w.player.p));
     assert(!w.npcs[0].life.alive && w.npcs[0].Name() == name);
     assert(w.npcs[1].life.gold == 173 && w.society.villages[0].treasury == 601);
     assert(w.society.villages[4].treasury == 600);
-    for (int i = 24; i < 350; ++i)
+    for (int i = 24; i < Society::VillageCount * Society::ResidentsPerVillage; ++i)
     {
         assert(w.npcs[i].id == i + 1 && w.npcs[i].life.houseLot >= 0);
     }
     std::stringstream upgraded;
     Society::Write(upgraded, w.society);
     Society::State state;
-    assert(Society::Read(upgraded, state, 350));
+    assert(Society::Read(upgraded, state, Society::VillageCount * Society::ResidentsPerVillage));
     w.society = state;
     Society::Initialize(w);
-    assert(w.npcs.size() == 350);
+    assert(w.npcs.size() == Society::VillageCount * Society::ResidentsPerVillage);
     auto moved = w.npcs[1];
     moved.life.village = 4;
     moved.life.job = Society::Raider;
@@ -221,6 +221,10 @@ void CheckOffscreenAndRecovery()
     auto& hunter = w.npcs[0];
     hunter.p = Game::HuntingGround(0);
     hunter.life.work = 4.95;
+    hunter.life.routine.workRemaining = 100;
+    hunter.life.routine.taskActivity = Society::Hunting;
+    hunter.life.routine.taskX = hunter.p.x;
+    hunter.life.routine.taskY = hunter.p.y;
     Society::Update(w, .1, false);
     assert(hunter.life.goods > 0);
     hunter.life.health = 15;
@@ -233,6 +237,11 @@ void CheckOffscreenAndRecovery()
     auto& seeker = w.npcs[5];
     seeker.p = Game::MeditationGround(0);
     seeker.life.work = 4.95;
+    seeker.life.routine.workRemaining = 100;
+    seeker.life.routine.leisureRemaining = 0;
+    seeker.life.routine.taskActivity = Society::Studying;
+    seeker.life.routine.taskX = seeker.p.x;
+    seeker.life.routine.taskY = seeker.p.y;
     Society::TickNpc(w, seeker, .1, false);
     assert(seeker.life.insight == 1);
 }
@@ -275,7 +284,7 @@ void CheckPlayerPursuitLimits()
     raider.origin = 2;
     raider.archetype = 0;
     raider.home = Game::VillageCenter(0);
-    raider.p = w.player.p = Game::Vec(680, 0);
+    raider.p = w.player.p = Game::Vec(760, 760);
     Society::InitializeNpc(raider);
     w.npcs.push_back(raider);
 
@@ -466,14 +475,14 @@ void CheckMailAndMigration()
     life << std::setprecision(17);
     Society::WriteLife(life, migrant.life, true);
     Society::Life restored;
-    assert(Society::ReadLife(life, restored, 350, true));
+    assert(Society::ReadLife(life, restored, Society::VillageCount * Society::ResidentsPerVillage, true));
     assert(restored.houseLot == migrant.life.houseLot && restored.known[1].time == 100);
     std::stringstream state;
     state << std::setprecision(17);
     Society::Write(state, w.society);
     Society::State loaded;
-    assert(Society::Read(state, loaded, 350));
-    assert(loaded.layoutVersion == 1 && loaded.rumors.back().reachMask == 127);
+    assert(Society::Read(state, loaded, Society::VillageCount * Society::ResidentsPerVillage));
+    assert(loaded.layoutVersion == 2 && loaded.rumors.back().reachMask == 127);
     assert(loaded.letters.size() == w.society.letters.size());
 }
 

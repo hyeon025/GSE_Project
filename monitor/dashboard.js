@@ -3,7 +3,7 @@
 const $ = (id) => document.getElementById(id);
 const names = {
   jobs: ["사냥꾼", "상인", "약탈자", "구도자", "수호자", "치유사"],
-  activities: ["회복", "사냥", "거래", "이동", "약탈", "명상", "순찰", "치료", "방어"],
+  activities: ["회복", "사냥", "거래", "이동", "약탈", "명상", "순찰", "치료", "방어", "휴식", "산책"],
   goals: ["체력", "재산", "깨달음"],
   villages: ["잿빛 마을", "종탑 마을", "강변 마을", "안개숲 마을", "검은나루 마을"],
   abilities: ["육체", "감각", "정신", "운명", "물질", "생명"],
@@ -216,7 +216,7 @@ function renderSummary() {
   $("alive").textContent = number(s.counts.npcAlive);
   $("population").textContent = `전체 ${number(s.counts.npcTotal)} / 사망 ${number(s.counts.npcDead)}`;
   $("mobs").textContent = number(s.counts.mobs);
-  $("combat").textContent = s.combat.active ? `${s.combat.story ? "스토리 전투" : "경작지"} · 등장 중 ${number(s.counts.spawning)} · 보스 ${number(s.counts.bosses)}` : "오픈월드 · 개체형 야생 몹 없음";
+  $("combat").textContent = s.combat.active ? `스토리 전투 · 등장 중 ${number(s.counts.spawning)} · 보스 ${number(s.counts.bosses)}` : `마을 주변 동물 ${number(s.counts.wildlifeEntities)}마리`;
   $("player-health").textContent = `${number(s.player.health)} / ${number(s.player.maxHealth)}`;
   $("player-gold").textContent = `은화 ${number(s.player.gold)} / 사망 ${number(s.player.deaths)}`;
   $("trades").textContent = number(s.statistics.trades);

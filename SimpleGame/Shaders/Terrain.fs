@@ -9,6 +9,7 @@ uniform bool u_Farming;
 uniform float u_Seed;
 uniform vec2 u_Villages[7];
 uniform float u_VillageRadius;
+uniform float u_HouseSpacing;
 out vec4 FragColor;
 
 float hash(vec2 p)
@@ -36,7 +37,7 @@ float road(vec2 p)
         if (length(q) < u_VillageRadius)
         {
             distance = min(distance, min(abs(q.x),abs(q.y)));
-            vec2 lane = abs(mod(q + 56.0,112.0)-56.0);
+            vec2 lane = abs(mod(q + u_HouseSpacing*.5,u_HouseSpacing)-u_HouseSpacing*.5);
             distance = min(distance,min(lane.x,lane.y));
         }
         for (int j = i + 1; j < 7; ++j)

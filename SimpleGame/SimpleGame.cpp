@@ -718,13 +718,7 @@ void Act(int action)
     }
     if (action == EnterLevel && !InCombat())
     {
-        g_World.levelOne.active = true;
-        g_LevelView.reset(new LevelOneView(*g_Scene, g_World.levelOne));
-        g_LevelView->paused = false;
-        g_Dialog = false;
-        g_Panel = 0;
-        std::fill(std::begin(g_Keys), std::end(g_Keys), false);
-        Persist();
+        Notify(L"\ub3d9\ubb3c\uc740 \ub9c8\uc744 \uc8fc\ubcc0\uc5d0\uc11c \ub9cc\ub0a0 \uc218 \uc788\uc2b5\ub2c8\ub2e4. F: \uacf5\uaca9");
         return;
     }
     auto& p = g_World.player;
@@ -1707,7 +1701,7 @@ void RenderUI()
         Text(24, 110, Story::Title(g_World.story.stage), g_Accent, 18);
         Wrap(24, 139, 300, Story::Objective(g_World), g_Muted, 14);
         AddButton(24, 222, 140, 40, L"\uc5ec\uc815", StoryOpen);
-        AddButton(172, 222, 140, 40, L"\uacbd\uc791\uc9c0 \uc785\uc7a5", EnterLevel);
+        Text(172,230,L"\uc8fc\ubcc0 \ub3d9\ubb3c  F: \uacf5\uaca9",g_Muted,13);
         int village = Society::NearestVillage(p.p);
         const auto& market = g_World.society.villages[village];
         Text(
@@ -1990,6 +1984,7 @@ void Update(float dt)
     g_World.time += dt;
     int previousDeaths = g_World.deaths;
     g_Scene->UpdateSociety(dt, true);
+    WorldCombat::Update(g_World,dt,!g_Dialog && !g_Panel);
     Story::UpdateWorld(g_World);
     if (g_World.deaths != previousDeaths)
     {
@@ -2096,6 +2091,8 @@ void KeyDown(unsigned char key, int, int)
     }
     if (key == 'f' && !g_Panel)
     {
+        if(g_World.worldShotTimer>0)return;
+        if(WorldCombat::Fire(g_World,true))return;
         int target = 0;
         double nearest = 65;
         for (const auto& n : g_World.npcs)
@@ -2346,6 +2343,7 @@ int main(int argc, char** argv)
     g_Scene->width = g_Width;
     g_Scene->height = g_Height;
     bool loaded = Load(g_World, g_SaveBlocked);
+    g_World.levelOne.active=false;
     Society::Initialize(g_World);
     g_Monitor.reset(new WorldMonitor());
     if (!Walkable(g_World.player.p))

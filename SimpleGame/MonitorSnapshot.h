@@ -13,7 +13,7 @@ namespace Monitoring
         double raidWeight = 0;
         int raiders = 0, recentDeaths = 0, heardRumors = 0;
         std::array<int, Society::JobCount> jobs = {};
-        std::array<int, Society::Defending + 1> activities = {};
+        std::array<int, Society::ActivityCount> activities = {};
     };
 
     inline void Number(std::ostream& out, double value)
@@ -181,6 +181,9 @@ namespace Monitoring
                                           : w.levelOne.active  ? &w.levelOne
                                                                : nullptr;
         int mobs = combat ? AliveEnemies(*combat) : 0;
+        int wildlife=0;
+        for(const auto& a:w.wildlife)wildlife+=a.health>0;
+        if(!combat)mobs=wildlife;
         int spawning = 0, bosses = 0;
         if (combat)
         {
@@ -205,7 +208,7 @@ namespace Monitoring
         out << ",\"tick\":" << w.society.ticks << ",\"counts\":{\"npcAlive\":" << alive
             << ",\"npcDead\":" << w.npcs.size() - alive << ",\"npcTotal\":" << w.npcs.size() << ",\"mobs\":" << mobs
             << ",\"spawning\":" << spawning << ",\"bosses\":" << bosses
-            << ",\"wildlifeEntities\":0},\"player\":{\"health\":";
+            << ",\"wildlifeEntities\":" << wildlife << "},\"player\":{\"health\":";
         Number(out, combat ? combat->health : w.player.health);
         out << ",\"maxHealth\":";
         Number(out, combat ? LevelOne::MaxHealth(*combat) : 100);

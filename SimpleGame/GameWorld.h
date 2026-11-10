@@ -135,6 +135,18 @@ namespace Game
         }
     };
 
+    struct Animal
+    {
+        Npc actor;
+        int species = 0;
+        float health = 60;
+        double respawn = 0, cooldown = 0, wander = 0;
+        float hitFlash = 0;
+        Vec destination;
+        bool chasing = false, moving = false;
+        float yaw = 0;
+    };
+
     struct Player
     {
         PlayerProfile profile;
@@ -159,6 +171,12 @@ namespace Game
         double time = 0;
         std::map<Key, SiteState> states;
         std::vector<Npc> npcs;
+        std::vector<Animal> wildlife;
+        bool wildlifeInitialized = false;
+        double wildlifePlayerCooldown = 0;
+        std::vector<LevelOne::Projectile> worldShots;
+        float worldShotTimer = 0, worldAttackAnimation = 0;
+        Vec worldAttackAim;
         std::vector<int> events;
         bool dirty = false;
 
@@ -273,13 +291,13 @@ namespace Game
     inline Vec HuntingGround(int index)
     {
         Vec p = VillageCenter(index);
-        return Vec(p.x + 570, p.y - 100);
+        return Vec(p.x + 760, p.y - 180);
     }
 
     inline Vec MeditationGround(int index)
     {
         Vec p = VillageCenter(index);
-        return Vec(p.x - 570, p.y + 100);
+        return Vec(p.x - 760, p.y + 180);
     }
 
     inline Vec VillageBuilding(int village, int building)
@@ -297,6 +315,7 @@ namespace Game
     }
 
     constexpr double BuildingHalfWidth = 33, BuildingHalfDepth = 28;
+    constexpr double HouseSpacing = 160, HouseExtent = HouseSpacing*4+68;
 
     inline Vec HousePosition(int village, int lot)
     {
@@ -311,7 +330,7 @@ namespace Game
             cell += 2;
         }
         Vec c = VillageCenter(village);
-        return Vec(c.x + (cell % 8 - 3.5) * 112, c.y + (cell / 8 - 3.5) * 112);
+        return Vec(c.x + (cell % 8 - 3.5) * HouseSpacing, c.y + (cell / 8 - 3.5) * HouseSpacing);
     }
 
     inline Vec HouseEntrance(int village, int lot)
@@ -355,7 +374,7 @@ namespace Game
                 distance = std::min(distance, std::min(std::abs(p.x - c.x), std::abs(p.y - c.y)));
                 distance = std::min(
                     distance,
-                    std::min(std::abs(std::remainder(p.x - c.x, 112.0)), std::abs(std::remainder(p.y - c.y, 112.0)))
+                    std::min(std::abs(std::remainder(p.x - c.x, HouseSpacing)), std::abs(std::remainder(p.y - c.y, HouseSpacing)))
                 );
             }
             for (const auto& destination : road.neighbors)
@@ -446,14 +465,14 @@ namespace Game
         for (int v = 0; v < Society::VillageCount; ++v)
         {
             Vec relative(p.x - VillageCenter(v).x, p.y - VillageCenter(v).y);
-            if (std::abs(relative.x) < 460 && std::abs(relative.y) < 460)
+            if (std::abs(relative.x) < HouseExtent && std::abs(relative.y) < HouseExtent)
             {
-                int cellX = (int)std::round(relative.x / 112 + 3.5);
-                int cellY = (int)std::round(relative.y / 112 + 3.5);
+                int cellX = (int)std::round(relative.x / HouseSpacing + 3.5);
+                int cellY = (int)std::round(relative.y / HouseSpacing + 3.5);
                 if (cellX >= 0 && cellX < 8 && cellY >= 0 && cellY < 8 &&
                     !((cellX == 3 || cellX == 4) && (cellY == 3 || cellY == 4)))
                 {
-                    Vec house(VillageCenter(v).x + (cellX - 3.5) * 112, VillageCenter(v).y + (cellY - 3.5) * 112);
+                    Vec house(VillageCenter(v).x + (cellX - 3.5) * HouseSpacing, VillageCenter(v).y + (cellY - 3.5) * HouseSpacing);
                     if (std::abs(p.x - house.x) < BuildingHalfWidth && std::abs(p.y - house.y) < BuildingHalfDepth)
                     {
                         return false;
@@ -666,7 +685,7 @@ namespace Game
             return false;
         }
         const Player& p = w.player;
-        f << std::setprecision(17) << "GSE_WORLD 8\n" << w.time << ' ' << w.deaths << '\n';
+        f << std::setprecision(17) << "GSE_WORLD 9\n" << w.time << ' ' << w.deaths << '\n';
         f << p.p.x << ' ' << p.p.y << ' ' << p.checkpoint.x << ' ' << p.checkpoint.y << ' ' << p.health << ' '
           << p.stamina << ' ' << p.bread << ' ' << p.herbs << ' ' << p.wood << ' ' << p.fragments << ' '
           << (int)p.ability << ' ' << p.exploration << '\n';
@@ -759,7 +778,7 @@ namespace Game
         Player& p = result.player;
         std::string magic;
         int version = 0, ability = 0;
-        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 8)
+        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 9)
         {
             return false;
         }
