@@ -13,7 +13,8 @@ namespace Society
     constexpr int VillageCount = 7;
     constexpr int ResidentsPerVillage = 24;
     constexpr int HousingCapacity = 60;
-    constexpr double VillageRadius = 850;
+    constexpr double VillageRadius = 990;
+    constexpr int VillageLayoutVersion = 3;
     constexpr double WalkingSpeed = 85;
     constexpr double VillageSpacing = WalkingSpeed * 20;
     constexpr double WorkInterval = 5;
@@ -409,7 +410,7 @@ namespace Society
         s.letters.clear();
         if (version >= 4)
         {
-            if (!(in >> s.layoutVersion >> s.nextNews) || s.layoutVersion < 0 || s.layoutVersion > 2 ||
+            if (!(in >> s.layoutVersion >> s.nextNews) || s.layoutVersion < 0 || s.layoutVersion > VillageLayoutVersion ||
                 !std::isfinite(s.nextNews) || s.nextNews < 0)
             {
                 return false;

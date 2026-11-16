@@ -302,7 +302,7 @@ namespace Game
 
     inline Vec VillageBuilding(int village, int building)
     {
-        static const Vec offsets[] = {Vec(-95, 65), Vec(110, 45), Vec(25, -115)};
+        static const Vec offsets[] = {Vec(-145, 70), Vec(145, 65), Vec(65, -145)};
         Vec p = VillageCenter(village);
         return Vec(p.x + offsets[building].x, p.y + offsets[building].y);
     }
@@ -315,7 +315,7 @@ namespace Game
     }
 
     constexpr double BuildingHalfWidth = 33, BuildingHalfDepth = 28;
-    constexpr double HouseSpacing = 160, HouseExtent = HouseSpacing*4+68;
+    constexpr double HouseSpacing = 190, HouseExtent = HouseSpacing * 4 + 68;
 
     inline Vec HousePosition(int village, int lot)
     {
@@ -402,14 +402,18 @@ namespace Game
 
     inline int VillageAt(Vec p)
     {
+        int village = -1;
+        double closest = Society::VillageRadius;
         for (int i = 0; i < Society::VillageCount; ++i)
         {
-            if (Distance(p, VillageCenter(i)) < Society::VillageRadius)
+            double distance = Distance(p, VillageCenter(i));
+            if (distance < closest)
             {
-                return i;
+                closest = distance;
+                village = i;
             }
         }
-        return -1;
+        return village;
     }
 
     inline bool ObstacleUncached(int tx, int ty)

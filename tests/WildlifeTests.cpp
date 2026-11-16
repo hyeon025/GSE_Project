@@ -10,7 +10,6 @@ int main()
 {
     Game::World w;w.levelOne.active=false;Society::Initialize(w);Wildlife::Initialize(w);
     assert(w.npcs.size()==168 && w.wildlife.size()==42);
-    assert(Game::HouseSpacing==160);
     for(const auto& a:w.wildlife)assert(Game::Walkable(a.actor.p));
     for(const auto& n:w.npcs)assert(Game::Walkable(n.home));
     auto& wolf=w.wildlife[0];wolf.actor.p=wolf.actor.home={0,0};
@@ -37,7 +36,15 @@ int main()
     assert(Monitoring::Snapshot(w,1,1,1,false).find("\"wildlifeEntities\":42")!=std::string::npos);
     // Old dense worlds keep their identities and migrate once, without adding residents.
     auto oldCount=w.npcs.size();w.society.layoutVersion=1;w.society.seeded.fill(50);
-    Society::Initialize(w);assert(w.npcs.size()==oldCount && w.society.layoutVersion==2);
+    Society::Initialize(w);assert(w.npcs.size()==oldCount && w.society.layoutVersion==Society::VillageLayoutVersion);
+    auto& resident=w.npcs.front();
+    w.society.layoutVersion=2;
+    resident.home={-560,-598};
+    resident.p=Game::HousePosition(0,resident.life.houseLot);
+    Society::Initialize(w);
+    assert(Game::Distance(resident.home,Game::HouseEntrance(0,resident.life.houseLot))==0);
+    assert(Game::Distance(resident.p,resident.home)==0);
+    assert(Game::VillageAt({900,0})==1 && Game::VillageAt({800,0})==0);
     std::stringstream state;Society::Write(state,w.society);Society::State restored;
     assert(Society::Read(state,restored,(int)w.npcs.size()));
     std::cout<<"Wildlife/density tests passed: 168 residents, 42 animals, heading, chase/flee, damage, attack, respawn, old density save\n";

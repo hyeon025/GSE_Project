@@ -198,15 +198,24 @@ namespace Society
             std::cout << "[World] villages=" << VillageCount << " settled=" << w.society.settledVillages
                       << " residentsPerVillage=" << ResidentsPerVillage << " npcRecords=" << w.npcs.size() << '\n';
         }
-        if(w.society.layoutVersion<2)
+        if (w.society.layoutVersion < VillageLayoutVersion)
         {
-            for(auto& n:w.npcs) if(n.life.houseLot>=0)
+            const bool relocateResidents = w.society.layoutVersion < 2;
+            for (auto& n : w.npcs)
             {
-                n.home=Game::HouseEntrance(n.life.village,n.life.houseLot);
-                if(n.life.alive)n.p=n.home;
-                n.life.navigation=Navigation();n.life.routine=Routine();
+                if (n.life.houseLot >= 0)
+                {
+                    n.home = Game::HouseEntrance(n.life.village, n.life.houseLot);
+                    if (n.life.alive && relocateResidents)
+                    {
+                        n.p = n.home;
+                    }
+                }
+                n.life.navigation = Navigation();
+                n.life.routine = Routine();
             }
-            w.society.layoutVersion=2;w.dirty=true;
+            w.society.layoutVersion = VillageLayoutVersion;
+            w.dirty = true;
         }
         // Build housing occupancy once, then preserve NPC order when assigning empty lots.
         std::array<std::array<bool, HousingCapacity>, VillageCount> occupied = {};

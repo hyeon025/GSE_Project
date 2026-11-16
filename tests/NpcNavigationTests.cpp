@@ -33,6 +33,17 @@ void Arrive(Game::Vec start,Game::Vec goal,int id)
 int main(int argc,char** argv)
 {
     auto begin=std::chrono::steady_clock::now();
+    for(int v=0;v<Society::VillageCount;++v)
+    {
+        const auto center=Game::VillageCenter(v);
+        const double end=Game::HouseSpacing*3.5;
+        // Keep both main streets open across the full residential grid.
+        for(double offset : {-25.0, 0.0, 25.0})
+        {
+            assert(NpcNavigation::Clear({center.x-end,center.y+offset},{center.x+end,center.y+offset}));
+            assert(NpcNavigation::Clear({center.x+offset,center.y-end},{center.x+offset,center.y+end}));
+        }
+    }
     // Old steering oscillates indefinitely for lots 4,24,25,26. Check every lot,
     // both work areas and the center, not merely the four observed regressions.
     for(int lot=0;lot<60;++lot)
