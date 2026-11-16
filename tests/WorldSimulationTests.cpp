@@ -482,7 +482,7 @@ void CheckMailAndMigration()
     Society::Write(state, w.society);
     Society::State loaded;
     assert(Society::Read(state, loaded, Society::VillageCount * Society::ResidentsPerVillage));
-    assert(loaded.layoutVersion == 2 && loaded.rumors.back().reachMask == 127);
+    assert(loaded.layoutVersion == Society::VillageLayoutVersion && loaded.rumors.back().reachMask == 127);
     assert(loaded.letters.size() == w.society.letters.size());
 }
 
