@@ -1228,7 +1228,9 @@ namespace Society
             L"\uc774\uc8fc \ucd9c\ubc1c",
             L"\uc774\uc8fc \uc644\ub8cc"
         };
-        return (e.actor ? L"#" + std::to_wstring(e.actor) : L"\ub2f9\uc2e0") + std::wstring(L"  ") + names[e.kind] +
+        const std::wstring actor = e.actor == WildlifeKiller ? L"\uc57c\uc0dd\ub3d9\ubb3c"
+                                                            : e.actor ? L"#" + std::to_wstring(e.actor) : L"\ub2f9\uc2e0";
+        return actor + L"  " + names[e.kind] +
                (e.other ? L"  #" + std::to_wstring(e.other) : L"");
     }
 }

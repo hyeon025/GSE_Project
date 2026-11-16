@@ -6,8 +6,61 @@
 #include "../SimpleGame/Wildlife.h"
 #include "../SimpleGame/MonitorSnapshot.h"
 
+static void TestNpcCombat()
+{
+    Game::World w;
+    w.player.p={2000,0};
+    w.wildlifeInitialized=true;
+    w.wildlife.resize(2);
+    auto& wolf=w.wildlife[0];
+    auto& goat=w.wildlife[1];
+    goat.species=4;
+    w.npcs.resize(3);
+    for(int i=0;i<3;++i)w.npcs[i].id=i+1;
+    auto& dead=w.npcs[0];
+    dead.life.alive=false;
+    dead.p={5,0};
+    auto& child=w.npcs[1];
+    w.story.childId=child.id;
+    child.p={10,0};
+    auto& resident=w.npcs[2];
+    resident.p={60,0};
+    resident.life.health=10;
+
+    Wildlife::Update(w,.1,false);
+    assert(wolf.chasing && wolf.actor.life.target==resident.id && wolf.actor.p.x>0);
+    assert(!goat.chasing);
+
+    const auto house=Game::HousePosition(0,0);
+    const Game::Vec corner={house.x+Game::BuildingHalfWidth,house.y+Game::BuildingHalfDepth};
+    wolf.actor.p=wolf.actor.home={corner.x-12,corner.y+4};
+    resident.p={corner.x+4,corner.y-12};
+    assert(Game::Walkable(wolf.actor.p) && Game::Walkable(resident.p));
+    assert(!Society::ClearSegment(wolf.actor.p,resident.p));
+    Wildlife::Update(w,.1,false);
+    assert(resident.life.health==10);
+
+    wolf.actor.home={0,0};
+    wolf.actor.p={40,0};
+    resident.p={60,0};
+    const int gold=w.society.gold;
+    Wildlife::Update(w,.1,false);
+    assert(resident.life.health==5 && resident.life.alive && w.player.health==100);
+    Wildlife::Update(w,.1,false);
+    assert(resident.life.health==5);
+    Wildlife::Update(w,1.8,false);
+    assert(!resident.life.alive && w.society.deaths==1 && w.society.gold==gold);
+    assert(w.society.events.back().actor==Society::WildlifeKiller);
+    std::stringstream saved;
+    Society::Write(saved,w.society);
+    Society::State restored;
+    assert(Society::Read(saved,restored,(int)w.npcs.size()));
+    assert(restored.rumors.back().actor==Society::WildlifeKiller);
+}
+
 int main()
 {
+    TestNpcCombat();
     Game::World w;w.levelOne.active=false;Society::Initialize(w);Wildlife::Initialize(w);
     assert(w.npcs.size()==168 && w.wildlife.size()==42);
     assert(Game::HouseSpacing==160);

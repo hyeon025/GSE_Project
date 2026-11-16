@@ -26,7 +26,10 @@ let latestStatus = "waiting";
 const PAGE_SIZE = 50;
 const number = (v) => typeof v === "number" && Number.isFinite(v) ? v.toLocaleString("ko-KR", {maximumFractionDigits: 1}) : "—";
 const label = (list, index) => list[index] ?? "미상";
-const actor = (id) => id === 0 || id === -1 ? "플레이어" : `${npcById.get(id)?.name ?? "NPC"} #${id}`;
+const actor = (id) => {
+  if (id === -2) return "야생동물";
+  return id === 0 || id === -1 ? "플레이어" : `${npcById.get(id)?.name ?? "NPC"} #${id}`;
+};
 const villageName = (id) => snapshot?.villages.find((v) => v.id === id)?.name ?? label(names.villages, id);
 const target = (id) => id === 0 ? "없음" : actor(id);
 const healthRatio = (n) => n.maxHealth > 0 && Number.isFinite(n.health) ? Math.max(0, Math.min(1, n.health / n.maxHealth)) : 0;

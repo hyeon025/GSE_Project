@@ -48,19 +48,63 @@ namespace Wildlife
             {
                 a.respawn=std::max(0.0,a.respawn-dt);
                 if(a.respawn<=0 && Game::Distance(w.player.p,a.actor.home)>220)
-                {a.health=60;a.actor.p=a.actor.home;a.chasing=false;}
+                {a.health=60;a.actor.p=a.actor.home;a.chasing=false;a.actor.life.target=0;}
                 continue;
             }
             double distance=Game::Distance(a.actor.p,w.player.p);
-            if(distance>1300){a.actor.motion.Update(0,0,0,0);continue;}
             auto before=a.actor.p;
             bool danger=a.species<3;
-            a.chasing=playerPresent && danger && distance< (a.chasing?300:155) && Game::Distance(a.actor.p,a.actor.home)<380;
+            const int previousTarget=a.actor.life.target;
+            a.actor.life.target=0;
+            if(danger && Game::Distance(a.actor.p,a.actor.home)<380)
+            {
+                auto* resident=Society::Find(w,previousTarget);
+                if(resident && resident->life.alive &&
+                   (resident->id!=w.story.childId || w.story.childComplete) &&
+                   Game::Distance(a.actor.p,resident->p)<300)
+                {
+                    a.actor.life.target=resident->id;
+                }
+                else if(playerPresent && distance<(a.chasing && previousTarget<=0 ? 300 : 155))
+                {
+                    a.actor.life.target=-1;
+                }
+                else
+                {
+                    double nearestSquared=155.0*155.0;
+                    for(const auto& npc:w.npcs)
+                    {
+                        if(!npc.life.alive || (npc.id==w.story.childId && !w.story.childComplete))continue;
+                        const double dx=npc.p.x-a.actor.p.x, dy=npc.p.y-a.actor.p.y;
+                        const double distanceSquared=dx*dx+dy*dy;
+                        if(distanceSquared>=nearestSquared)continue;
+                        nearestSquared=distanceSquared;
+                        a.actor.life.target=npc.id;
+                    }
+                }
+            }
+            a.chasing=a.actor.life.target!=0;
+            if(!a.chasing && distance>1300)
+            {
+                a.moving=false;
+                a.actor.motion.Update(0,0,0,0);
+                continue;
+            }
             if(a.chasing)
             {
-                a.destination=w.player.p;a.actor.life.target=-1;
-                if(distance>27)Society::Move(a.actor,a.destination,dt*1.9,&w.society.navigationBudget);
-                else if(a.cooldown<=0 && w.wildlifePlayerCooldown<=0)
+                auto* resident=Society::Find(w,a.actor.life.target);
+                a.destination=resident ? resident->p : w.player.p;
+                if(Game::Distance(a.actor.p,a.destination)>27 || !Society::ClearSegment(a.actor.p,a.destination))
+                    Society::Move(a.actor,a.destination,dt*1.9,&w.society.navigationBudget);
+                else if(resident && a.cooldown<=0)
+                {
+                    resident->life.health=std::max(0.f,resident->life.health-5);
+                    a.cooldown=1.8;
+                    w.dirty=true;
+                    if(resident->life.health<=0)
+                        Society::Die(w,*resident,Society::WildlifeKiller);
+                }
+                else if(!resident && a.cooldown<=0 && w.wildlifePlayerCooldown<=0)
                 {
                     w.player.health=std::max(0.f,w.player.health-5);
                     a.cooldown=1.8;w.wildlifePlayerCooldown=1;
@@ -69,7 +113,7 @@ namespace Wildlife
             }
             else
             {
-                a.actor.life.target=0;
+                if(previousTarget!=0)a.wander=0;
                 a.wander-=dt;
                 if(a.wander<=0)
                 {
@@ -87,7 +131,7 @@ namespace Wildlife
             }
             Game::Vec travel(a.actor.p.x-before.x,a.actor.p.y-before.y);
             a.moving=std::hypot(travel.x,travel.y)>.001;
-            if(a.chasing)a.yaw=Yaw({w.player.p.x-a.actor.p.x,w.player.p.y-a.actor.p.y});
+            if(a.chasing)a.yaw=Yaw({a.destination.x-a.actor.p.x,a.destination.y-a.actor.p.y});
             else if(a.moving)a.yaw=Yaw(travel);
             a.actor.motion.Update(travel.x,travel.y,travel.x,travel.y,a.chasing);
         }

@@ -118,6 +118,8 @@ namespace Society
         ActivityCount
     };
 
+    constexpr int WildlifeKiller = -2;
+
     enum EventKind
     {
         HuntCompleted,
@@ -365,7 +367,8 @@ namespace Society
             Event e;
             in >> e.time >> e.kind >> e.actor >> e.other >> e.amount;
             if (!in || !(e.time >= 0 && e.time <= s.elapsed) || e.kind < HuntCompleted || e.kind > MigrationCompleted ||
-                e.actor < 0 || e.actor > count || e.other < 0 || e.other > count || e.amount < 0 || e.amount > 1000000)
+                (e.actor < 0 && e.actor != WildlifeKiller) || e.actor > count || e.other < 0 || e.other > count ||
+                e.amount < 0 || e.amount > 1000000)
             {
                 return false;
             }
@@ -385,7 +388,8 @@ namespace Society
                 Rumor r;
                 in >> r.id >> r.time >> r.actor >> r.victim >> r.village >> r.witnesses >> r.x >> r.y;
                 if (!in || r.id <= previous || r.id >= s.nextRumorId || !(r.time >= 0 && r.time <= s.elapsed) ||
-                    r.actor < 0 || r.actor > count || r.victim < 0 || r.victim > count || r.village < 0 ||
+                    (r.actor < 0 && r.actor != WildlifeKiller) || r.actor > count || r.victim < 0 ||
+                    r.victim > count || r.village < 0 ||
                     r.village >= storedVillages || r.witnesses < 0 || r.witnesses > count || !std::isfinite(r.x) ||
                     !std::isfinite(r.y) || std::abs(r.x) >= 1e10 || std::abs(r.y) >= 1e10)
                 {
