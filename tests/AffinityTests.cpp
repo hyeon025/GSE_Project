@@ -114,13 +114,13 @@ int main()
     std::ifstream input(path);
     std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
     std::string old = text.substr(0, text.find("AFFINITY 1 "));
-    old.replace(0, 11, "GSE_WORLD 7");
+    old.replace(0, old.find('\n'), "GSE_WORLD 7");
     { std::ofstream file("x64/affinity-tests/legacy.txt"); file << old; }
     assert(Game::Load(restored, damaged, L"x64/affinity-tests/legacy.txt") && !damaged);
     assert(restored.npcs[0].relationship == 30 && restored.npcs[0].trust == 1);
     assert(restored.npcs[0].affinity.lastTalk == -1 && restored.affinity.events.empty());
     std::string versionSix = old.substr(0, old.find("PROFILE 1 "));
-    versionSix.replace(0, 11, "GSE_WORLD 6");
+    versionSix.replace(0, versionSix.find('\n'), "GSE_WORLD 6");
     { std::ofstream file("x64/affinity-tests/legacy6.txt"); file << versionSix; }
     assert(Game::Load(restored, damaged, L"x64/affinity-tests/legacy6.txt") && !damaged);
     assert(restored.npcs[0].relationship == 30 && restored.affinity.events.empty());

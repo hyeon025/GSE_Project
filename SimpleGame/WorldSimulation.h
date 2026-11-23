@@ -483,6 +483,7 @@ namespace Society
         }
         float damage = 6.f + n.power * .13f + (n.ability == Game::Body ? 3 : Secondary(n, Game::Body) ? 1 : 0);
         victim.life.health = std::max(0.f, victim.life.health - damage);
+        victim.life.hitFlash = HitFlashDuration;
         victim.life.target = n.id;
         if (n.life.activity == Raiding)
         {
@@ -1058,6 +1059,9 @@ namespace Society
             return;
         }
         Initialize(w);
+        // Advance feedback once per frame, independently of NPC tick order and AI cadence.
+        for (auto& n : w.npcs)
+            n.life.hitFlash = std::max(0.f, n.life.hitFlash - (float)dt);
         auto& s = w.society;
         s.accumulator += std::min(dt, .25);
         while (s.accumulator + 1e-9 >= .1)
@@ -1193,6 +1197,7 @@ namespace Society
         n->life.playerChase = 0;
         n->life.cooldown = std::max(n->life.cooldown, .8);
         n->life.health = std::max(0.f, n->life.health - 22);
+        n->life.hitFlash = HitFlashDuration;
         w.player.echo[0] += 2;
         ++w.player.echo[5];
         Record(w, Assault, 0, id, 22);

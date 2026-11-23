@@ -139,7 +139,8 @@ namespace Game
     {
         Npc actor;
         int species = 0;
-        float health = 60;
+        float health = 60, maxHealth = 60;
+        bool balanceInitialized = false;
         double respawn = 0, cooldown = 0, wander = 0;
         float hitFlash = 0;
         Vec destination;
@@ -689,7 +690,7 @@ namespace Game
             return false;
         }
         const Player& p = w.player;
-        f << std::setprecision(17) << "GSE_WORLD 9\n" << w.time << ' ' << w.deaths << '\n';
+        f << std::setprecision(17) << "GSE_WORLD 10\n" << w.time << ' ' << w.deaths << '\n';
         f << p.p.x << ' ' << p.p.y << ' ' << p.checkpoint.x << ' ' << p.checkpoint.y << ' ' << p.health << ' '
           << p.stamina << ' ' << p.bread << ' ' << p.herbs << ' ' << p.wood << ' ' << p.fragments << ' '
           << (int)p.ability << ' ' << p.exploration << '\n';
@@ -782,7 +783,7 @@ namespace Game
         Player& p = result.player;
         std::string magic;
         int version = 0, ability = 0;
-        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 9)
+        if (!(f >> magic >> version) || magic != "GSE_WORLD" || version < 1 || version > 10)
         {
             return false;
         }
@@ -964,6 +965,11 @@ namespace Game
             result.story.stage = result.deaths ? Story::Successors : Story::Prologue;
             result.story.villageChoices = result.levelOne.completedOnce ? 7 : 0;
             // Older saves have no death history; never invent missing memories.
+        }
+        if (version < 10)
+        {
+            LevelOne::RebalanceLegacyEnemies(result.levelOne);
+            LevelOne::RebalanceLegacyEnemies(result.storyBattle);
         }
         if (version >= 4 && !Society::Read(f, result.society, (int)result.npcs.size()))
         {

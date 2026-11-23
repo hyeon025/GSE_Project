@@ -104,12 +104,12 @@ public:
     // Queue an already resident mesh without requiring a CPU pose-cache entry.
     bool TryCachedMesh(MeshKind kind, std::uint64_t variant,
                        float x, float y, float scale, float opacity,
-                       const std::array<Color,4>* palette = nullptr, bool pixelDepth = false);
+                       const std::array<Color,4>* palette = nullptr, bool pixelDepth = false, float hitFlash = 0);
     // Preserve per-vertex depth (u) in imported solid meshes. Each queued actor
     // occupies its own depth interval, retaining the existing world painter order.
     void CachedVertices(MeshKind kind, std::uint64_t variant, float x, float y, float scale, float opacity,
                         const std::vector<RenderMeshCache::Vertex>& vertices, bool persistent = true,
-                        const std::array<Color,4>* palette = nullptr, bool pixelDepth = false);
+                        const std::array<Color,4>* palette = nullptr, bool pixelDepth = false, float hitFlash = 0);
     // Queue in painter order; Flush submits compatible instances together.
     // Build local-space geometry only on a memory and disk cache miss.
     void CachedMesh(
@@ -122,7 +122,8 @@ public:
         const std::function<void()>& build,
         bool persistent = true,
         const std::array<Color,4>* palette = nullptr,
-        bool pixelDepth = false
+        bool pixelDepth = false,
+        float hitFlash = 0
     );
     void Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c);
     void Rect(float x, float y, float width, float height, Color color);
@@ -166,7 +167,7 @@ private:
         float options[4] = {0, 1, 0, 0};
         float uv[4] = {0, 0, 1, 1};
         std::array<Color,4> palette = {{Color(1,1,1),Color(1,1,1),Color(1,1,1),Color(1,1,1)}};
-        float depth[4] = {}; // far edge, interval width, use mesh depth, reserved
+        float depth[4] = {}; // far edge, interval width, use mesh depth, red hit tint
     };
     enum class Pass
     {

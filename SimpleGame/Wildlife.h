@@ -3,6 +3,28 @@
 
 namespace Wildlife
 {
+    inline float MaxHealth(const LevelOne::Session& growth, int species)
+    {
+        static const float base[] = {60,84,132,36,24,18};
+        return base[std::max(0,std::min(5,species))] * LevelOne::EnemyStrength(growth);
+    }
+    inline void InitializeStats(Game::Animal& animal, const LevelOne::Session& growth)
+    {
+        if(animal.balanceInitialized)return;
+        const float ratio=animal.maxHealth>0 ? std::max(0.f,std::min(1.f,animal.health/animal.maxHealth)) : 0.f;
+        animal.maxHealth=MaxHealth(growth,animal.species);
+        animal.health=animal.maxHealth*ratio;
+        animal.balanceInitialized=true;
+    }
+    inline float HealthRatio(const Game::Animal& animal)
+    {
+        return animal.maxHealth>0 ? std::max(0.f,std::min(1.f,animal.health/animal.maxHealth)) : 0.f;
+    }
+    inline float PlayerDamage(int species)
+    {
+        static const float damage[]={8,12,18};
+        return damage[std::max(0,std::min(2,species))];
+    }
     inline const char* Asset(int species)
     {
         static const char* names[]={"MOB_Wolf","MOB_Boar","MOB_Bear","MOB_Stag","MOB_Goat","MOB_Hare"};
@@ -19,6 +41,7 @@ namespace Wildlife
         for(int v=0;v<Society::VillageCount;++v)for(int species=0;species<6;++species)
         {
             Game::Animal animal;animal.species=species;animal.actor.id=v*6+species+1;
+            InitializeStats(animal,w.levelOne);
             auto center=Game::VillageCenter(v);
             for(int attempt=0;attempt<64;++attempt)
             {
@@ -42,13 +65,19 @@ namespace Wildlife
         w.wildlifePlayerCooldown=std::max(0.0,w.wildlifePlayerCooldown-dt);
         for(auto& a:w.wildlife)
         {
+            InitializeStats(a,w.levelOne);
             a.cooldown=std::max(0.0,a.cooldown-dt);
             a.hitFlash=std::max(0.f,a.hitFlash-(float)dt);
             if(a.health<=0)
             {
                 a.respawn=std::max(0.0,a.respawn-dt);
                 if(a.respawn<=0 && Game::Distance(w.player.p,a.actor.home)>220)
-                {a.health=60;a.actor.p=a.actor.home;a.chasing=false;a.actor.life.target=0;}
+                {
+                    a.health=a.maxHealth;a.balanceInitialized=false;
+                    InitializeStats(a,w.levelOne); // A new encounter snapshots current growth.
+                    a.hitFlash=0;a.cooldown=0;
+                    a.actor.p=a.actor.home;a.chasing=false;a.actor.life.target=0;
+                }
                 continue;
             }
             double distance=Game::Distance(a.actor.p,w.player.p);
@@ -99,6 +128,7 @@ namespace Wildlife
                 else if(resident && a.cooldown<=0)
                 {
                     resident->life.health=std::max(0.f,resident->life.health-5);
+                    resident->life.hitFlash=Society::HitFlashDuration;
                     a.cooldown=1.8;
                     w.dirty=true;
                     if(resident->life.health<=0)
@@ -106,7 +136,7 @@ namespace Wildlife
                 }
                 else if(!resident && a.cooldown<=0 && w.wildlifePlayerCooldown<=0)
                 {
-                    w.player.health=std::max(0.f,w.player.health-5);
+                    w.player.health=std::max(0.f,w.player.health-PlayerDamage(a.species));
                     a.cooldown=1.8;w.wildlifePlayerCooldown=1;
                     if(w.player.health<=0)Game::Die(w,Story::VillageRaid);
                 }
@@ -142,11 +172,13 @@ namespace Wildlife
         Game::Animal* nearest=nullptr;double best=65;
         for(auto& a:w.wildlife)
         {
+            InitializeStats(a,w.levelOne);
             double d=Game::Distance(a.actor.p,w.player.p);
             if(a.health>0 && d<best && NpcNavigation::Clear(w.player.p,a.actor.p)) {best=d;nearest=&a;}
         }
         if(!nearest)return false;
-        nearest->health=std::max(0.f,nearest->health-25);nearest->chasing=nearest->species<3;
+        nearest->health=std::max(0.f,nearest->health-LevelOne::Damage(w.levelOne));nearest->chasing=nearest->species<3;
+        nearest->hitFlash=Society::HitFlashDuration;
         w.wildlifePlayerCooldown=.5;
         if(nearest->health<=0){nearest->respawn=45;w.player.bread=std::min(1000,w.player.bread+1);++w.player.echo[0];}
         w.dirty=true;return true;

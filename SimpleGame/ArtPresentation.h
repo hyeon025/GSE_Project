@@ -14,6 +14,7 @@ namespace Art
         float x = 0, y = 0, scale = 1, opacity = 1;
         float unitsPerMeter = 30;
         float yaw = 0;
+        float hitFlash = 0; // Instance-only red damage tint, [0,1]; excluded from pose caches.
         bool deferAnimation = false;
         bool priorityAnimation = false; // Reserve prompt pose updates for the controlled player.
         bool preciseDepth = false;

@@ -65,6 +65,13 @@ void main()
         }
         v_Color=vec4(pow(max(vec3(0),base*color.g),vec3(1.0/2.2)),color.a);
     }
+    if(a_Depth.w > 0.0)
+    {
+        // Tint after both palette and fixed material colors, retaining face shading.
+        float light=dot(v_Color.rgb,vec3(.299,.587,.114));
+        vec3 damage=vec3(.55+.45*light,.08*light,.045*light);
+        v_Color.rgb=mix(v_Color.rgb,damage,.90*clamp(a_Depth.w,0.0,1.0));
+    }
     v_Color.a *= a_Options.y;
     v_Uv = a_UvRect.xy + first.xy * a_UvRect.zw;
 }

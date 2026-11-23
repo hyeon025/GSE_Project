@@ -155,6 +155,8 @@ namespace Society
                n.residents <= 200000;
     }
 
+    constexpr float HitFlashDuration = .30f;
+
     struct Life
     {
         bool initialized = false, alive = true;
@@ -164,6 +166,7 @@ namespace Society
         double cooldown = 0, work = 0, birthAt = 0;
         // Encounter timers are session-local, not part of the persistent life record.
         double playerChase = 0, playerRetry = 0, playerProvoked = 0;
+        float hitFlash = 0; // Session-local damage feedback; never serialized.
         Navigation navigation;
         Routine routine;
         int houseLot = -1, movingTo = -1, carriedRumor = 0;
@@ -239,6 +242,7 @@ namespace Society
         n.navigation = Navigation();
         n.routine = Routine();
         n.playerChase = n.playerRetry = n.playerProvoked = 0;
+        n.hitFlash = 0;
         in >> n.initialized >> n.alive >> n.job >> n.goal >> n.activity >> n.village >> n.destination >> n.gold >>
             n.goods >> n.insight >> n.target >> n.parentId >> n.successorId >> n.health >> n.maxHealth >>
             n.raidWeight >> n.cooldown >> n.work >> n.birthAt;

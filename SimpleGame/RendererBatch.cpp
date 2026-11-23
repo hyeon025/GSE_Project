@@ -228,10 +228,10 @@ void Renderer::Flush()
 }
 
 bool Renderer::TryCachedMesh(MeshKind kind, std::uint64_t variant,
-                             float x, float y, float scale, float opacity, const std::array<Color,4>* palette, bool pixelDepth)
+                             float x, float y, float scale, float opacity, const std::array<Color,4>* palette, bool pixelDepth, float hitFlash)
 {
     if (m_Meshes.find(MeshKey(kind, variant)) == m_Meshes.end()) return false;
-    CachedMesh(kind, variant, x, y, scale, opacity, [] {}, true, palette, pixelDepth);
+    CachedMesh(kind, variant, x, y, scale, opacity, [] {}, true, palette, pixelDepth, hitFlash);
     return true;
 }
 
@@ -245,7 +245,8 @@ void Renderer::CachedMesh(
     const std::function<void()>& build,
     bool persistent,
     const std::array<Color,4>* palette,
-    bool pixelDepth
+    bool pixelDepth,
+    float hitFlash
 )
 {
     if (m_Capture)
@@ -260,6 +261,7 @@ void Renderer::CachedMesh(
     instance.options[1] = opacity;
     if(palette) { instance.palette=*palette; instance.options[3]=1; }
     instance.depth[2] = pixelDepth ? 1.f : 0.f;
+    instance.depth[3] = std::isfinite(hitFlash) ? std::max(0.f, std::min(1.f, hitFlash)) : 0.f;
     if (kind == MeshKind::Character)
     {
         instance.options[2] = 1.f;
@@ -278,12 +280,12 @@ void Renderer::CachedMesh(
 void Renderer::CachedVertices(MeshKind kind, std::uint64_t variant,
                               float x, float y, float scale, float opacity,
                               const std::vector<RenderMeshCache::Vertex>& vertices, bool persistent,
-                              const std::array<Color,4>* palette, bool pixelDepth)
+                              const std::array<Color,4>* palette, bool pixelDepth, float hitFlash)
 {
     CachedMesh(kind, variant, x, y, scale, opacity, [this, &vertices] {
         if (!m_Capture) throw std::logic_error("Missing mesh capture");
         *m_Capture = vertices;
-    }, persistent, palette, pixelDepth);
+    }, persistent, palette, pixelDepth, hitFlash);
 }
 
 void Renderer::Triangle(float ax, float ay, float bx, float by, float cx, float cy, Color a, Color b, Color c)

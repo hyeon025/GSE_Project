@@ -11,6 +11,7 @@ namespace WorldCombat
         Game::Animal* target=nullptr;double best=Range(w);
         for(auto& a:w.wildlife)
         {
+            Wildlife::InitializeStats(a,w.levelOne);
             double d=Game::Distance(w.player.p,a.actor.p);
             if(a.health>0 && (manual || a.species<3 || a.chasing) && d<=best && NpcNavigation::Clear(w.player.p,a.actor.p))
             {target=&a;best=d;}
@@ -43,9 +44,10 @@ namespace WorldCombat
                 if(!NpcNavigation::Clear(before,{shot.p.x,shot.p.y})) {shot.remaining=0;break;}
                 for(auto& animal:w.wildlife)
                 {
+                    Wildlife::InitializeStats(animal,w.levelOne);
                     if(animal.health<=0 || Game::Distance(animal.actor.p,{shot.p.x,shot.p.y})>(animal.species==2?23:16))continue;
                     animal.health=std::max(0.f,animal.health-shot.damage);
-                    animal.hitFlash=.18f;
+                    animal.hitFlash=Society::HitFlashDuration;
                     animal.chasing=animal.species<3;shot.remaining=0;w.dirty=true;
                     if(animal.health<=0)
                     {animal.respawn=45;w.player.bread=std::min(1000,w.player.bread+1);++w.player.echo[0];}

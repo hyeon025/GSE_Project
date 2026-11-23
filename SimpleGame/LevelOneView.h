@@ -106,52 +106,13 @@ public:
         imported.scale = scene.zoom * (enemy.kind == LevelOne::Boss ? 1.5f : 1.f);
         imported.clip = enemy.windup > 0 ? "Attack" : "Walk";
         imported.seconds = scene.world.time;
+        imported.hitFlash = enemy.flash / LevelOne::HitFlashDuration;
         Game::Vec direction(level.p.x-enemy.p.x,level.p.y-enemy.p.y);
         imported.yaw = Wildlife::Yaw(direction);
         bool loaded = Art::Draw(scene.r, imported);
         if (!loaded && enemy.kind == LevelOne::Boss)
         {
-            float x = (float)p.x;
-            float y = (float)p.y;
-            float z = scene.zoom;
-            scene.zoom *= 1.65f;
-            scene.Shadow(x, y, 24, 9);
-            scene.Stroke(x, y, -7, -24, -9, -1, 7, Color(.24f, .25f, .24f));
-            scene.Stroke(x, y, 7, -24, 9, -1, 7, Color(.19f, .22f, .22f));
-            scene.Tri(
-                x,
-                y,
-                -15,
-                -52,
-                -13,
-                -18,
-                15,
-                -18,
-                Color(.50f, .53f, .51f),
-                Color(.28f, .31f, .31f),
-                Color(.23f, .27f, .27f)
-            );
-            scene.Tri(
-                x,
-                y,
-                -15,
-                -52,
-                15,
-                -18,
-                15,
-                -52,
-                Color(.50f, .53f, .51f),
-                Color(.23f, .27f, .27f),
-                Color(.40f, .44f, .43f)
-            );
-            scene.Oval(x, y, 0, -62, 10, 12, Color(.49f, .52f, .48f), Color(.21f, .26f, .25f));
-            scene.Stroke(x, y, -7, -63, 7, -63, 2, Color(.11f, .15f, .14f));
-            scene.Stroke(x, y, -5, -63, -2, -63, 1, Color(2.4f, .45f, .18f));
-            scene.Stroke(x, y, 3, -63, 6, -63, 1, Color(2.4f, .45f, .18f));
-            scene.Stroke(x, y, 18, -47, 22, -26, 8, Color(.38f, .43f, .42f));
-            scene.Stroke(x, y, 23, -39, 30, -4, 4, Color(.65f, .68f, .63f));
-            scene.Stroke(x, y, -21, -43, -21, -17, 10, Color(.32f, .37f, .36f));
-            scene.zoom = z;
+            BossFallback((float)p.x, (float)p.y, imported.hitFlash);
         }
         else if (!loaded)
         {
@@ -162,7 +123,11 @@ public:
                                                  : Game::Body,
                 false,
                 0,
-                enemy.id
+                enemy.id,
+                false,
+                false,
+                nullptr,
+                imported.hitFlash
             );
         }
         float width = enemy.kind == LevelOne::Boss ? 70 : 28;
@@ -184,6 +149,57 @@ public:
             scene.r.Line((float)p.x - 12, top - 6, (float)p.x - 5, top - 10, 1.5f, Color(.91f, .81f, .47f));
             scene.r.Line((float)p.x + 12, top - 6, (float)p.x + 5, top - 10, 1.5f, Color(.91f, .81f, .47f));
         }
+    }
+
+    void BossFallback(float x, float y, float hitFlash)
+    {
+        const float scale = scene.zoom * 1.65f;
+        const float zoom = scene.zoom;
+        scene.zoom = scale;
+        scene.Shadow(x, y, 24, 9);
+        scene.zoom = zoom;
+        scene.r.CachedMesh(Renderer::MeshKind::Character, 0x424f535346414c4cull,
+            x, y, scale, 1, [this]
+        {
+            GameScene mesh(scene.r, scene.world);
+            mesh.zoom = 1;
+            const float x = 0, y = 0;
+            mesh.Stroke(x, y, -7, -24, -9, -1, 7, Color(.24f, .25f, .24f));
+            mesh.Stroke(x, y, 7, -24, 9, -1, 7, Color(.19f, .22f, .22f));
+            mesh.Tri(
+                x,
+                y,
+                -15,
+                -52,
+                -13,
+                -18,
+                15,
+                -18,
+                Color(.50f, .53f, .51f),
+                Color(.28f, .31f, .31f),
+                Color(.23f, .27f, .27f)
+            );
+            mesh.Tri(
+                x,
+                y,
+                -15,
+                -52,
+                15,
+                -18,
+                15,
+                -52,
+                Color(.50f, .53f, .51f),
+                Color(.23f, .27f, .27f),
+                Color(.40f, .44f, .43f)
+            );
+            mesh.Oval(x, y, 0, -62, 10, 12, Color(.49f, .52f, .48f), Color(.21f, .26f, .25f));
+            mesh.Stroke(x, y, -7, -63, 7, -63, 2, Color(.11f, .15f, .14f));
+            mesh.Stroke(x, y, -5, -63, -2, -63, 1, Color(2.4f, .45f, .18f));
+            mesh.Stroke(x, y, 3, -63, 6, -63, 1, Color(2.4f, .45f, .18f));
+            mesh.Stroke(x, y, 18, -47, 22, -26, 8, Color(.38f, .43f, .42f));
+            mesh.Stroke(x, y, 23, -39, 30, -4, 4, Color(.65f, .68f, .63f));
+            mesh.Stroke(x, y, -21, -43, -21, -17, 10, Color(.32f, .37f, .36f));
+        }, true, nullptr, false, hitFlash);
     }
 
     SceneGraph graph;

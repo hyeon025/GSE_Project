@@ -272,7 +272,8 @@ public:
                                 data.id,
                                 data.life.job == Society::Hunter,
                                 data.id == world.story.childId,
-                                &data.motion
+                                &data.motion,
+                                data.life.hitFlash / Society::HitFlashDuration
                             );
                             auto p = Project({});
                             Color color = data.life.target ? Color(.88f, .35f, .29f) : Color(.65f, .80f, .65f);
@@ -764,7 +765,8 @@ public:
         int id = 0,
         bool crossbow = false,
         bool child = false,
-        const CharacterMotion* motion = nullptr
+        const CharacterMotion* motion = nullptr,
+        float hitFlash = 0
     )
     {
         Game::Vec screen = Project(p);
@@ -792,6 +794,7 @@ public:
                 : (player ? Art::Assets().PlayerRecipe(world.player.profile.hairShape, world.player.profile.outfit)
                           : Art::Assets().Recipe((unsigned)id));
         imported.style = player ? world.player.profile.style : Art::Styles::Npc((unsigned)id);
+        imported.hitFlash = hitFlash;
         if(!player && !cameraOverride && id>0 && id<=(int)world.npcs.size())
         {
             const auto& palettes=world.npcs[id-1].artPalettes;
@@ -865,7 +868,8 @@ public:
                         Color(c.r, c.g, c.b, c.a)
                     );
                 }
-            }
+            },
+            true, nullptr, false, hitFlash
         );
     }
 
@@ -1063,15 +1067,16 @@ public:
                     request.seconds=a.moving?a.actor.motion.ClipPhase():world.time;
                     request.x=(float)p.x;request.y=(float)p.y;request.scale=zoom;
                     request.yaw=a.yaw;request.pixelDepth=true;request.deferAnimation=true;
+                    request.hitFlash=a.hitFlash/Society::HitFlashDuration;
                     request.animationStream=1000000+a.actor.id;
                     Art::Draw(r,request);
                     if(a.hitFlash>0)
                         r.Ellipse((float)p.x,(float)p.y-28*zoom,12*zoom,12*zoom,
                                   Color(1,.9f,.45f,a.hitFlash*3),Color(1,.5f,.15f,0));
-                    if(a.chasing || a.health<60)
+                    if(a.chasing || a.health<a.maxHealth)
                     {
                         r.Rect((float)p.x-18*zoom,(float)p.y-52*zoom,36*zoom,3*zoom,Color(.12f,.12f,.12f));
-                        r.Rect((float)p.x-18*zoom,(float)p.y-52*zoom,36*zoom*a.health/60,3*zoom,Color(.8f,.3f,.25f));
+                        r.Rect((float)p.x-18*zoom,(float)p.y-52*zoom,36*zoom*Wildlife::HealthRatio(a),3*zoom,Color(.8f,.3f,.25f));
                     }
                 });
             actor.streamed=true;

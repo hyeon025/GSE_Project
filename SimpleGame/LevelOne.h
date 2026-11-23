@@ -18,6 +18,7 @@ namespace LevelOne
     constexpr int Center = MapSize / 2;
     constexpr int KillGoal = 24;
     constexpr int SoulGoal = 12;
+    constexpr float HitFlashDuration = .30f;
 
     struct Point
     {
@@ -204,9 +205,38 @@ namespace LevelOne
                                   : L"\uace1\ucc3d\uc758 \ud30c\uc218\uafbc";
     }
 
-    inline float Cooldown(const Session& s)
+    inline float CooldownForLevel(int level)
     {
-        return std::max(0.18f, 0.78f * std::pow(0.94f, (float)(s.level - 1)));
+        return std::max(0.18f, 0.78f * std::pow(0.94f, (float)(level - 1)));
+    }
+
+    inline float Cooldown(const Session& s) { return CooldownForLevel(s.level); }
+
+    inline float EnemyStrength(const Session& s)
+    {
+        const int level = std::max(1, std::min(30, s.level));
+        const int weapon = std::max(0, std::min(20, s.weapon));
+        // Half of weapon growth and part of attack-speed growth preserve upgrade value.
+        return (12.f + 3.f * (level - 1) + 2.f * weapon) / 12.f *
+               std::sqrt(.78f / CooldownForLevel(level));
+    }
+
+    inline float EnemyMaxHealth(const Session& s, int kind)
+    {
+        const float base = kind == Boss ? 240.f : kind == Runner ? 36.f : kind == Archer ? 60.f : 48.f;
+        return base * EnemyStrength(s) + (kind == Boss ? 0.f : std::min(20.f, s.elapsed * .08f));
+    }
+
+    inline void RebalanceLegacyEnemies(Session& s)
+    {
+        for (auto& enemy : s.enemies)
+        {
+            const float maximum = EnemyMaxHealth(s, enemy.kind);
+            if (enemy.health <= 0 || enemy.maxHealth <= 0 || maximum <= enemy.maxHealth) continue;
+            const float ratio = std::max(0.f, std::min(1.f, enemy.health / enemy.maxHealth));
+            enemy.maxHealth = maximum;
+            enemy.health = maximum * ratio;
+        }
     }
 
     inline float Range(const Session& s)
@@ -452,11 +482,7 @@ namespace LevelOne
         enemy.id = s.nextEnemyId++;
         enemy.kind = kind;
         enemy.p = p;
-        enemy.maxHealth = kind == Boss ? 680 : kind == Runner ? 22 : kind == Archer ? 34 : 28;
-        if (kind != Boss)
-        {
-            enemy.maxHealth += std::min(20.0f, s.elapsed * 0.08f);
-        }
+        enemy.maxHealth = EnemyMaxHealth(s, kind);
         enemy.health = enemy.maxHealth;
         enemy.attackTimer = kind == Boss ? 2.5f : 1.5f;
         s.enemies.push_back(enemy);
@@ -925,7 +951,7 @@ namespace LevelOne
                         if (Distance(shot.p, enemy.p) < (enemy.kind == Boss ? 23 : 15))
                         {
                             enemy.health -= shot.damage;
-                            enemy.flash = 0.18f;
+                            enemy.flash = HitFlashDuration;
                             shot.remaining = 0;
                             if (enemy.kind == Boss && s.encounter == 3 && !s.judgementSeen &&
                                 enemy.health <= enemy.maxHealth * .1f)

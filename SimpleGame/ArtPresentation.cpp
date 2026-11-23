@@ -237,7 +237,7 @@ namespace Art
         {
             auto colors=PaletteColors(r.style);
             renderer.CachedVertices(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,
-                *vertices, persistent, r.style.enabled ? &colors : nullptr, r.pixelDepth || r.style.enabled);
+                *vertices, persistent, r.style.enabled ? &colors : nullptr, r.pixelDepth || r.style.enabled, r.hitFlash);
         }
         void Remember(std::uint64_t family, std::uint64_t key, Vertices vertices, std::uint64_t serial)
         {
@@ -386,7 +386,7 @@ namespace Art
             }
             auto colors=PaletteColors(r.style);
             auto palette=r.style.enabled ? &colors : nullptr;
-            if (renderer.TryCachedMesh(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,palette,depth))
+            if (renderer.TryCachedMesh(Renderer::MeshKind::Imported, key, r.x, r.y, r.scale, r.opacity,palette,depth,r.hitFlash))
             {
                 // A later cache miss must reuse the pose actually displayed most recently.
                 auto cpu = poses.find(key);
@@ -401,7 +401,7 @@ namespace Art
                 {
                     auto vertices = last->second.vertices.lock();
                     bool resident = renderer.TryCachedMesh(Renderer::MeshKind::Imported, last->second.key,
-                                                           r.x,r.y,r.scale,r.opacity,palette,depth);
+                                                           r.x,r.y,r.scale,r.opacity,palette,depth,r.hitFlash);
                     if (vertices || resident)
                     {
                         if (!worker) worker.reset(new PoseWorker<Prepared>());

@@ -83,9 +83,10 @@ int main()
     wolf.actor.p={58,0};wolf.cooldown=0;w.wildlifePlayerCooldown=0;
     float hp=w.player.health;Wildlife::Update(w,.1,true);assert(w.player.health<hp);
     w.wildlifePlayerCooldown=0;assert(Wildlife::Attack(w));assert(!Wildlife::Attack(w));
-    w.wildlifePlayerCooldown=0;Wildlife::Attack(w);w.wildlifePlayerCooldown=0;Wildlife::Attack(w);
+    for(int hits=0;hits<20 && wolf.health>0;++hits)
+    {w.wildlifePlayerCooldown=0;Wildlife::Attack(w);}
     assert(wolf.health==0 && wolf.respawn>0);
-    w.player.p={2000,0};Wildlife::Update(w,46,false);assert(wolf.health==60);
+    w.player.p={2000,0};Wildlife::Update(w,46,false);assert(wolf.health==wolf.maxHealth);
     assert(Monitoring::Snapshot(w,1,1,1,false).find("\"wildlifeEntities\":42")!=std::string::npos);
     // Old dense worlds keep their identities and migrate once, without adding residents.
     auto oldCount=w.npcs.size();w.society.layoutVersion=1;w.society.seeded.fill(50);
